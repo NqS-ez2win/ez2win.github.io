@@ -75,111 +75,19 @@ border-radius: 8px;
 border: 1px solid #334155;
 }
 
-/* Winner Ticker */
-.winner-ticker-wrapper {
-background: linear-gradient(90deg, #1e1b4b, #312e81, #1e1b4b);
-border-bottom: 1px solid var(--primary);
-overflow: hidden;
-white-space: nowrap;
-padding: 10px 0;
-font-size: 0.92rem;
-color: #fef08a;
-box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
-position: relative;
-}
-.winner-ticker-content {
-display: inline-block;
-padding-left: 100%;
-animation: tickerAnimation 28s linear infinite;
-font-weight: 700;
-}
-.winner-ticker-content:hover {
-animation-play-state: paused;
-cursor: pointer;
-}
-.ticker-item {
-display: inline-flex;
-align-items: center;
-margin-right: 40px;
-gap: 6px;
-}
-.ticker-tag {
-background: var(--primary);
-color: #000;
-padding: 2px 6px;
-border-radius: 4px;
-font-size: 0.75rem;
-font-weight: 800;
-text-transform: uppercase;
-}
-
-@keyframes tickerAnimation {
-0% { transform: translate3d(0, 0, 0); }
-100% { transform: translate3d(-100%, 0, 0); }
-}
-
 .btn {
-padding: 8px 16px;
+padding: 10px 16px;
 border: none;
 border-radius: 8px;
 font-weight: 600;
 cursor: pointer;
 transition: all 0.2s;
 }
-.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
-.btn-primary { background: var(--primary); color: #000; }
+.btn-primary { background: var(--primary); color: #000; width: 100%; font-size: 1rem; }
 .btn-primary:hover { background: var(--primary-hover); }
-.btn-secondary { background: #334155; color: var(--text); }
-.btn-admin { background: #6366f1; color: #fff; }
-.btn-agent { background: var(--agent-purple); color: #fff; }
-.btn-gcash { background: var(--gcash-blue); color: #fff; }
-.btn-maya { background: var(--maya-green); color: #000; font-weight: 700; }
-.btn-success { background: #16a34a; color: #fff; }
-.btn-danger { background: var(--danger); color: #fff; }
 
 /* Layout */
-.container { max-width: 850px; margin: 24px auto; padding: 0 16px; }
-
-.active-draw-banner {
-background: #14532d;
-border: 1px solid #22c55e;
-color: #86efac;
-border-radius: 10px;
-padding: 12px 16px;
-margin-bottom: 20px;
-text-align: center;
-font-weight: 600;
-font-size: 0.95rem;
-}
-
-.draw-banner-grid {
-display: flex;
-gap: 16px;
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-
-.draw-banner {
-flex: 1;
-min-width: 280px;
-background: linear-gradient(135deg, #1e1b4b, #312e81);
-border: 1px solid #6366f1;
-border-radius: 12px;
-padding: 18px;
-text-align: center;
-}
-.draw-banner h4 { color: #818cf8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.draw-banner h2 { color: #fff; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
-.winning-numbers-display { display: flex; justify-content: center; gap: 12px; align-items: center; }
-.win-ball {
-width: 48px; height: 48px;
-background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
-color: #000; border-radius: 50%;
-display: flex; align-items: center; justify-content: center;
-font-size: 1.25rem; font-weight: 800;
-box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
-}
-.win-ball.pending { background: #334155; color: #94a3b8; box-shadow: none; font-size: 0.9rem; }
+.container { max-width: 600px; margin: 24px auto; padding: 0 16px; }
 
 .card {
 background: var(--card-bg);
@@ -187,16 +95,29 @@ border-radius: 12px;
 padding: 24px;
 margin-bottom: 20px;
 border: 1px solid #334155;
+box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-.card-title { font-size: 1.2rem; margin-bottom: 14px; color: var(--primary); }
+.card-title { font-size: 1.2rem; margin-bottom: 8px; color: var(--primary); }
 
 /* EZ2 Grid */
-.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
-.num-btn {
-aspect-ratio: 1; border: 1px solid #475569; background: #0f172a;
-color: var(--text); border-radius: 8px; font-size: 1.1rem; font-weight: 700;
-cursor: pointer; transition: all 0.15s;
+.grid { 
+  display: grid; 
+  grid-template-columns: repeat(6, 1fr); 
+  gap: 10px; 
+  margin: 20px 0; 
 }
+.num-btn {
+  aspect-ratio: 1; 
+  border: 1px solid #475569; 
+  background: #0f172a;
+  color: var(--text); 
+  border-radius: 8px; 
+  font-size: 1.1rem; 
+  font-weight: 700;
+  cursor: pointer; 
+  transition: all 0.15s;
+}
+.num-btn:hover { border-color: var(--primary); }
 .num-btn.selected { background: var(--primary); color: #000; border-color: var(--primary-hover); }
 </style>
 </head>
@@ -217,19 +138,21 @@ cursor: pointer; transition: all 0.15s;
 <div class="container">
   <div class="card">
     <h3 class="card-title">Place Your Bet (Cloud Storage via Supabase)</h3>
-    <p style="color: var(--text-muted); margin-bottom: 15px;">Select your numbers and send them directly to the Supabase database.</p>
+    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Select your 2 numbers and send them directly to the Supabase cloud database.</p>
+    
     <div class="grid" id="number-grid">
       <!-- Generated via JS -->
     </div>
-    <button class="btn btn-primary" id="submit-bet-btn" style="width: 100%;">Submit Bet to Supabase</button>
+
+    <button class="btn btn-primary" id="submit-bet-btn">Submit Bet to Supabase</button>
   </div>
 </div>
 
 <script>
-  // Initialize Supabase Client (Replace with your actual Supabase URL and Anon Key)
-  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Initialize Supabase Client (Ensure these match your actual Supabase project keys)
+  const SUPABASE_URL = https://iiwmghlxxsnxpkgljlml.supabase.co;
+  const SUPABASE_ANON_KEY = 'sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r';
+  const supabase = window.supabase.createClient(https://iiwmghlxxsnxpkgljlml.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpd21naGx4eHNueHBrZ2xqbG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjc4MTcsImV4cCI6MjEwMDgwMzgxN30.niQhKfOYMvgDaa8NGgPlW3fYxUt3hoMOebUsQDk7cKY);
 
   // Generate grid numbers 1 to 31 (EZ2 style)
   const gridContainer = document.getElementById('number-grid');
@@ -238,6 +161,7 @@ cursor: pointer; transition: all 0.15s;
   for (let i = 1; i <= 31; i++) {
     const btn = document.createElement('button');
     btn.className = 'num-btn';
+    btn.type = 'button';
     btn.innerText = i < 10 ? '0' + i : i;
     btn.onclick = () => {
       const val = btn.innerText;
@@ -256,14 +180,13 @@ cursor: pointer; transition: all 0.15s;
     gridContainer.appendChild(btn);
   }
 
-  // Replace LocalStorage with Supabase Insert
+  // Handle Supabase Cloud Insert
   document.getElementById('submit-bet-btn').onclick = async () => {
     if (selectedNumbers.length !== 2) {
       alert('Please select exactly 2 numbers.');
       return;
     }
 
-    // Insert into Supabase 'bets' table (Cloud Storage)
     const { data, error } = await supabase
       .from('bets')
       .insert([{ numbers: selectedNumbers }]);
@@ -273,7 +196,6 @@ cursor: pointer; transition: all 0.15s;
       alert('Failed to save bet to Supabase cloud: ' + error.message);
     } else {
       alert('Bet successfully stored in Supabase cloud database!');
-      // Reset selection
       selectedNumbers = [];
       document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
     }
