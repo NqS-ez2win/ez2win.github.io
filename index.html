@@ -1295,7 +1295,7 @@
           return;
         }
 
-        headerSub.textContent = Chatting with Support (${activeClient.referredBy || 'Admin'});
+        headerSub.textContent = `Chatting with Support (${activeClient.referredBy || 'Admin'})`;
         const threadMsgs = chatMessages.filter(m => m.clientThread === activeClient.username);
         if (threadMsgs.length === 0) {
           body.innerHTML = `
