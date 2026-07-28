@@ -1394,13 +1394,13 @@
         let label = threadId;
         const cli = registeredClients.find(c => c.username.toLowerCase() === threadId.toLowerCase());
         if (cli) {
-          label = ${cli.name} (${cli.username});
+          label = `${cli.name} (${cli.username});`;
         } else if (threadId.startsWith('guest_')) {
-          label =🔑 Password Reset Guest (${threadId.slice(-4)})`;
+          label = `🔑 Password Reset Guest (${threadId.slice(-4)})`;
         }
 
         const chip = document.createElement('button');
-        chip.className = chat-user-chip ${activeChatClientUser === threadId ? 'active' : ''};
+        chip.className = `chat-user-chip ${activeChatClientUser === threadId ? 'active' : ''}`;
         chip.textContent = label;
         chip.onclick = () => {
           activeChatClientUser = threadId;
@@ -1721,12 +1721,12 @@
         clientView.style.display = 'none';
         adminView.style.display = 'block';
         clientControls.style.display = 'none';
-        viewModeBadge.textContent = SEMI-ADMIN: ${activeAgentIdentity.toUpperCase()};
+        viewModeBadge.textContent = `SEMI-ADMIN: ${activeAgentIdentity.toUpperCase()}`;
         viewModeBadge.style.background = 'var(--agent-purple)';
         roleToggleBtn.textContent = 'Exit Semi-Admin';
         roleToggleBtn.className = 'btn btn-agent btn-sm';
         
-        agentNotice.textContent = Semi-Admin Account (${activeAgentIdentity});
+        agentNotice.textContent = `Semi-Admin Account (${activeAgentIdentity})`;
         agentNotice.style.display = 'inline-block';
         
         if (agentMgmtCard) agentMgmtCard.style.display = 'block';
@@ -1735,8 +1735,8 @@
         if (winningComboPanel) winningComboPanel.style.display = 'block';
         if (clearAllBetsBtn) clearAllBetsBtn.style.display = 'none';
 
-        profileCardTitle.innerHTML =👤 Semi-Admin Profile: ${activeAgentIdentity}`;
-        profileAccountRole.textContent = Semi-Admin Agent Account (${activeAgentIdentity});
+        rofileCardTitle.innerHTML = `👤 Semi-Admin Profile: ${activeAgentIdentity}`;
+        profileAccountRole.textContent = `Semi-Admin Agent Account (${activeAgentIdentity})`;
         profileStatusVal.textContent = 'Active Semi-Admin Rights';
 
         renderAdminBetsTable();
@@ -1762,7 +1762,7 @@
         if (winningComboPanel) winningComboPanel.style.display = 'none';
         if (clearAllBetsBtn) clearAllBetsBtn.style.display = 'none';
 
-        profileCardTitle.innerHTML =👤 Viewer Account: ${activeAgentIdentity || 'viewer'}`;
+        profileCardTitle.innerHTML = `👤 Viewer Account: ${activeAgentIdentity || 'viewer'}`;
         profileAccountRole.textContent = 'Read-Only Viewer Account';
         profileStatusVal.textContent = 'Active (View-Only)';
 
@@ -1802,8 +1802,11 @@
       const pass = document.getElementById('clientRegPassInput').value.trim();
       const confirmPass = document.getElementById('clientRegConfirmPassInput').value.trim();
       
-      let refCode = document.getElementById('clientRegReferralInput').value.trim() || await getStorage('ez2_pendingRef', null) || 'admin';
-
+      async function handleRegistration() {
+    let refCode = document.getElementById('clientRegReferralInput')?.value?.trim() || await getStorage('ez2_pendingRef', null) || 'admin';
+    
+    console.log(refCode);
+}
       if (!name || !username || !pass) {
         alert("Please fill in all registration fields.");
         return;
@@ -1818,7 +1821,7 @@
 
       const duplicate = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase());
       if (duplicate) {
-        alert(The Username/Mobile "${username}" is already registered! Please log in or use a different unique Mobile/Username.);
+        alert(`The Username/Mobile "${username}" is already registered! Please log in or use a different unique Mobile/Username.`);
         return;
       }
 
@@ -1847,7 +1850,7 @@
       renderClientBetsTable();
 
       closeModal('authModal');
-      alert🎉 Registration successful! Welcome ${name}.\nYour account is successfully linked to Semi-Admin / Agent: "${refCode}".\nYour personal referral link is ready in your profile.`);
+      alert(`🎉 Registration successful! Welcome ${name}.\nYour account is successfully linked to Semi-Admin / Agent: "${refCode}".\nYour personal referral link is ready in your profile.`);
     }
 
     async function loginClientAccount() {
@@ -1876,7 +1879,7 @@
         renderClientBetsTable();
 
         closeModal('authModal');
-        alert(Welcome back, ${activeClient.name}!);
+        alert(`Welcome back, ${activeClient.name}!`);
       } else {
         alert("Invalid Username/Mobile No. or Password. If you forgot your password, please use the 'Chat with Admin/Semi-Admin' link below.");
       }
@@ -1908,7 +1911,7 @@
       const tabBtnProfile = document.getElementById('tabBtnProfile');
 
       if (activeClient) {
-        userDisplay.textContent =👤 ${activeClient.name} (${activeClient.username})`;
+        userDisplay.textContent = `👤 ${activeClient.name} (${activeClient.username})`;
         headerLogoutBtn.style.display = 'inline-block';
 
         if (profileViewName) profileViewName.textContent = activeClient.name;
@@ -1916,7 +1919,7 @@
         if (profileViewReferredBy) profileViewReferredBy.textContent = activeClient.referredBy || 'admin';
         
         const refCode = activeClient.refCode || activeClient.username;
-        const refLink = ${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)};
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
         if (profileReferralLinkInput) profileReferralLinkInput.value = refLink;
 
         tabBtnProfile.style.display = 'inline-block';
@@ -1998,7 +2001,7 @@
       renderAdminBetsTable();
       updateClientAuthUI();
 
-      alert🎉 Successfully confirmed receipt of your winning prize of ₱${bet.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}! Thank you for playing EZ2WIN.`);
+      alert(`🎉 Successfully confirmed receipt of your winning prize of ₱${bet.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}! Thank you for playing EZ2WIN.`);
     }
 
     async function updateClientPassword() {
@@ -2098,7 +2101,7 @@
       document.getElementById('semiAdminClientNewPassInput').value = '';
       document.getElementById('semiAdminClientConfirmPassInput').value = '';
 
-      alert🔒 Successfully updated password for client: ${client.name} (${client.username})`);
+      alert(`🔒 Successfully updated password for client: ${client.name} (${client.username})`);
     }
 
     async function createNewPaymentMethod() {
@@ -2128,7 +2131,7 @@
       document.getElementById('newMethodAccountNameInput').value = '';
 
       renderAdminPaymentMethodsTable();
-      alert(✅ Successfully added payment method: "${name}");
+      alert(`✅ Successfully added payment method: "${name}"`);
     }
 
     async function deletePaymentMethod(id) {
@@ -2187,15 +2190,15 @@
       selectorContainer.innerHTML = '';
       paymentMethods.forEach(m => {
         const btn = document.createElement('button');
-        btn.className = payment-method-btn ${m.name === selectedPaymentMethod ? 'active-payment' : ''};
+        btn.className = `payment-method-btn ${m.name === selectedPaymentMethod ? 'active-payment' : ''}`;
         btn.textContent = m.name;
         btn.onclick = () => selectPaymentMethod(m.name);
         selectorContainer.appendChild(btn);
       });
 
       numberDisplay.textContent = method.number;
-      accountNameDisplay.textContent = Account Name: ${method.accountName};
-      subtitle.textContent = Send Total Payment To Official ${method.name}:;
+      accountNameDisplay.textContent = `Account Name: ${method.accountName}`;
+      subtitle.textContent = `Send Total Payment To Official ${method.name}:`;
     }
 
     async function updateWinnerTicker() {
@@ -2267,7 +2270,7 @@
         const agentCleanUsername = currentAgent ? currentAgent.username.toLowerCase() : '';
         
         if (titleEl) {
-          titleEl.textContent =💰 Referred Clients Revenue Summary (${activeAgentIdentity})`;
+          titleEl.textContent = `💰 Referred Clients Revenue Summary (${activeAgentIdentity})`;
         }
 
         const filteredBets = placedBets.filter(b => {
@@ -2523,7 +2526,7 @@
       renderClientBetsTable();
       updateWinnerTicker();
 
-      alert🎉 Successfully published winning combination for ${drawSelect} Draw: [ ${winningCombos[drawSelect].map(n => n < 10 ? '0' + n : n).join(' - ')} ]`);
+      alert(`🎉 Successfully published winning combination for ${drawSelect} Draw: [ ${winningCombos[drawSelect].map(n => n < 10 ? '0' + n : n).join(' - ')} ]`);
     }
 
     async function resetAdminWinningCombination() {
@@ -2537,7 +2540,7 @@
       renderClientBetsTable();
       updateWinnerTicker();
 
-      alert(Winning combination for ${drawSelect} Draw has been reset.);
+      alert(`Winning combination for ${drawSelect} Draw has been reset.`);
     }
 
     async function updateWinningDisplay() {
@@ -2614,14 +2617,14 @@
       document.getElementById('newAgentPassInput').value = '';
 
       renderAdminAgentsTable();
-      alert(✅ Successfully created agent account: "${name}"\nUsername: ${username}\nPassword: ${pass});
+      alert(`✅ Successfully created agent account: "${name}"\nUsername: ${username}\nPassword: ${pass}`);
     }
 
     async function autoGenerateNextAgent() {
       agentsList = await getStorage('ez2_agents', agentsList);
       const nextNum = agentsList.length + 1;
-      const name = Agent ${nextNum};
-      const username = admin_agent${nextNum};
+      const name = `Agent ${nextNum}`;
+      const username = `admin_agent${nextNum}`;
       const pass = 'agent123';
 
       const newAgent = {
@@ -2638,7 +2641,7 @@
       await setStorage('ez2_agents', agentsList);
 
       renderAdminAgentsTable();
-      alert(⚡ Auto-created agent "${name}" successfully!);
+      alert(`⚡ Auto-created agent "${name}" successfully!`);
     }
 
     async function deleteAgent(id) {
@@ -2672,7 +2675,7 @@
 
       agentsList.forEach(agent => {
         const tr = document.createElement('tr');
-        const refLink = ${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.name)};
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.name)}`;
         const deleteAction = <button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button>;
 
         tr.innerHTML = `
@@ -2734,7 +2737,7 @@
           if (drawCombo && drawCombo.length === 2) {
             const drawComboStr = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
             const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-            winStatusStr = isWin ?<span class="badge-win">🎉 WINNER! ₱${bet.potentialWin.toLocaleString()}</span>` : <span class="badge-loss">LOSS [ ${drawComboStr} ]</span>;
+            winStatusStr = isWin ? `<span class="badge-win">🎉 WINNER! ₱${bet.potentialWin.toLocaleString()}</span>` : `<span class="badge-loss">LOSS [ ${drawComboStr} ]</span>`;
           }
         }
 
