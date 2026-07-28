@@ -94,7 +94,37 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Select your 2 numbers and send them directly to the Supabase cloud database.</p>
     
     <div class="grid" id="number-grid">
-      <!-- Generated via JS -->
+      <button class="num-btn" type="button">01</button>
+      <button class="num-btn" type="button">02</button>
+      <button class="num-btn" type="button">03</button>
+      <button class="num-btn" type="button">04</button>
+      <button class="num-btn" type="button">05</button>
+      <button class="num-btn" type="button">06</button>
+      <button class="num-btn" type="button">07</button>
+      <button class="num-btn" type="button">08</button>
+      <button class="num-btn" type="button">09</button>
+      <button class="num-btn" type="button">10</button>
+      <button class="num-btn" type="button">11</button>
+      <button class="num-btn" type="button">12</button>
+      <button class="num-btn" type="button">13</button>
+      <button class="num-btn" type="button">14</button>
+      <button class="num-btn" type="button">15</button>
+      <button class="num-btn" type="button">16</button>
+      <button class="num-btn" type="button">17</button>
+      <button class="num-btn" type="button">18</button>
+      <button class="num-btn" type="button">19</button>
+      <button class="num-btn" type="button">20</button>
+      <button class="num-btn" type="button">21</button>
+      <button class="num-btn" type="button">22</button>
+      <button class="num-btn" type="button">23</button>
+      <button class="num-btn" type="button">24</button>
+      <button class="num-btn" type="button">25</button>
+      <button class="num-btn" type="button">26</button>
+      <button class="num-btn" type="button">27</button>
+      <button class="num-btn" type="button">28</button>
+      <button class="num-btn" type="button">29</button>
+      <button class="num-btn" type="button">30</button>
+      <button class="num-btn" type="button">31</button>
     </div>
 
     <button class="btn btn-primary" id="submit-bet-btn" type="button">Submit Bet to Supabase</button>
@@ -114,15 +144,10 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     console.error('Supabase Setup Error:', err);
   }
 
-  // Generate grid numbers 1 to 31 (EZ2 style)
-  const gridContainer = document.getElementById('number-grid');
   let selectedNumbers = [];
 
-  for (let i = 1; i <= 31; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'num-btn';
-    btn.type = 'button';
-    btn.innerText = i < 10 ? '0' + i : i;
+  // Attach click handlers to the hardcoded buttons
+  document.querySelectorAll('.num-btn').forEach(btn => {
     btn.onclick = () => {
       const val = btn.innerText;
       if (selectedNumbers.includes(val)) {
@@ -137,8 +162,7 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
       }
     };
-    gridContainer.appendChild(btn);
-  }
+  });
 
   // Handle Supabase Cloud Insert
   document.getElementById('submit-bet-btn').onclick = async () => {
