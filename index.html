@@ -1312,7 +1312,7 @@
         threadMsgs.forEach(m => {
           const isOut = m.senderId === activeClient.username;
           const div = document.createElement('div');
-          div.className = chat-message ${isOut ? 'outgoing' : 'incoming'};
+          div.className = `chat-message ${isOut ? 'outgoing' : 'incoming'}`;
           div.innerHTML = `
             <div class="chat-sender-name">${m.senderName} (${m.timestamp})</div>
             <div>${m.text}</div>
