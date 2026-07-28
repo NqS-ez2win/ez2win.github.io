@@ -1331,7 +1331,7 @@
 
         const threadMsgs = chatMessages.filter(m => m.clientThread === activeChatClientUser);
         if (threadMsgs.length === 0) {
-          body.innerHTML = <div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">No messages in this thread yet.</div>;
+          body.innerHTML = '<div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">No messages in this thread yet.</div>';
           return;
         }
 
