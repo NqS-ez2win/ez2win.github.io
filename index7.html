@@ -1,0 +1,2759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EZ2WIN x100 - PCSO 5:00 PM & 9:00 PM Draw</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #eab308;
+      --primary-hover: #ca8a04;
+      --accent: #22c55e;
+      --gcash-blue: #007dfe;
+      --maya-green: #00d632;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --agent-purple: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text); padding-bottom: 50px; }
+
+    /* Header */
+    header {
+      background: var(--card-bg);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      position: sticky; top: 0; z-index: 10;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1;
+    }
+    .logo-text {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
+    .logo-multiplier {
+      background: linear-gradient(135deg, #22c55e, #15803d);
+      color: #ffffff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+      margin-top: 3px;
+    }
+    .badge-mode { font-size: 0.75rem; background: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+    .user-actions { display: flex; align-items: center; gap: 10px; }
+    .user-profile-badge {
+      font-size: 0.85rem;
+      color: var(--primary);
+      font-weight: 700;
+      background: #0f172a;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+
+    /* Winner Ticker */
+    .winner-ticker-wrapper {
+      background: linear-gradient(90deg, #1e1b4b, #312e81, #1e1b4b);
+      border-bottom: 1px solid var(--primary);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 10px 0;
+      font-size: 0.92rem;
+      color: #fef08a;
+      box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
+      position: relative;
+    }
+    .winner-ticker-content {
+      display: inline-block;
+      padding-left: 100%;
+      animation: tickerAnimation 28s linear infinite;
+      font-weight: 700;
+    }
+    .winner-ticker-content:hover {
+      animation-play-state: paused;
+      cursor: pointer;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 40px;
+      gap: 6px;
+    }
+    .ticker-tag {
+      background: var(--primary);
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    @keyframes tickerAnimation {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+    .btn-primary { background: var(--primary); color: #000; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #334155; color: var(--text); }
+    .btn-admin { background: #6366f1; color: #fff; }
+    .btn-agent { background: var(--agent-purple); color: #fff; }
+    .btn-gcash { background: var(--gcash-blue); color: #fff; }
+    .btn-maya { background: var(--maya-green); color: #000; font-weight: 700; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+
+    /* Layout */
+    .container { max-width: 850px; margin: 24px auto; padding: 0 16px; }
+
+    .active-draw-banner {
+      background: #14532d;
+      border: 1px solid #22c55e;
+      color: #86efac;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .draw-banner-grid {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .draw-banner {
+      flex: 1;
+      min-width: 280px;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border: 1px solid #6366f1;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+    .draw-banner h4 { color: #818cf8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .draw-banner h2 { color: #fff; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
+    .winning-numbers-display { display: flex; justify-content: center; gap: 12px; align-items: center; }
+    .win-ball {
+      width: 48px; height: 48px;
+      background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
+      color: #000; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 800;
+      box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
+    }
+    .win-ball.pending { background: #334155; color: #94a3b8; box-shadow: none; font-size: 0.9rem; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid #334155;
+    }
+    .card-title { font-size: 1.2rem; margin-bottom: 14px; color: var(--primary); }
+
+    /* EZ2 Grid */
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+    .num-btn {
+      aspect-ratio: 1; border: 1px solid #475569; background: #0f172a;
+      color: var(--text); border-radius: 50%; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+    }
+    .num-btn.selected { background: var(--primary); color: #000; border-color: var(--primary); }
+
+    .bet-options { display: flex; gap: 8px; margin-bottom: 14px; }
+    .bet-btn {
+      flex: 1; padding: 12px 0; background: #0f172a; border: 1px solid #475569;
+      color: var(--text); border-radius: 8px; cursor: pointer; font-weight: 700; text-align: center;
+    }
+    .bet-btn.active { border-color: var(--accent); background: #14532d; color: #fff; }
+
+    .payout-box {
+      background: #0f172a; border: 1px solid #22c55e; border-radius: 8px;
+      padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .payout-tag { font-size: 0.9rem; color: var(--text-muted); }
+    .payout-amount { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+    .play-btn { width: 100%; padding: 14px; font-size: 1.1rem; }
+
+    .bet-slip {
+      background: #0f172a;
+      border: 1px dashed #475569;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .slip-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #1e293b;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #334155;
+    }
+    .slip-combo { font-weight: bold; color: var(--primary); font-size: 1rem; }
+    .slip-details { font-size: 0.8rem; color: var(--text-muted); }
+
+    .admin-form { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+    .admin-input {
+      padding: 10px; border-radius: 8px; border: 1px solid #475569;
+      background: #0f172a; color: #fff; font-size: 1rem; font-weight: bold;
+    }
+    .admin-input-num { width: 90px; text-align: center; font-size: 1.1rem; }
+
+    .table-responsive { overflow-x: auto; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #334155; }
+    th { color: var(--text-muted); background: #0f172a; }
+
+    .badge-draw { background: #3b82f6; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+    .badge-win { background: #166534; color: #86efac; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    .badge-loss { background: #991b1b; color: #fca5a5; padding: 2px 8px; border-radius: 4px; }
+    .badge-pending { background: #854d0e; color: #fef08a; padding: 2px 8px; border-radius: 4px; }
+    .badge-awaiting { background: #1d4ed8; color: #bfdbfe; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    .badge-rejected { background: #7f1d1d; color: #fca5a5; padding: 2px 8px; border-radius: 4px; }
+
+    .admin-status-chip {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-profile-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .profile-item {
+      background: #1e293b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .profile-item-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+    .profile-item-val { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 2px; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center;
+      z-index: 100; padding: 16px;
+    }
+    .modal {
+      background: var(--card-bg); padding: 24px; border-radius: 12px;
+      width: 100%; max-width: 520px; border: 1px solid #334155; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+    .tab-btn { background: none; border: none; color: var(--text-muted); font-weight: 700; cursor: pointer; padding: 6px 12px; }
+    .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
+    .input-group input {
+      width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569;
+      background: #0f172a; color: var(--text); font-size: 1rem;
+    }
+
+    .payment-method-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .payment-method-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .payment-method-btn.active-payment {
+      border-color: var(--primary);
+      background: rgba(234, 179, 8, 0.15);
+      color: var(--primary);
+    }
+
+    .payment-card {
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      margin-bottom: 16px;
+      text-align: center;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--primary);
+      box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+    }
+    .payment-number {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin: 8px 0;
+      color: #fef08a;
+    }
+
+    /* Live Chat Widget Styling */
+    .chat-floating-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--primary);
+      color: #000;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 4px 16px rgba(234, 179, 8, 0.4);
+      cursor: pointer;
+      z-index: 1000;
+      border: none;
+      transition: transform 0.2s;
+    }
+    .chat-floating-btn:hover { transform: scale(1.08); }
+    
+    .chat-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 50%;
+      display: none;
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      height: 480px;
+      background: var(--card-bg);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #0f172a;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #0f172a;
+    }
+
+    .chat-message {
+      max-width: 80%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .chat-message.incoming {
+      background: #1e293b;
+      color: var(--text);
+      align-self: flex-start;
+      border: 1px solid #334155;
+    }
+    .chat-message.outgoing {
+      background: var(--primary);
+      color: #000;
+      align-self: flex-end;
+      font-weight: 500;
+    }
+    .chat-sender-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      font-weight: bold;
+    }
+
+    .chat-footer {
+      padding: 12px;
+      background: var(--card-bg);
+      border-top: 1px solid #334155;
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .chat-sidebar-list {
+      max-height: 100px;
+      overflow-y: auto;
+      background: #1e293b;
+      padding: 6px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chat-user-chip {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .chat-user-chip.active {
+      border-color: var(--primary);
+      background: rgba(234, 179, 8, 0.15);
+      color: var(--primary);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo">
+        <span class="logo-text">EZ2WIN</span>
+        <span class="logo-multiplier">x100</span>
+      </div>
+      <span class="badge-mode" id="viewModeBadge">CLIENT HOME</span>
+    </div>
+    <div class="user-actions">
+      <div id="clientControls" style="display: flex; gap: 8px; align-items: center;">
+        <span class="user-profile-badge" id="clientHeaderUserDisplay">👤 Guest</span>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('authModal')">Account / Register</button>
+        <button class="btn btn-danger btn-sm" id="clientHeaderLogoutBtn" onclick="logoutClientAccount()" style="display: none;">Logout</button>
+      </div>
+      <button class="btn btn-admin btn-sm" onclick="handleRoleButtonClick()" id="roleToggleBtn">Staff Portal</button>
+    </div>
+  </header>
+
+  <!-- Winner Ticker -->
+  <div class="winner-ticker-wrapper" id="winnerTickerWrapper">
+    <div class="winner-ticker-content" id="winnerTickerContent"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- CLIENT HOME PAGE -->
+    <div id="clientView">
+
+      <!-- Official Draw Dates Schedule Card -->
+      <div class="card" style="background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1px solid var(--primary); text-align: center; margin-bottom: 20px;">
+        <h2 class="card-title" style="color: var(--primary); margin-bottom: 8px;">📅 PCSO EZ2 Official Draw Dates</h2>
+        <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 14px;">The official draw dates for the 5:00 PM and 9:00 PM draws are scheduled for:</p>
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+          <div style="background: #0f172a; padding: 12px 18px; border-radius: 8px; border: 1px solid #475569; min-width: 200px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">5:00 PM Draw Date</div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-top: 4px;">July 27, 2026</div>
+          </div>
+          <div style="background: #0f172a; padding: 12px 18px; border-radius: 8px; border: 1px solid #475569; min-width: 200px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">9:00 PM Draw Date</div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-top: 4px;">July 27, 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="active-draw-banner" id="activeDrawNotice">
+        🎯 Currently Accepting Bets For: <strong>5:00 PM DRAW</strong>
+      </div>
+
+      <div class="draw-banner-grid">
+        <div class="draw-banner">
+          <h4>Official PCSO 5:00 PM Draw Result</h4>
+          <h2>EZ2 Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplay5PM"></div>
+        </div>
+
+        <div class="draw-banner">
+          <h4>Official PCSO 9:00 PM Draw Result</h4>
+          <h2>EZ2 Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplay9PM"></div>
+        </div>
+      </div>
+      
+      <!-- Bet Slip & Selector Card -->
+      <div class="card">
+        <h2 class="card-title">1. Choose 2 Lucky Numbers (1–31)</h2>
+        <div class="grid" id="numberGrid"></div>
+
+        <h2 class="card-title">2. Select Bet Amount per Combination</h2>
+        <div class="bet-options">
+          <button class="bet-btn active" onclick="setBet(10, this)">₱10</button>
+          <button class="bet-btn" onclick="setBet(20, this)">₱20</button>
+          <button class="bet-btn" onclick="setBet(30, this)">₱30</button>
+          <button class="bet-btn" onclick="setBet(40, this)">₱40</button>
+          <button class="bet-btn" onclick="setBet(50, this)">₱50</button>
+        </div>
+
+        <div class="payout-box">
+          <div class="payout-tag">Payout Multiplier (100x):</div>
+          <div class="payout-amount">Win ₱<span id="potentialWin">1,000.00</span></div>
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 24px; padding: 12px; font-size: 1rem;" onclick="addCombinationToSlip()">➕ Add Combination to Slip</button>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h2 class="card-title" style="margin-bottom: 0;">🛒 Your Bet Slip (<span id="slipCount">0</span>)</h2>
+          <button class="btn btn-danger btn-sm" onclick="clearBetSlip()">Clear Slip</button>
+        </div>
+
+        <div class="bet-slip" id="betSlipContainer">
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;" id="emptySlipMsg">
+            No combinations added yet. Pick 2 numbers above and click "Add Combination to Slip".
+          </div>
+          <div id="slipItems"></div>
+        </div>
+
+        <div class="payout-box" style="border-color: var(--primary); background: #1e1b4b;">
+          <div class="payout-tag" style="color: #cbd5e1;">Total Slip Amount:</div>
+          <div class="payout-amount" style="color: var(--primary);">₱<span id="totalSlipAmount">0.00</span></div>
+        </div>
+
+        <button class="btn btn-primary play-btn" id="placeBetsBtn" onclick="initiatePaymentFlow()">Place All Bets for Active Draw</button>
+      </div>
+
+      <!-- Client Placed Bets & Winning History Table -->
+      <div class="card">
+        <h2 class="card-title">📜 My Placed Bets & Payment Status</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Target Draw</th>
+                <th>Your Combo</th>
+                <th>Winning Combo</th>
+                <th>Bet Amount</th>
+                <th>Method</th>
+                <th>Ref No.</th>
+                <th>Payment / Win Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="clientBetsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ADMIN / SEMI-ADMIN AGENT / VIEWER DASHBOARD VIEW -->
+    <div id="adminView" style="display: none;">
+
+      <!-- Revenue Summary Card -->
+      <div class="card" id="revenueSummaryCard" style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid var(--accent);">
+        <h2 class="card-title" id="revenueSummaryTitle" style="color: var(--accent); margin-bottom: 16px;">💰 Admin Revenue Summary (Confirmed Bets)</h2>
+        
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div class="admin-status-chip" style="flex: 1; min-width: 240px; padding: 16px; background: #0f172a; border-color: var(--accent); justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">5:00 PM Draw Total</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent); margin-top: 4px;" id="adminNet5PMDisplay">₱0.00</div>
+            </div>
+            <span class="badge-draw" style="background: #16532d; color: #86efac; padding: 4px 10px; font-size: 0.8rem;">5:00 PM</span>
+          </div>
+
+          <div class="admin-status-chip" style="flex: 1; min-width: 240px; padding: 16px; background: #0f172a; border-color: var(--accent); justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">9:00 PM Draw Total</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent); margin-top: 4px;" id="adminNet9PMDisplay">₱0.00</div>
+            </div>
+            <span class="badge-draw" style="background: #1e3a8a; color: #bfdbfe; padding: 4px 10px; font-size: 0.8rem;">9:00 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Verification / Confirmation Queue -->
+      <div class="card" style="border: 1px solid var(--gcash-blue);" id="paymentQueueCard">
+        <h2 class="card-title" style="color: var(--gcash-blue);">💳 Payment Pending Approval Queue</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Bettor Name</th>
+                <th>Method</th>
+                <th>Sender Mobile</th>
+                <th>Ref No.</th>
+                <th>Target Draw</th>
+                <th>Combos</th>
+                <th>Total Amount</th>
+                <th id="paymentQueueActionHeader">Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPaymentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin / Semi-Admin Profile Viewer Card -->
+      <div class="admin-profile-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+          <h2 style="font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" id="profileCardTitle">
+            👤 Admin Profile Information
+          </h2>
+          <span id="agentViewerNotice" style="font-size: 0.78rem; background: var(--agent-purple); color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: none;">
+            Semi-Admin Account
+          </span>
+        </div>
+        
+        <div class="profile-grid">
+          <div class="profile-item">
+            <div class="profile-item-label">Account Role</div>
+            <div class="profile-item-val" id="profileAccountRole">System Super Admin</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-item-label">Account Status</div>
+            <div class="profile-item-val" style="color: var(--maya-green);" id="profileStatusVal">Active & Verified</div>
+          </div>
+        </div>
+
+        <!-- Change Password of Client Account Under Semi-Admin Referral -->
+        <div style="margin-top: 16px; border-top: 1px solid #334155; padding-top: 14px;">
+          <h4 style="color: var(--primary); font-size: 0.9rem; margin-bottom: 10px;">🔒 Change Password of Referred Client Account</h4>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1.2; min-width: 160px;" class="input-group">
+              <label style="font-size: 0.75rem; margin-bottom: 4px;">Client Username / Mobile</label>
+              <input type="text" id="semiAdminClientUsernameInput" placeholder="Client Username/Mobile" style="padding: 8px; font-size: 0.85rem; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 140px;" class="input-group">
+              <label style="font-size: 0.75rem; margin-bottom: 4px;">New Password</label>
+              <input type="password" id="semiAdminClientNewPassInput" placeholder="New Password" style="padding: 8px; font-size: 0.85rem; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 140px;" class="input-group">
+              <label style="font-size: 0.75rem; margin-bottom: 4px;">Confirm Password</label>
+              <input type="password" id="semiAdminClientConfirmPassInput" placeholder="Confirm Password" style="padding: 8px; font-size: 0.85rem; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; width: 100%;">
+            </div>
+            <button class="btn btn-primary btn-sm" style="height: 38px; margin-bottom: 14px;" onclick="updateReferredClientPassword()">Update Client Pass</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Methods Management Card -->
+      <div class="card" id="adminPaymentMethodsCard">
+        <h2 class="card-title">💳 Payment Methods Management</h2>
+        <div class="admin-form" id="adminPaymentMethodForm">
+          <input type="text" id="newMethodNameInput" class="admin-input" placeholder="Method Name (e.g. BDO, UnionBank)" style="flex: 1; min-width: 160px;">
+          <input type="text" id="newMethodNumberInput" class="admin-input" placeholder="Account No. / Mobile" style="flex: 1; min-width: 160px;">
+          <input type="text" id="newMethodAccountNameInput" class="admin-input" placeholder="Account Holder Name" style="flex: 1; min-width: 180px;">
+          <button class="btn btn-primary" onclick="createNewPaymentMethod()">➕ Add Method</button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Method Name</th>
+                <th>Account Number / Details</th>
+                <th>Account Holder</th>
+                <th id="paymentMethodActionHeader">Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPaymentMethodsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Agent Account Creator & Referral Links Management -->
+      <div class="card" id="adminAgentManagementCard">
+        <h2 class="card-title">👥 Agent Accounts & Referral Links Management</h2>
+        <div class="admin-form" id="agentManagementForm">
+          <input type="text" id="newAgentNameInput" class="admin-input" placeholder="Agent Name (e.g. SubAgent 1)" style="flex: 1; min-width: 180px;">
+          <input type="text" id="newAgentPassInput" class="admin-input" placeholder="Password (default: agent123)" style="flex: 1; min-width: 160px;">
+          <button class="btn btn-agent" onclick="createNewAgent()">➕ Create Agent & Link</button>
+          <button class="btn btn-secondary" onclick="autoGenerateNextAgent()">⚡ Auto-Create Agent</button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent Name</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Agent Referral Link</th>
+                <th>Created Date</th>
+                <th id="agentTableActionHeader">Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminAgentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Winning Combination Panel -->
+      <div class="card" id="winningComboPanel">
+        <h2 class="card-title">⚙️ Set Winning Combinations</h2>
+        <div class="admin-form" id="adminWinningForm">
+          <select id="adminDrawSelect" class="admin-input" style="cursor: pointer;">
+            <option value="5:00 PM">5:00 PM Draw</option>
+            <option value="9:00 PM">9:00 PM Draw</option>
+          </select>
+          <input type="number" id="adminNum1" class="admin-input admin-input-num" min="1" max="31" placeholder="Ball 1">
+          <span style="font-size: 1.2rem; font-weight: bold;">-</span>
+          <input type="number" id="adminNum2" class="admin-input admin-input-num" min="1" max="31" placeholder="Ball 2">
+          <button class="btn btn-primary" id="publishResultBtn" onclick="saveAdminWinningCombination()">Publish Result</button>
+          <button class="btn btn-danger" onclick="resetAdminWinningCombination()">Reset Result</button>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;" id="adminCurrentWinningDisplay"></div>
+      </div>
+
+      <!-- Bettor / Client List Table (Place Bet History) -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <h2 class="card-title" style="margin-bottom: 0;">📋 Place Bet History (Referred Clients Only)</h2>
+          <button class="btn btn-danger btn-sm" id="clearAllBetsBtn" onclick="clearAllBetsHistory()">🗑️ Clear All Bets History</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Bettor Name</th>
+                <th>Target Draw</th>
+                <th>Selected Combo</th>
+                <th>Draw Result</th>
+                <th>Bet Amount</th>
+                <th>Method</th>
+                <th>Ref No.</th>
+                <th>Status</th>
+                <th>Prize Claimed Status</th>
+                <th id="betHistoryActionHeader">Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminBetsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FLOATING LIVE SUPPORT CHAT WIDGET -->
+  <button class="chat-floating-btn" onclick="toggleChatWindow()">
+    💬
+    <span class="chat-badge" id="chatUnreadBadge">0</span>
+  </button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div>
+        <strong id="chatHeaderTitle" style="color: var(--primary); font-size: 0.95rem;">💬 Live Support Chat</strong>
+        <div id="chatHeaderSubtitle" style="font-size: 0.72rem; color: var(--text-muted);">Chat with Admin / Semi-Admin for Password Reset</div>
+      </div>
+      <button class="close-btn" style="font-size: 1.2rem;" onclick="toggleChatWindow()">&times;</button>
+    </div>
+
+    <!-- Admin / Semi-Admin Conversation Selector Sidebar -->
+    <div class="chat-sidebar-list" id="chatSidebarList" style="display: none;"></div>
+
+    <div class="chat-body" id="chatMessagesBody"></div>
+
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chatMessageInput" placeholder="Type your message or request password reset..." onkeypress="handleChatKeypress(event)">
+      <button class="btn btn-primary btn-sm" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Payment Gate Modal -->
+  <div class="modal-overlay" id="gcashPaymentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="paymentModalTitle">💙 Payment Confirmation</h3>
+        <button class="close-btn" onclick="closeModal('gcashPaymentModal')">&times;</button>
+      </div>
+
+      <div class="payment-method-selector" id="paymentMethodSelectorContainer"></div>
+
+      <div class="payment-card" id="paymentCardDisplay">
+        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;" id="paymentCardSubtitle">Send Total Payment To Official Admin Account:</div>
+        <div class="payment-number" id="adminPaymentNumberDisplay">0927-7668-297</div>
+        <div style="font-size: 0.8rem; opacity: 0.9;" id="paymentCardAccountName">Account Name: EZ2WIN OFFICIAL ADMIN</div>
+      </div>
+
+      <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Target Active Draw:</span>
+          <strong style="color: var(--primary);" id="gcashModalTargetDraw">5:00 PM DRAW</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Total Combination(s):</span>
+          <strong id="gcashModalComboCount">0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Total Payment Due:</span>
+          <strong style="color: var(--accent); font-size: 1.1rem;" id="gcashModalTotalAmount">₱0.00</strong>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label id="senderMobileLabel">Your Account / Mobile Number used for Transfer</label>
+        <input type="text" id="clientGcashSenderNo" placeholder="e.g. 09171234567 or account no.">
+      </div>
+
+      <div class="input-group">
+        <label id="refNoLabel">Transaction Reference No. / Receipt Number</label>
+        <input type="text" id="clientGcashRefNo" placeholder="e.g. 10023456789">
+      </div>
+
+      <button class="btn btn-primary" id="paymentSubmitBtn" style="width: 100%; margin-top: 8px; padding: 12px; font-size: 1rem;" onclick="confirmGcashPayment()">Submit Payment & Place Bets</button>
+    </div>
+  </div>
+
+  <!-- Staff Login Modal -->
+  <div class="modal-overlay" id="staffLoginModal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3>🔐 Staff Portal Login</h3>
+        <button class="close-btn" onclick="closeModal('staffLoginModal')">&times;</button>
+      </div>
+      <div class="input-group">
+        <label>Username (admin, Admin Mark, etc.)</label>
+        <input type="text" id="staffUsernameInput" placeholder="e.g. admin or adminmark">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="staffPasswordInput" placeholder="Enter password">
+      </div>
+      <button class="btn btn-admin" style="width: 100%; margin-top: 8px; padding: 12px;" onclick="authenticateStaff()">Login to Panel</button>
+    </div>
+  </div>
+
+  <!-- Client Authentication Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="authModalTitle">👤 Client Account & Registration</h3>
+        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('loginTab', this)">Client Login</button>
+        <button class="tab-btn" id="tabBtnRegister" onclick="switchAuthTab('registerTab', this)">Register Account</button>
+        <button class="tab-btn" id="tabBtnProfile" onclick="switchAuthTab('profileTab', this)">My Profile</button>
+      </div>
+
+      <!-- Login Tab -->
+      <div id="loginTab">
+        <div class="input-group">
+          <label>Username / Mobile No.</label>
+          <input type="text" id="clientLoginUsernameInput" placeholder="e.g. 09171234567 or juan_winner">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="clientLoginPasswordInput" placeholder="Enter your password">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 8px; padding: 12px;" onclick="loginClientAccount()">Login</button>
+        <div style="text-align: center; margin-top: 14px; font-size: 0.85rem; background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+          <span style="color: var(--text-muted);">Forgot your password?</span><br>
+          <a href="#" onclick="openChatForPasswordReset()" style="color: var(--primary); font-weight: bold; text-decoration: underline; display: inline-block; margin-top: 4px;">💬 Chat with Admin / Semi-Admin for Password Reset</a>
+        </div>
+      </div>
+
+      <!-- Register Tab -->
+      <div id="registerTab" style="display: none;">
+        <div id="registrationReferralBanner" style="background: #1e1b4b; border: 1px solid var(--primary); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; display: none; font-size: 0.88rem;"></div>
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="clientRegNameInput" placeholder="e.g. Juan Cruz">
+        </div>
+        <div class="input-group">
+          <label>Username / Mobile No. (Unique Identifier)</label>
+          <input type="text" id="clientRegUserInput" placeholder="e.g. 09171234567 or username">
+        </div>
+        <div class="input-group">
+          <label>Unique Password</label>
+          <input type="password" id="clientRegPassInput" placeholder="Create your unique password">
+        </div>
+        <div class="input-group">
+          <label>Confirm Password</label>
+          <input type="password" id="clientRegConfirmPassInput" placeholder="Confirm your unique password">
+        </div>
+        <div class="input-group">
+          <label>Referral Code / Semi-Admin Agent</label>
+          <input type="text" id="clientRegReferralInput" placeholder="e.g. Admin Mark">
+        </div>
+        <button class="btn btn-success" style="width: 100%; margin-top: 8px; padding: 12px;" onclick="registerClientAccount()">Create Account & Generate Referral Link</button>
+      </div>
+
+      <!-- Profile Tab with Client Winning Prizes Confirmation & Password Reset -->
+      <div id="profileTab" style="display: none;">
+        <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 16px;">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Account Full Name</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #fff;" id="profileViewName">---</div>
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Username / Mobile No.</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);" id="profileViewUsername">---</div>
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Referred By (Semi-Admin / Agent)</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--agent-purple); margin-top: 2px;" id="profileViewReferredBy">---</div>
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Your Personal Referral Link</div>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <input type="text" id="profileReferralLinkInput" readonly style="flex: 1; background: #1e293b; border: 1px solid #475569; color: var(--primary); padding: 8px; border-radius: 6px; font-size: 0.85rem;">
+            <button class="btn btn-primary btn-sm" onclick="copyReferralLink()">Copy Link</button>
+          </div>
+        </div>
+
+        <!-- Client Profile Winning Prizes & Payout Confirmations Card -->
+        <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 16px;">
+          <h4 style="color: var(--accent); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            🏆 My Winning Prizes & Payout Claims
+          </h4>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+            Review your won combinations below and confirm receipt once your payout has been successfully credited or received.
+          </p>
+          <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Draw</th>
+                  <th>Winning Combo</th>
+                  <th>Prize (100x)</th>
+                  <th>Receipt Status</th>
+                </tr>
+              </thead>
+              <tbody id="profileWinningClaimsTableBody">
+                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No winning prizes recorded yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Client Password Change / Reset Section -->
+        <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 16px;">
+          <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 10px;">🔒 Change Account Password</h4>
+          <div class="input-group" style="margin-bottom: 10px;">
+            <label style="font-size: 0.78rem;">Current Password</label>
+            <input type="password" id="clientCurrentPassInput" placeholder="Enter current password" style="padding: 10px; font-size: 0.9rem;">
+          </div>
+          <div class="input-group" style="margin-bottom: 10px;">
+            <label style="font-size: 0.78rem;">New Password</label>
+            <input type="password" id="clientNewPassInput" placeholder="Enter new password (min. 6 chars)" style="padding: 10px; font-size: 0.9rem;">
+          </div>
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label style="font-size: 0.78rem;">Confirm New Password</label>
+            <input type="password" id="clientConfirmNewPassInput" placeholder="Confirm new password" style="padding: 10px; font-size: 0.9rem;">
+          </div>
+          <button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="updateClientPassword()">Update Password</button>
+        </div>
+
+        <button class="btn btn-danger" style="width: 100%; padding: 12px;" onclick="logoutClientAccount()">Logout Account</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const CREDENTIALS = JSON.parse(localStorage.getItem('ez2_credentials')) || {
+      admin: { username: 'admin', password: 'NqS312719', role: 'admin' },
+      viewer: { username: 'viewer', password: 'viewer123', role: 'viewer' }
+    };
+
+    let currentRole = 'client';
+    let activeAgentIdentity = '';
+    let selectedNumbers = [];
+    let currentBet = 10;
+    let betSlip = [];
+    let selectedPaymentMethod = null;
+    
+    let registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [
+      { id: 'cli-1', name: 'Juan Cruz', username: '09171234567', password: 'password123', refCode: 'admin', referredBy: 'admin' }
+    ];
+
+    let activeClient = JSON.parse(localStorage.getItem('ez2_activeClient')) || null;
+
+    let agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [
+      { id: 'agent-mark', name: 'Admin Mark', username: 'admin_adminmark', password: 'agent123', role: 'agent', createdBy: 'admin', createdAt: new Date().toLocaleDateString() },
+      { id: 'agent-1', name: 'Agent 1', username: 'admin_agent1', password: 'agent123', role: 'agent', createdBy: 'admin', createdAt: new Date().toLocaleDateString() },
+      { id: 'agent-2', name: 'Agent 2', username: 'admin_agent2', password: 'agent123', role: 'viewer', createdBy: 'admin', createdAt: new Date().toLocaleDateString() }
+    ];
+
+    let paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [
+      { id: 'pm-1', name: 'GCash', number: '0927-7668-297', accountName: 'EZ2WIN OFFICIAL ADMIN' },
+      { id: 'pm-2', name: 'Maya', number: '0927-7668-297', accountName: 'EZ2WIN OFFICIAL ADMIN' }
+    ];
+
+    let winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || {
+      '5:00 PM': null,
+      '9:00 PM': null
+    };
+
+    let placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+    let chatMessages = JSON.parse(localStorage.getItem('ez2_chatMessages')) || [];
+    let activeChatClientUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refParam = urlParams.get('ref') || urlParams.get('agent');
+      
+      if (refParam) {
+        localStorage.setItem('ez2_pendingRef', refParam);
+      }
+
+      const pendingRefCode = refParam || localStorage.getItem('ez2_pendingRef');
+      if (pendingRefCode) {
+        const refInput = document.getElementById('clientRegReferralInput');
+        if (refInput) {
+          refInput.value = pendingRefCode;
+        }
+
+        const banner = document.getElementById('registrationReferralBanner');
+        if (banner) {
+          banner.style.display = 'block';
+          banner.innerHTML = `🎯 You were invited via Semi-Admin / Agent Link: <strong style="color: var(--primary);">${pendingRefCode}</strong>. Your account will automatically link to this agent upon registration!`;
+        }
+      }
+
+      if (!localStorage.getItem('ez2_registeredClients')) {
+        localStorage.setItem('ez2_registeredClients', JSON.stringify(registeredClients));
+      }
+      if (!localStorage.getItem('ez2_agents')) {
+        localStorage.setItem('ez2_agents', JSON.stringify(agentsList));
+      }
+      if (!localStorage.getItem('ez2_paymentMethods')) {
+        localStorage.setItem('ez2_paymentMethods', JSON.stringify(paymentMethods));
+      }
+      if (!localStorage.getItem('ez2_credentials')) {
+        localStorage.setItem('ez2_credentials', JSON.stringify(CREDENTIALS));
+      }
+      if (!localStorage.getItem('ez2_chatMessages')) {
+        localStorage.setItem('ez2_chatMessages', JSON.stringify(chatMessages));
+      }
+
+      renderNumberGrid();
+      updateWinningDisplay();
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      renderAdminAgentsTable();
+      renderAdminPaymentMethodsTable();
+      renderAdminPaymentsQueue();
+      updateClientAuthUI();
+      renderBetSlip();
+      updateWinnerTicker();
+      updateAdminNetTotals();
+      updateChatBadge();
+    });
+
+    function getCurrentTargetDraw() {
+      const now = new Date();
+      const hours = now.getHours();
+      return hours < 17 ? '5:00 PM' : '9:00 PM';
+    }
+
+    function toggleChatWindow() {
+      const chatWin = document.getElementById('chatWindow');
+      if (chatWin.style.display === 'flex') {
+        chatWin.style.display = 'none';
+      } else {
+        chatWin.style.display = 'flex';
+        renderChatMessages();
+        if (currentRole !== 'client') {
+          renderChatSidebar();
+        }
+      }
+    }
+
+    function openChatForPasswordReset() {
+      closeModal('authModal');
+      const chatWin = document.getElementById('chatWindow');
+      chatWin.style.display = 'flex';
+      sendPasswordResetPrompt();
+      renderChatMessages();
+    }
+
+    function sendPasswordResetPrompt() {
+      const inputEl = document.getElementById('chatMessageInput');
+      inputEl.value = "Hello Admin/Semi-Admin, I forgot my password and need help resetting it. My username/mobile is: ";
+      inputEl.focus();
+    }
+
+    function sendChatMessage() {
+      const inputEl = document.getElementById('chatMessageInput');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      chatMessages = JSON.parse(localStorage.getItem('ez2_chatMessages')) || [];
+
+      let senderName = 'Guest';
+      let senderId = 'guest_' + Math.random();
+      let recipientId = 'admin';
+      let clientThreadId = '';
+
+      if (currentRole === 'client') {
+        if (!activeClient) {
+          let guestThreadId = localStorage.getItem('ez2_guestThreadId');
+          if (!guestThreadId) {
+            guestThreadId = 'guest_' + Date.now();
+            localStorage.setItem('ez2_guestThreadId', guestThreadId);
+          }
+          senderName = 'Guest (Password Reset / Support)';
+          senderId = guestThreadId;
+          recipientId = 'admin';
+          clientThreadId = guestThreadId;
+        } else {
+          senderName = activeClient.name;
+          senderId = activeClient.username;
+          recipientId = activeClient.referredBy || 'admin';
+          clientThreadId = activeClient.username;
+        }
+      } else {
+        senderName = activeAgentIdentity || currentRole.toUpperCase();
+        senderId = currentRole === 'admin' ? 'admin' : activeAgentIdentity;
+        if (!activeChatClientUser) {
+          alert("Please select a client or guest from the chat list to reply to.");
+          return;
+        }
+        recipientId = activeChatClientUser;
+        clientThreadId = activeChatClientUser;
+      }
+
+      const newMsg = {
+        id: 'msg-' + Date.now(),
+        senderName: senderName,
+        senderId: senderId,
+        recipientId: recipientId,
+        clientThread: clientThreadId,
+        text: text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      chatMessages.push(newMsg);
+      localStorage.setItem('ez2_chatMessages', JSON.stringify(chatMessages));
+
+      inputEl.value = '';
+      renderChatMessages();
+      if (currentRole !== 'client') {
+        renderChatSidebar();
+      }
+    }
+
+    function handleChatKeypress(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    function renderChatMessages() {
+      const body = document.getElementById('chatMessagesBody');
+      const sidebar = document.getElementById('chatSidebarList');
+      const headerSub = document.getElementById('chatHeaderSubtitle');
+      if (!body) return;
+
+      chatMessages = JSON.parse(localStorage.getItem('ez2_chatMessages')) || [];
+      body.innerHTML = '';
+
+      if (currentRole === 'client') {
+        sidebar.style.display = 'none';
+
+        if (!activeClient) {
+          let guestThreadId = localStorage.getItem('ez2_guestThreadId');
+          if (!guestThreadId) {
+            guestThreadId = 'guest_' + Date.now();
+            localStorage.setItem('ez2_guestThreadId', guestThreadId);
+          }
+          headerSub.textContent = `Chat with Support (Password Reset Help)`;
+
+          const threadMsgs = chatMessages.filter(m => m.clientThread === guestThreadId);
+          if (threadMsgs.length === 0) {
+            body.innerHTML = `
+              <div style="background: #1e293b; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px;">
+                🔑 <strong>Forgot Your Password?</strong><br>
+                <span style="font-size: 0.82rem; color: var(--text-muted);">Chat directly with Admin or Semi-Admin to verify your account and reset your password instantly!</span>
+              </div>
+              <div style="text-align:center; margin-bottom: 12px;">
+                <button class="btn btn-primary btn-sm" onclick="sendPasswordResetPrompt()">💬 Request Password Reset</button>
+              </div>
+              <div style="text-align:center; color: var(--text-muted); font-size: 0.82rem;">Type your message below and send. Support will reply shortly.</div>
+            `;
+            return;
+          }
+
+          threadMsgs.forEach(m => {
+            const isOut = m.senderId.startsWith('guest_');
+            const div = document.createElement('div');
+            div.className = `chat-message ${isOut ? 'outgoing' : 'incoming'}`;
+            div.innerHTML = `
+              <div class="chat-sender-name">${m.senderName} (${m.timestamp})</div>
+              <div>${m.text}</div>
+            `;
+            body.appendChild(div);
+          });
+          return;
+        }
+
+        headerSub.textContent = `Chatting with Support (${activeClient.referredBy || 'Admin'})`;
+        const threadMsgs = chatMessages.filter(m => m.clientThread === activeClient.username);
+        if (threadMsgs.length === 0) {
+          body.innerHTML = `
+            <div style="background: #1e293b; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px; font-size: 0.85rem;">
+              👋 Hello <strong>${activeClient.name}</strong>! Need to reset your password or have questions about bets? Chat with us below.
+            </div>
+            <div style="text-align:center; margin-bottom: 10px;">
+              <button class="btn btn-primary btn-sm" onclick="sendPasswordResetPrompt()">🔒 Request Password Reset</button>
+            </div>
+          `;
+          return;
+        }
+
+        threadMsgs.forEach(m => {
+          const isOut = m.senderId === activeClient.username;
+          const div = document.createElement('div');
+          div.className = `chat-message ${isOut ? 'outgoing' : 'incoming'}`;
+          div.innerHTML = `
+            <div class="chat-sender-name">${m.senderName} (${m.timestamp})</div>
+            <div>${m.text}</div>
+          `;
+          body.appendChild(div);
+        });
+
+      } else {
+        sidebar.style.display = 'flex';
+        headerSub.textContent = activeChatClientUser ? `Chatting with: ${activeChatClientUser}` : 'Select a conversation chip above';
+
+        if (!activeChatClientUser) {
+          body.innerHTML = `<div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">Select a client or password-reset guest conversation above to reply.</div>`;
+          return;
+        }
+
+        const threadMsgs = chatMessages.filter(m => m.clientThread === activeChatClientUser);
+        if (threadMsgs.length === 0) {
+          body.innerHTML = `<div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">No messages in this thread yet.</div>`;
+          return;
+        }
+
+        threadMsgs.forEach(m => {
+          const isOut = m.senderId !== activeChatClientUser;
+          const div = document.createElement('div');
+          div.className = `chat-message ${isOut ? 'outgoing' : 'incoming'}`;
+          div.innerHTML = `
+            <div class="chat-sender-name">${m.senderName} (${m.timestamp})</div>
+            <div>${m.text}</div>
+          `;
+          body.appendChild(div);
+        });
+      }
+
+      body.scrollTop = body.scrollHeight;
+      updateChatBadge();
+    }
+
+    function renderChatSidebar() {
+      const sidebar = document.getElementById('chatSidebarList');
+      if (!sidebar) return;
+      sidebar.innerHTML = '';
+
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+      chatMessages = JSON.parse(localStorage.getItem('ez2_chatMessages')) || [];
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+
+      const activeThreadsSet = new Set();
+      chatMessages.forEach(m => {
+        if (m.clientThread) activeThreadsSet.add(m.clientThread);
+      });
+
+      let visibleThreads = Array.from(activeThreadsSet);
+
+      if (currentRole === 'agent') {
+        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
+        const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
+
+        visibleThreads = visibleThreads.filter(threadId => {
+          if (threadId.startsWith('guest_')) return true;
+          const clientObj = registeredClients.find(c => c.username.toLowerCase() === threadId.toLowerCase());
+          if (!clientObj) return false;
+          const refBy = (clientObj.referredBy || '').toLowerCase().trim();
+          return refBy === agentIdentifier || refBy === agentName || refBy === activeAgentIdentity.toLowerCase();
+        });
+      }
+
+      if (visibleThreads.length === 0) {
+        sidebar.innerHTML = `<span style="font-size: 0.75rem; color: var(--text-muted); padding: 4px;">No active chat threads found.</span>`;
+        return;
+      }
+
+      if (!activeChatClientUser && visibleThreads.length > 0) {
+        activeChatClientUser = visibleThreads[0];
+      }
+
+      visibleThreads.forEach(threadId => {
+        let label = threadId;
+        const cli = registeredClients.find(c => c.username.toLowerCase() === threadId.toLowerCase());
+        if (cli) {
+          label = `${cli.name} (${cli.username})`;
+        } else if (threadId.startsWith('guest_')) {
+          label = `🔑 Password Reset Guest (${threadId.slice(-4)})`;
+        }
+
+        const chip = document.createElement('button');
+        chip.className = `chat-user-chip ${activeChatClientUser === threadId ? 'active' : ''}`;
+        chip.textContent = label;
+        chip.onclick = () => {
+          activeChatClientUser = threadId;
+          renderChatMessages();
+          renderChatSidebar();
+        };
+        sidebar.appendChild(chip);
+      });
+    }
+
+    function updateChatBadge() {
+      const badge = document.getElementById('chatUnreadBadge');
+      if (!badge) return;
+
+      chatMessages = JSON.parse(localStorage.getItem('ez2_chatMessages')) || [];
+      let unreadCount = 0;
+
+      if (currentRole === 'client' && activeClient) {
+        unreadCount = chatMessages.filter(m => m.clientThread === activeClient.username && m.senderId !== activeClient.username).length;
+      } else if (currentRole === 'client' && !activeClient) {
+        const guestThreadId = localStorage.getItem('ez2_guestThreadId');
+        if (guestThreadId) {
+          unreadCount = chatMessages.filter(m => m.clientThread === guestThreadId && !m.senderId.startsWith('guest_')).length;
+        }
+      } else if (currentRole !== 'client') {
+        unreadCount = chatMessages.filter(m => m.senderId !== 'admin' && !m.senderId.startsWith('agent_') && m.senderId !== activeAgentIdentity).length;
+      }
+
+      if (unreadCount > 0) {
+        badge.style.display = 'block';
+        badge.textContent = unreadCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'ez2_chatMessages') {
+        renderChatMessages();
+        updateChatBadge();
+      }
+      if (e.key === 'ez2_placedBets') {
+        renderClientBetsTable();
+        renderAdminBetsTable();
+        renderAdminPaymentsQueue();
+        updateWinnerTicker();
+        updateAdminNetTotals();
+      }
+      if (e.key === 'ez2_activeClient' || e.key === 'ez2_registeredClients') {
+        registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+        activeClient = JSON.parse(localStorage.getItem('ez2_activeClient')) || null;
+        updateClientAuthUI();
+      }
+      if (e.key === 'ez2_winningCombos') {
+        winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+        updateWinningDisplay();
+        renderClientBetsTable();
+        renderAdminBetsTable();
+        updateWinnerTicker();
+      }
+      if (e.key === 'ez2_agents') {
+        agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+        renderAdminAgentsTable();
+      }
+      if (e.key === 'ez2_paymentMethods') {
+        paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+        renderAdminPaymentMethodsTable();
+      }
+    });
+
+    function renderNumberGrid() {
+      const grid = document.getElementById('numberGrid');
+      grid.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        if (selectedNumbers.includes(i)) {
+          btn.classList.add('selected');
+        }
+        btn.textContent = i < 10 ? '0' + i : i;
+        btn.onclick = () => selectNumber(i, btn);
+        grid.appendChild(btn);
+      }
+    }
+
+    function selectNumber(num, btn) {
+      if (selectedNumbers.includes(num)) {
+        selectedNumbers = selectedNumbers.filter(n => n !== num);
+        btn.classList.remove('selected');
+      } else {
+        if (selectedNumbers.length < 2) {
+          selectedNumbers.push(num);
+          btn.classList.add('selected');
+        } else {
+          alert('You can only select 2 numbers per EZ2 combination.');
+        }
+      }
+    }
+
+    function setBet(amount, element) {
+      currentBet = amount;
+      document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+      element.classList.add('active');
+      const potentialWin = amount * 100;
+      document.getElementById('potentialWin').textContent = potentialWin.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+
+    function addCombinationToSlip() {
+      if (selectedNumbers.length !== 2) {
+        alert("Please select exactly 2 numbers for your EZ2 combination.");
+        return;
+      }
+
+      const comboSorted = [...selectedNumbers].sort((a, b) => a - b);
+      const potentialWin = currentBet * 100;
+
+      const newSlipItem = {
+        id: 'slip-' + Date.now() + '-' + Math.random(),
+        combo: comboSorted,
+        betAmount: currentBet,
+        potentialWin: potentialWin
+      };
+
+      betSlip.push(newSlipItem);
+      selectedNumbers = [];
+      renderNumberGrid();
+      renderBetSlip();
+    }
+
+    function clearBetSlip() {
+      betSlip = [];
+      renderBetSlip();
+    }
+
+    function removeSlipItem(id) {
+      betSlip = betSlip.filter(item => item.id !== id);
+      renderBetSlip();
+    }
+
+    function renderBetSlip() {
+      const container = document.getElementById('slipItems');
+      const emptyMsg = document.getElementById('emptySlipMsg');
+      const countEl = document.getElementById('slipCount');
+      const totalAmountEl = document.getElementById('totalSlipAmount');
+
+      if (!container) return;
+
+      countEl.textContent = betSlip.length;
+      container.innerHTML = '';
+
+      if (betSlip.length === 0) {
+        emptyMsg.style.display = 'block';
+        totalAmountEl.textContent = '0.00';
+        return;
+      }
+
+      emptyMsg.style.display = 'none';
+      let totalAmount = 0;
+
+      betSlip.forEach(item => {
+        totalAmount += item.betAmount;
+        const comboStr = item.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+
+        const div = document.createElement('div');
+        div.className = 'slip-item';
+        div.innerHTML = `
+          <div>
+            <div class="slip-combo">[ ${comboStr} ]</div>
+            <div class="slip-details">Bet: ₱${item.betAmount} | Win: ₱${item.potentialWin.toLocaleString()}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="removeSlipItem('${item.id}')">Remove</button>
+        `;
+        container.appendChild(div);
+      });
+
+      totalAmountEl.textContent = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+
+    function initiatePaymentFlow() {
+      if (betSlip.length === 0) {
+        alert("Your bet slip is empty! Please add at least one combination.");
+        return;
+      }
+
+      if (!activeClient) {
+        alert("Please log in or register your client account before placing bets.");
+        openModal('authModal');
+        switchAuthTab('loginTab', document.getElementById('tabBtnLogin'));
+        return;
+      }
+
+      const targetDraw = getCurrentTargetDraw();
+      let totalAmount = betSlip.reduce((sum, item) => sum + item.betAmount, 0);
+
+      document.getElementById('gcashModalTargetDraw').textContent = targetDraw + ' DRAW';
+      document.getElementById('gcashModalComboCount').textContent = betSlip.length;
+      document.getElementById('gcashModalTotalAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+      paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+      selectPaymentMethod(paymentMethods[0] ? paymentMethods[0].name : 'GCash');
+
+      openModal('gcashPaymentModal');
+    }
+
+    function confirmGcashPayment() {
+      const senderNo = document.getElementById('clientGcashSenderNo').value.trim();
+      const refNo = document.getElementById('clientGcashRefNo').value.trim();
+
+      if (!senderNo || !refNo) {
+        alert("Please provide your sender mobile number and reference number.");
+        return;
+      }
+
+      const targetDraw = getCurrentTargetDraw();
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+
+      betSlip.forEach(item => {
+        const newBet = {
+          id: 'bet-' + Date.now() + '-' + Math.random(),
+          bettorName: activeClient.name,
+          bettorAccount: activeClient.username,
+          referredBy: activeClient.referredBy || 'admin',
+          targetDraw: targetDraw,
+          combo: item.combo,
+          betAmount: item.betAmount,
+          potentialWin: item.potentialWin,
+          paymentMethod: selectedPaymentMethod || 'GCash',
+          senderNo: senderNo,
+          refNo: refNo,
+          paymentStatus: 'PENDING',
+          prizeStatus: 'PENDING',
+          createdAt: new Date().toLocaleString()
+        };
+        placedBets.push(newBet);
+      });
+
+      localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+      betSlip = [];
+      renderBetSlip();
+      closeModal('gcashPaymentModal');
+
+      document.getElementById('clientGcashSenderNo').value = '';
+      document.getElementById('clientGcashRefNo').value = '';
+
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      renderAdminPaymentsQueue();
+
+      alert("🎉 Your bets have been successfully submitted and are pending admin payment verification!");
+    }
+
+    function handleRoleButtonClick() {
+      if (currentRole === 'client') {
+        openModal('staffLoginModal');
+      } else {
+        currentRole = 'client';
+        activeAgentIdentity = '';
+        applyRoleUI();
+      }
+    }
+
+    function authenticateStaff() {
+      const u = document.getElementById('staffUsernameInput').value.trim();
+      const p = document.getElementById('staffPasswordInput').value.trim();
+
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+      let creds = JSON.parse(localStorage.getItem('ez2_credentials')) || {
+        admin: { username: 'admin', password: 'NqS312719', role: 'admin' },
+        viewer: { username: 'viewer', password: 'viewer123', role: 'viewer' }
+      };
+
+      if (u === creds.admin.username && p === creds.admin.password) {
+        currentRole = 'admin';
+        activeAgentIdentity = 'System Super Admin';
+        closeModal('staffLoginModal');
+        document.getElementById('staffUsernameInput').value = '';
+        document.getElementById('staffPasswordInput').value = '';
+        applyRoleUI();
+        return;
+      }
+
+      if (u === creds.viewer.username && p === creds.viewer.password) {
+        currentRole = 'viewer';
+        activeAgentIdentity = 'System Viewer';
+        closeModal('staffLoginModal');
+        document.getElementById('staffUsernameInput').value = '';
+        document.getElementById('staffPasswordInput').value = '';
+        applyRoleUI();
+        return;
+      }
+
+      const matchedAgent = agentsList.find(a => 
+        (a.username.toLowerCase() === u.toLowerCase() || a.name.toLowerCase() === u.toLowerCase()) && 
+        a.password === p
+      );
+
+      if (matchedAgent) {
+        currentRole = matchedAgent.role || 'agent';
+        activeAgentIdentity = matchedAgent.name;
+        closeModal('staffLoginModal');
+        document.getElementById('staffUsernameInput').value = '';
+        document.getElementById('staffPasswordInput').value = '';
+        applyRoleUI();
+      } else {
+        alert("Invalid Username or Password! Please check your credentials.");
+      }
+    }
+
+    function applyRoleUI() {
+      const clientView = document.getElementById('clientView');
+      const adminView = document.getElementById('adminView');
+      const clientControls = document.getElementById('clientControls');
+      const viewModeBadge = document.getElementById('viewModeBadge');
+      const roleToggleBtn = document.getElementById('roleToggleBtn');
+      const agentNotice = document.getElementById('agentViewerNotice');
+      const agentMgmtCard = document.getElementById('adminAgentManagementCard');
+      const agentMgmtForm = document.getElementById('agentManagementForm');
+      const paymentMethodForm = document.getElementById('adminPaymentMethodForm');
+      const winningComboPanel = document.getElementById('winningComboPanel');
+      const clearAllBetsBtn = document.getElementById('clearAllBetsBtn');
+
+      const profileCardTitle = document.getElementById('profileCardTitle');
+      const profileAccountRole = document.getElementById('profileAccountRole');
+      const profileStatusVal = document.getElementById('profileStatusVal');
+
+      if (currentRole === 'admin') {
+        clientView.style.display = 'none';
+        adminView.style.display = 'block';
+        clientControls.style.display = 'none';
+        viewModeBadge.textContent = 'ADMIN PANEL';
+        viewModeBadge.style.background = '#6366f1';
+        roleToggleBtn.textContent = 'Exit Admin';
+        roleToggleBtn.className = 'btn btn-admin btn-sm';
+        agentNotice.style.display = 'none';
+        if (agentMgmtCard) agentMgmtCard.style.display = 'block';
+        if (agentMgmtForm) agentMgmtForm.style.display = 'flex';
+        if (paymentMethodForm) paymentMethodForm.style.display = 'flex';
+        if (winningComboPanel) winningComboPanel.style.display = 'block';
+        if (clearAllBetsBtn) clearAllBetsBtn.style.display = 'inline-block';
+
+        profileCardTitle.innerHTML = '👤 Admin Profile Information';
+        profileAccountRole.textContent = 'System Super Admin';
+        profileStatusVal.textContent = 'Active & Verified';
+
+        renderAdminBetsTable();
+        renderAdminAgentsTable();
+        renderAdminPaymentMethodsTable();
+        renderAdminPaymentsQueue();
+        updateAdminNetTotals();
+      } else if (currentRole === 'agent') {
+        clientView.style.display = 'none';
+        adminView.style.display = 'block';
+        clientControls.style.display = 'none';
+        viewModeBadge.textContent = `SEMI-ADMIN: ${activeAgentIdentity.toUpperCase()}`;
+        viewModeBadge.style.background = 'var(--agent-purple)';
+        roleToggleBtn.textContent = 'Exit Semi-Admin';
+        roleToggleBtn.className = 'btn btn-agent btn-sm';
+        
+        agentNotice.textContent = `Semi-Admin Account (${activeAgentIdentity})`;
+        agentNotice.style.display = 'inline-block';
+        
+        if (agentMgmtCard) agentMgmtCard.style.display = 'block';
+        if (agentMgmtForm) agentMgmtForm.style.display = 'flex';
+        if (paymentMethodForm) paymentMethodForm.style.display = 'flex';
+        if (winningComboPanel) winningComboPanel.style.display = 'block';
+        if (clearAllBetsBtn) clearAllBetsBtn.style.display = 'none';
+
+        profileCardTitle.innerHTML = `👤 Semi-Admin Profile: ${activeAgentIdentity}`;
+        profileAccountRole.textContent = `Semi-Admin Agent Account (${activeAgentIdentity})`;
+        profileStatusVal.textContent = 'Active Semi-Admin Rights';
+
+        renderAdminBetsTable();
+        renderAdminAgentsTable();
+        renderAdminPaymentMethodsTable();
+        renderAdminPaymentsQueue();
+        updateAdminNetTotals();
+      } else if (currentRole === 'viewer') {
+        clientView.style.display = 'none';
+        adminView.style.display = 'block';
+        clientControls.style.display = 'none';
+        viewModeBadge.textContent = 'VIEWER ACCOUNT (READ-ONLY)';
+        viewModeBadge.style.background = '#0284c7';
+        roleToggleBtn.textContent = 'Exit Viewer';
+        roleToggleBtn.className = 'btn btn-secondary btn-sm';
+        
+        agentNotice.textContent = 'Viewer Account Mode';
+        agentNotice.style.display = 'inline-block';
+        
+        if (agentMgmtCard) agentMgmtCard.style.display = 'block';
+        if (agentMgmtForm) agentMgmtForm.style.display = 'none';
+        if (paymentMethodForm) paymentMethodForm.style.display = 'none';
+        if (winningComboPanel) winningComboPanel.style.display = 'none';
+        if (clearAllBetsBtn) clearAllBetsBtn.style.display = 'none';
+
+        profileCardTitle.innerHTML = `👤 Viewer Account: ${activeAgentIdentity || 'viewer'}`;
+        profileAccountRole.textContent = 'Read-Only Viewer Account';
+        profileStatusVal.textContent = 'Active (View-Only)';
+
+        renderAdminBetsTable();
+        renderAdminAgentsTable();
+        renderAdminPaymentMethodsTable();
+        renderAdminPaymentsQueue();
+        updateAdminNetTotals();
+      } else {
+        clientView.style.display = 'block';
+        adminView.style.display = 'none';
+        clientControls.style.display = 'flex';
+        viewModeBadge.textContent = 'CLIENT HOME';
+        viewModeBadge.style.background = '#334155';
+        roleToggleBtn.textContent = 'Staff Portal';
+        roleToggleBtn.className = 'btn btn-admin btn-sm';
+
+        renderClientBetsTable();
+      }
+      updateChatBadge();
+    }
+
+    function switchAuthTab(tabId, element) {
+      document.getElementById('loginTab').style.display = 'none';
+      document.getElementById('registerTab').style.display = 'none';
+      document.getElementById('profileTab').style.display = 'none';
+
+      document.querySelectorAll('#authModal .tab-btn').forEach(b => b.classList.remove('active'));
+      if (element) element.classList.add('active');
+
+      document.getElementById(tabId).style.display = 'block';
+    }
+
+    function registerClientAccount() {
+      const name = document.getElementById('clientRegNameInput').value.trim();
+      const username = document.getElementById('clientRegUserInput').value.trim();
+      const pass = document.getElementById('clientRegPassInput').value.trim();
+      const confirmPass = document.getElementById('clientRegConfirmPassInput').value.trim();
+      
+      let refCode = document.getElementById('clientRegReferralInput').value.trim() || localStorage.getItem('ez2_pendingRef') || 'admin';
+
+      if (!name || !username || !pass) {
+        alert("Please fill in all registration fields.");
+        return;
+      }
+
+      if (pass !== confirmPass) {
+        alert("Passwords do not match. Please verify.");
+        return;
+      }
+
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+
+      const duplicate = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase());
+      if (duplicate) {
+        alert(`The Username/Mobile "${username}" is already registered! Please log in or use a different unique Mobile/Username.`);
+        return;
+      }
+
+      const newClient = {
+        id: 'cli-' + Date.now(),
+        name: name,
+        username: username,
+        password: pass,
+        refCode: username.toLowerCase().replace(/\s+/g, ''),
+        referredBy: refCode,
+        createdAt: new Date().toLocaleDateString()
+      };
+
+      registeredClients.push(newClient);
+      localStorage.setItem('ez2_registeredClients', JSON.stringify(registeredClients));
+
+      activeClient = newClient;
+      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+
+      document.getElementById('clientRegNameInput').value = '';
+      document.getElementById('clientRegUserInput').value = '';
+      document.getElementById('clientRegPassInput').value = '';
+      document.getElementById('clientRegConfirmPassInput').value = '';
+
+      updateClientAuthUI();
+      renderClientBetsTable();
+
+      closeModal('authModal');
+      alert(`🎉 Registration successful! Welcome ${name}.\nYour account is successfully linked to Semi-Admin / Agent: "${refCode}".\nYour personal referral link is ready in your profile.`);
+    }
+
+    function loginClientAccount() {
+      const username = document.getElementById('clientLoginUsernameInput').value.trim();
+      const pass = document.getElementById('clientLoginPasswordInput').value.trim();
+
+      if (!username || !pass) {
+        alert("Please enter both Username/Mobile No. and Password.");
+        return;
+      }
+
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+
+      const foundClient = registeredClients.find(c => 
+        c.username.toLowerCase() === username.toLowerCase() && c.password === pass
+      );
+
+      if (foundClient) {
+        activeClient = foundClient;
+        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+
+        document.getElementById('clientLoginUsernameInput').value = '';
+        document.getElementById('clientLoginPasswordInput').value = '';
+
+        updateClientAuthUI();
+        renderClientBetsTable();
+
+        closeModal('authModal');
+        alert(`Welcome back, ${activeClient.name}!`);
+      } else {
+        alert("Invalid Username/Mobile No. or Password. If you forgot your password, please use the 'Chat with Admin/Semi-Admin' link below.");
+      }
+    }
+
+    function logoutClientAccount() {
+      if (!confirm("Are you sure you want to log out of your account?")) return;
+
+      activeClient = null;
+      localStorage.removeItem('ez2_activeClient');
+
+      updateClientAuthUI();
+      renderClientBetsTable();
+
+      closeModal('authModal');
+      alert("You have logged out successfully.");
+    }
+
+    function updateClientAuthUI() {
+      const userDisplay = document.getElementById('clientHeaderUserDisplay');
+      const headerLogoutBtn = document.getElementById('clientHeaderLogoutBtn');
+
+      const profileViewName = document.getElementById('profileViewName');
+      const profileViewUsername = document.getElementById('profileViewUsername');
+      const profileViewReferredBy = document.getElementById('profileViewReferredBy');
+      const profileReferralLinkInput = document.getElementById('profileReferralLinkInput');
+
+      const tabBtnLogin = document.getElementById('tabBtnLogin');
+      const tabBtnProfile = document.getElementById('tabBtnProfile');
+
+      if (activeClient) {
+        userDisplay.textContent = `👤 ${activeClient.name} (${activeClient.username})`;
+        headerLogoutBtn.style.display = 'inline-block';
+
+        if (profileViewName) profileViewName.textContent = activeClient.name;
+        if (profileViewUsername) profileViewUsername.textContent = activeClient.username;
+        if (profileViewReferredBy) profileViewReferredBy.textContent = activeClient.referredBy || 'admin';
+        
+        const refCode = activeClient.refCode || activeClient.username;
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
+        if (profileReferralLinkInput) profileReferralLinkInput.value = refLink;
+
+        tabBtnProfile.style.display = 'inline-block';
+        switchAuthTab('profileTab', tabBtnProfile);
+        renderProfileWinningClaims();
+      } else {
+        userDisplay.textContent = '👤 Guest (Please Login)';
+        headerLogoutBtn.style.display = 'none';
+
+        tabBtnProfile.style.display = 'none';
+        switchAuthTab('loginTab', tabBtnLogin);
+      }
+      updateChatBadge();
+    }
+
+    function renderProfileWinningClaims() {
+      const tbody = document.getElementById('profileWinningClaimsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!activeClient) return;
+
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+
+      const clientWins = placedBets.filter(b => {
+        if (b.bettorAccount !== activeClient.username && b.bettorName !== activeClient.name) return false;
+        const targetDraw = b.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+        if (!drawCombo || drawCombo.length !== 2) return false;
+        return b.combo.length === 2 && drawCombo.includes(b.combo[0]) && drawCombo.includes(b.combo[1]);
+      });
+
+      if (clientWins.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No winning prizes recorded yet.</td></tr>`;
+        return;
+      }
+
+      clientWins.forEach(win => {
+        const tr = document.createElement('tr');
+        const comboStr = win.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        
+        let statusHtml = '';
+        if (win.prizeStatus === 'CONFIRMED_RECEIVED') {
+          statusHtml = `<span class="badge-win">✅ RECEIVED & CONFIRMED</span>`;
+        } else {
+          statusHtml = `<button class="btn btn-success btn-sm" onclick="confirmPrizeReceived('${win.id}')">Confirm Receipt</button>`;
+        }
+
+        tr.innerHTML = `
+          <td><span class="badge-draw">${win.targetDraw || '9:00 PM'}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">${comboStr}</td>
+          <td style="color: var(--accent); font-weight: bold;">₱${win.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td>${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function confirmPrizeReceived(betId) {
+      if (!activeClient) {
+        alert("Please log in to your client account.");
+        return;
+      }
+
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      const bet = placedBets.find(b => b.id === betId);
+
+      if (!bet) {
+        alert("Bet record not found.");
+        return;
+      }
+
+      bet.prizeStatus = 'CONFIRMED_RECEIVED';
+      bet.prizeConfirmedAt = new Date().toLocaleString();
+      localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      updateClientAuthUI();
+
+      alert(`🎉 Successfully confirmed receipt of your winning prize of ₱${bet.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}! Thank you for playing EZ2WIN.`);
+    }
+
+    function updateClientPassword() {
+      if (!activeClient) {
+        alert("No active client logged in.");
+        return;
+      }
+
+      const currentPass = document.getElementById('clientCurrentPassInput').value.trim();
+      const newPass = document.getElementById('clientNewPassInput').value.trim();
+      const confirmPass = document.getElementById('clientConfirmNewPassInput').value.trim();
+
+      if (!currentPass || !newPass || !confirmPass) {
+        alert("Please fill in all password fields.");
+        return;
+      }
+
+      if (currentPass !== activeClient.password) {
+        alert("Incorrect current password.");
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alert("New passwords do not match.");
+        return;
+      }
+
+      if (newPass.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+      }
+
+      activeClient.password = newPass;
+      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+      const clientIndex = registeredClients.findIndex(c => c.username.toLowerCase() === activeClient.username.toLowerCase());
+      if (clientIndex !== -1) {
+        registeredClients[clientIndex].password = newPass;
+        localStorage.setItem('ez2_registeredClients', JSON.stringify(registeredClients));
+      }
+
+      document.getElementById('clientCurrentPassInput').value = '';
+      document.getElementById('clientNewPassInput').value = '';
+      document.getElementById('clientConfirmNewPassInput').value = '';
+
+      alert("🔒 Your client account password has been successfully updated!");
+    }
+
+    function updateReferredClientPassword() {
+      const clientUser = document.getElementById('semiAdminClientUsernameInput').value.trim();
+      const newPass = document.getElementById('semiAdminClientNewPassInput').value.trim();
+      const confirmPass = document.getElementById('semiAdminClientConfirmPassInput').value.trim();
+
+      if (!clientUser || !newPass || !confirmPass) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alert("New passwords do not match.");
+        return;
+      }
+
+      if (newPass.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+      }
+
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+      const client = registeredClients.find(c => c.username.toLowerCase() === clientUser.toLowerCase() || c.name.toLowerCase() === clientUser.toLowerCase());
+
+      if (!client) {
+        alert("Client account not found.");
+        return;
+      }
+
+      if (currentRole === 'agent') {
+        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
+        const agentIden = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        const refBy = (client.referredBy || '').toLowerCase().trim();
+        if (refBy !== agentIden && refBy !== activeAgentIdentity.toLowerCase()) {
+          alert("Access Denied: You can only change passwords for clients registered under your referral.");
+          return;
+        }
+      }
+
+      client.password = newPass;
+      localStorage.setItem('ez2_registeredClients', JSON.stringify(registeredClients));
+
+      if (activeClient && activeClient.username.toLowerCase() === client.username.toLowerCase()) {
+        activeClient.password = newPass;
+        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+      }
+
+      document.getElementById('semiAdminClientUsernameInput').value = '';
+      document.getElementById('semiAdminClientNewPassInput').value = '';
+      document.getElementById('semiAdminClientConfirmPassInput').value = '';
+
+      alert(`🔒 Successfully updated password for client: ${client.name} (${client.username})`);
+    }
+
+    function createNewPaymentMethod() {
+      const name = document.getElementById('newMethodNameInput').value.trim();
+      const number = document.getElementById('newMethodNumberInput').value.trim();
+      const accountName = document.getElementById('newMethodAccountNameInput').value.trim() || 'EZ2WIN OFFICIAL ADMIN';
+
+      if (!name || !number) {
+        alert("Please enter both the Payment Method Name and Account Number/Details.");
+        return;
+      }
+
+      paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+
+      const newMethod = {
+        id: 'pm-' + Date.now(),
+        name: name,
+        number: number,
+        accountName: accountName
+      };
+
+      paymentMethods.push(newMethod);
+      localStorage.setItem('ez2_paymentMethods', JSON.stringify(paymentMethods));
+
+      document.getElementById('newMethodNameInput').value = '';
+      document.getElementById('newMethodNumberInput').value = '';
+      document.getElementById('newMethodAccountNameInput').value = '';
+
+      renderAdminPaymentMethodsTable();
+      alert(`✅ Successfully added payment method: "${name}"`);
+    }
+
+    function deletePaymentMethod(id) {
+      paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+      if (paymentMethods.length <= 1) {
+        alert("You must keep at least one active payment method.");
+        return;
+      }
+
+      if (!confirm("Are you sure you want to delete this payment method?")) return;
+
+      paymentMethods = paymentMethods.filter(m => m.id !== id);
+      localStorage.setItem('ez2_paymentMethods', JSON.stringify(paymentMethods));
+
+      renderAdminPaymentMethodsTable();
+    }
+
+    function renderAdminPaymentMethodsTable() {
+      paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+      const tbody = document.getElementById('adminPaymentMethodsTableBody');
+      const actionHeader = document.getElementById('paymentMethodActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
+
+      if (paymentMethods.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 3 : 4}" style="text-align:center; color: var(--text-muted);">No payment methods configured.</td></tr>`;
+        return;
+      }
+
+      paymentMethods.forEach(method => {
+        const tr = document.createElement('tr');
+        const deleteAction = `<button class="btn btn-danger btn-sm" onclick="deletePaymentMethod('${method.id}')">Delete</button>`;
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${method.name}</td>
+          <td><code>${method.number}</code></td>
+          <td>${method.accountName}</td>
+          ${currentRole === 'viewer' ? '' : `<td>${deleteAction}</td>`}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function selectPaymentMethod(methodName) {
+      paymentMethods = JSON.parse(localStorage.getItem('ez2_paymentMethods')) || [];
+      const method = paymentMethods.find(m => m.name === methodName) || paymentMethods[0];
+      selectedPaymentMethod = method.name;
+
+      const selectorContainer = document.getElementById('paymentMethodSelectorContainer');
+      const numberDisplay = document.getElementById('adminPaymentNumberDisplay');
+      const accountNameDisplay = document.getElementById('paymentCardAccountName');
+      const subtitle = document.getElementById('paymentCardSubtitle');
+
+      selectorContainer.innerHTML = '';
+      paymentMethods.forEach(m => {
+        const btn = document.createElement('button');
+        btn.className = `payment-method-btn ${m.name === selectedPaymentMethod ? 'active-payment' : ''}`;
+        btn.textContent = m.name;
+        btn.onclick = () => selectPaymentMethod(m.name);
+        selectorContainer.appendChild(btn);
+      });
+
+      numberDisplay.textContent = method.number;
+      accountNameDisplay.textContent = `Account Name: ${method.accountName}`;
+      subtitle.textContent = `Send Total Payment To Official ${method.name}:`;
+    }
+
+    function updateWinnerTicker() {
+      const tickerContent = document.getElementById('winnerTickerContent');
+      if (!tickerContent) return;
+
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+
+      let realWinners = [];
+
+      placedBets.forEach(bet => {
+        if (bet.paymentStatus !== 'CONFIRMED') return;
+
+        const targetDraw = bet.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+
+        if (drawCombo && drawCombo.length === 2) {
+          const isWinner = bet.combo.length === 2 &&
+            bet.combo.includes(drawCombo[0]) &&
+            bet.combo.includes(drawCombo[1]);
+
+          if (isWinner) {
+            const formattedCombo = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+            realWinners.push({
+              name: bet.bettorName,
+              combo: formattedCombo,
+              payout: bet.potentialWin,
+              draw: targetDraw
+            });
+          }
+        }
+      });
+
+      const sampleWinners = [
+        { name: 'Maria Santos', combo: '07 - 21', payout: 5000, draw: '5:00 PM' },
+        { name: 'Roberto Garcia', combo: '12 - 28', payout: 2000, draw: '9:00 PM' }
+      ];
+
+      const activeWinnersList = realWinners.length > 0 ? realWinners : sampleWinners;
+
+      let tickerHTML = '';
+      activeWinnersList.forEach(w => {
+        tickerHTML += `
+          <div class="ticker-item">
+            <span class="ticker-tag">🎉 WINNER</span>
+            <span><strong>${w.name}</strong> won <strong style="color: var(--accent);">₱${w.payout.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> with Combination <strong style="color: var(--primary);">[ ${w.combo} ]</strong> in ${w.draw} Draw!</span>
+          </div>
+        `;
+      });
+
+      tickerContent.innerHTML = tickerHTML + tickerHTML;
+    }
+
+    function updateAdminNetTotals() {
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+
+      const titleEl = document.getElementById('revenueSummaryTitle');
+      let total5PM = 0;
+      let total9PM = 0;
+
+      if (currentRole === 'agent' || currentRole === 'viewer') {
+        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
+        const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
+        const agentCleanName = activeAgentIdentity.toLowerCase().replace(/\s+/g, '');
+        const agentCleanUsername = currentAgent ? currentAgent.username.toLowerCase().replace(/\s+/g, '') : '';
+
+        if (titleEl) titleEl.textContent = `💰 Revenue Summary (${activeAgentIdentity} Referred Clients)`;
+
+        const referredClientUsernames = new Set();
+        registeredClients.forEach(c => {
+          const refBy = (c.referredBy || '').toLowerCase().trim().replace(/\s+/g, '');
+          if (refBy === agentIdentifier.replace(/\s+/g, '') || refBy === agentName.replace(/\s+/g, '') || refBy === agentCleanName || refBy === agentCleanUsername) {
+            referredClientUsernames.add(c.username.toLowerCase());
+          }
+        });
+
+        placedBets.forEach(bet => {
+          if (bet.paymentStatus !== 'CONFIRMED') return;
+          const bettorAcc = (bet.bettorAccount || '').toLowerCase();
+          const bettorName = (bet.bettorName || '').toLowerCase();
+          const betRefBy = (bet.referredBy || '').toLowerCase().trim().replace(/\s+/g, '');
+
+          const isReferred = referredClientUsernames.has(bettorAcc) || 
+                             betRefBy === agentIdentifier.replace(/\s+/g, '') || 
+                             betRefBy === agentName.replace(/\s+/g, '') || 
+                             betRefBy === agentCleanName;
+
+          if (isReferred) {
+            if (bet.targetDraw === '5:00 PM') total5PM += bet.betAmount;
+            else total9PM += bet.betAmount;
+          }
+        });
+      } else {
+        if (titleEl) titleEl.textContent = `💰 Admin Revenue Summary (Confirmed Bets)`;
+        placedBets.forEach(bet => {
+          if (bet.paymentStatus !== 'CONFIRMED') return;
+          if (bet.targetDraw === '5:00 PM') total5PM += bet.betAmount;
+          else total9PM += bet.betAmount;
+        });
+      }
+
+      document.getElementById('adminNet5PMDisplay').textContent = '₱' + total5PM.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('adminNet9PMDisplay').textContent = '₱' + total9PM.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+
+    function renderAdminAgentsTable() {
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+      const tbody = document.getElementById('adminAgentsTableBody');
+      const actionHeader = document.getElementById('agentTableActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
+
+      if (agentsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 4 : 6}" style="text-align:center; color: var(--text-muted);">No agent accounts created yet.</td></tr>`;
+        return;
+      }
+
+      agentsList.forEach(agent => {
+        const tr = document.createElement('tr');
+        const deleteAction = `<button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button>`;
+
+        // Mask Username and Password if role is viewer
+        const displayUsername = currentRole === 'viewer' ? '<span style="color: var(--text-muted); font-style: italic;">•••••••• (Hidden)</span>' : `<code>${agent.username}</code>`;
+        const displayPassword = currentRole === 'viewer' ? '<span style="color: var(--text-muted); font-style: italic;">••••••••</span>' : `<code>${agent.password}</code>`;
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--agent-purple);">${agent.name}</td>
+          <td>${displayUsername}</td>
+          <td>${displayPassword}</td>
+          <td><input type="text" readonly value="${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.username)}" style="background: #0f172a; border: 1px solid #475569; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.78rem; width: 100%;"></td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">${agent.createdAt || '---'}</td>
+          ${currentRole === 'viewer' ? '' : `<td>${deleteAction}</td>`}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function createNewAgent() {
+      const name = document.getElementById('newAgentNameInput').value.trim();
+      const pass = document.getElementById('newAgentPassInput').value.trim() || 'agent123';
+
+      if (!name) {
+        alert("Please enter an agent name.");
+        return;
+      }
+
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+
+      const cleanName = name.toLowerCase().replace(/\s+/g, '');
+      const newAgent = {
+        id: 'agent-' + Date.now(),
+        name: name,
+        username: 'admin_' + cleanName,
+        password: pass,
+        role: 'agent',
+        createdBy: activeAgentIdentity || 'admin',
+        createdAt: new Date().toLocaleDateString()
+      };
+
+      agentsList.push(newAgent);
+      localStorage.setItem('ez2_agents', JSON.stringify(agentsList));
+
+      document.getElementById('newAgentNameInput').value = '';
+      document.getElementById('newAgentPassInput').value = '';
+
+      renderAdminAgentsTable();
+      alert(`✅ Successfully created agent account for "${name}" with username: admin_${cleanName}`);
+    }
+
+    function autoGenerateNextAgent() {
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+      const nextNum = agentsList.length + 1;
+      const name = `Agent ${nextNum}`;
+      const cleanName = `agent${nextNum}`;
+
+      const newAgent = {
+        id: 'agent-' + Date.now(),
+        name: name,
+        username: 'admin_' + cleanName,
+        password: 'agent123',
+        role: 'agent',
+        createdBy: activeAgentIdentity || 'admin',
+        createdAt: new Date().toLocaleDateString()
+      };
+
+      agentsList.push(newAgent);
+      localStorage.setItem('ez2_agents', JSON.stringify(agentsList));
+
+      renderAdminAgentsTable();
+      alert(`⚡ Successfully auto-created agent: ${name}`);
+    }
+
+    function deleteAgent(id) {
+      if (!confirm("Are you sure you want to delete this agent account?")) return;
+
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+      agentsList = agentsList.filter(a => a.id !== id);
+      localStorage.setItem('ez2_agents', JSON.stringify(agentsList));
+
+      renderAdminAgentsTable();
+    }
+
+    function saveAdminWinningCombination() {
+      const draw = document.getElementById('adminDrawSelect').value;
+      const n1 = parseInt(document.getElementById('adminNum1').value);
+      const n2 = parseInt(document.getElementById('adminNum2').value);
+
+      if (isNaN(n1) || isNaN(n2) || n1 < 1 || n1 > 31 || n2 < 1 || n2 > 31) {
+        alert("Please enter valid numbers between 1 and 31 for both balls.");
+        return;
+      }
+
+      if (n1 === n2) {
+        alert("EZ2 numbers cannot be identical. Please pick two different numbers.");
+        return;
+      }
+
+      winningCombos[draw] = [n1, n2].sort((a, b) => a - b);
+      localStorage.setItem('ez2_winningCombos', JSON.stringify(winningCombos));
+
+      document.getElementById('adminNum1').value = '';
+      document.getElementById('adminNum2').value = '';
+
+      updateWinningDisplay();
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      updateWinnerTicker();
+
+      alert(`🎉 Successfully published official winning combination for ${draw}!`);
+    }
+
+    function resetAdminWinningCombination() {
+      const draw = document.getElementById('adminDrawSelect').value;
+      winningCombos[draw] = null;
+      localStorage.setItem('ez2_winningCombos', JSON.stringify(winningCombos));
+
+      updateWinningDisplay();
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      updateWinnerTicker();
+
+      alert(`Reset winning combination for ${draw}.`);
+    }
+
+    function updateWinningDisplay() {
+      winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+
+      const display5 = document.getElementById('clientWinDisplay5PM');
+      const display9 = document.getElementById('clientWinDisplay9PM');
+      const adminDisplay = document.getElementById('adminCurrentWinningDisplay');
+
+      if (display5) {
+        display5.innerHTML = winningCombos['5:00 PM'] ? 
+          winningCombos['5:00 PM'].map(n => `<div class="win-ball">${n < 10 ? '0' + n : n}</div>`).join('') :
+          `<div class="win-ball pending">Awaiting Draw</div>`;
+      }
+
+      if (display9) {
+        display9.innerHTML = winningCombos['9:00 PM'] ? 
+          winningCombos['9:00 PM'].map(n => `<div class="win-ball">${n < 10 ? '0' + n : n}</div>`).join('') :
+          `<div class="win-ball pending">Awaiting Draw</div>`;
+      }
+
+      if (adminDisplay) {
+        adminDisplay.innerHTML = `
+          <div class="admin-status-chip">
+            <span>5:00 PM Result:</span>
+            <strong>${winningCombos['5:00 PM'] ? winningCombos['5:00 PM'].map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}</strong>
+          </div>
+          <div class="admin-status-chip">
+            <span>9:00 PM Result:</span>
+            <strong>${winningCombos['9:00 PM'] ? winningCombos['9:00 PM'].map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}</strong>
+          </div>
+        `;
+      }
+    }
+
+    function renderClientBetsTable() {
+      const tbody = document.getElementById('clientBetsTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+
+      const clientBets = activeClient ? placedBets.filter(b => b.bettorAccount === activeClient.username || b.bettorName === activeClient.name) : [];
+
+      if (clientBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No placed bets found. Log in and place your first EZ2 bet!</td></tr>`;
+        return;
+      }
+
+      clientBets.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        const targetDraw = bet.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+
+        let winningComboStr = '<span style="color: var(--text-muted);">Pending Draw</span>';
+        let statusBadge = '';
+
+        if (bet.paymentStatus === 'PENDING') {
+          statusBadge = `<span class="badge-pending">⏳ PENDING APPROVAL</span>`;
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusBadge = `<span class="badge-rejected">❌ REJECTED</span>`;
+        } else {
+          if (drawCombo && drawCombo.length === 2) {
+            winningComboStr = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
+            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
+            statusBadge = isWin ? 
+              `<span class="badge-win">🎉 WINNER (+₱${bet.potentialWin.toLocaleString()})</span>` : 
+              `<span class="badge-loss">❌ LOSS</span>`;
+          } else {
+            statusBadge = `<span class="badge-awaiting">✅ PAID (Awaiting Draw)</span>`;
+          }
+        }
+
+        tr.innerHTML = `
+          <td><span class="badge-draw">${targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">${comboStr}</td>
+          <td>${winningComboStr}</td>
+          <td>₱${bet.betAmount.toLocaleString()}</td>
+          <td>${bet.paymentMethod || 'GCash'}</td>
+          <td><code>${bet.refNo}</code></td>
+          <td>${statusBadge}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="cancelClientBet('${bet.id}')" ${bet.paymentStatus === 'CONFIRMED' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Cancel</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function cancelClientBet(betId) {
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      const bet = placedBets.find(b => b.id === betId);
+      if (bet && bet.paymentStatus === 'CONFIRMED') {
+        alert("Confirmed bets cannot be cancelled.");
+        return;
+      }
+
+      placedBets = placedBets.filter(b => b.id !== betId);
+      localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      renderAdminPaymentsQueue();
+      alert("Bet cancelled successfully.");
+    }
+
+    function renderAdminPaymentsQueue() {
+      const tbody = document.getElementById('adminPaymentsTableBody');
+      const actionHeader = document.getElementById('paymentQueueActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      const pendingBets = placedBets.filter(b => b.paymentStatus === 'PENDING');
+
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
+
+      if (pendingBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 7 : 8}" style="text-align: center; color: var(--text-muted);">No pending payment approvals in queue.</td></tr>`;
+        return;
+      }
+
+      pendingBets.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        
+        const approveAction = currentRole === 'viewer' ? '' : `
+          <td>
+            <button class="btn btn-success btn-sm" onclick="approveBetPayment('${bet.id}')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectBetPayment('${bet.id}')">Reject</button>
+          </td>
+        `;
+
+        tr.innerHTML = `
+          <td><strong>${bet.bettorName}</strong><br><small style="color:var(--text-muted);">${bet.bettorAccount}</small></td>
+          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
+          <td><code>${bet.senderNo}</code></td>
+          <td><code>${bet.refNo}</code></td>
+          <td><span class="badge-draw">${bet.targetDraw || '9:00 PM'}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">${comboStr}</td>
+          <td style="color: var(--accent); font-weight: bold;">₱${bet.betAmount.toLocaleString()}</td>
+          ${currentRole === 'viewer' ? '' : approveAction}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function approveBetPayment(betId) {
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      const bet = placedBets.find(b => b.id === betId);
+      if (bet) {
+        bet.paymentStatus = 'CONFIRMED';
+        localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+        renderAdminPaymentsQueue();
+        renderAdminBetsTable();
+        renderClientBetsTable();
+        updateWinnerTicker();
+        updateAdminNetTotals();
+        alert("✅ Payment approved and confirmed successfully!");
+      }
+    }
+
+    function rejectBetPayment(betId) {
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      const bet = placedBets.find(b => b.id === betId);
+      if (bet) {
+        bet.paymentStatus = 'REJECTED';
+        localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+        renderAdminPaymentsQueue();
+        renderAdminBetsTable();
+        renderClientBetsTable();
+        alert("❌ Payment rejected.");
+      }
+    }
+
+    function renderAdminBetsTable() {
+      const tbody = document.getElementById('adminBetsTableBody');
+      const actionHeader = document.getElementById('betHistoryActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      registeredClients = JSON.parse(localStorage.getItem('ez2_registeredClients')) || [];
+      agentsList = JSON.parse(localStorage.getItem('ez2_agents')) || [];
+      winningCombos = JSON.parse(localStorage.getItem('ez2_winningCombos')) || { '5:00 PM': null, '9:00 PM': null };
+
+      let targetBets = placedBets;
+
+      if (currentRole === 'agent') {
+        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
+        const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
+        const agentCleanName = activeAgentIdentity.toLowerCase().replace(/\s+/g, '');
+
+        const referredClientUsernames = new Set();
+        registeredClients.forEach(c => {
+          const refBy = (c.referredBy || '').toLowerCase().trim().replace(/\s+/g, '');
+          if (refBy === agentIdentifier.replace(/\s+/g, '') || refBy === agentName.replace(/\s+/g, '') || refBy === agentCleanName) {
+            referredClientUsernames.add(c.username.toLowerCase());
+          }
+        });
+
+        targetBets = placedBets.filter(b => {
+          const bettorAcc = (b.bettorAccount || '').toLowerCase();
+          const betRefBy = (b.referredBy || '').toLowerCase().trim().replace(/\s+/g, '');
+          return referredClientUsernames.has(bettorAcc) || betRefBy === agentIdentifier.replace(/\s+/g, '') || betRefBy === agentName.replace(/\s+/g, '') || betRefBy === agentCleanName;
+        });
+      }
+
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
+
+      if (targetBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 9 : 10}" style="text-align: center; color: var(--text-muted);">No bets history found.</td></tr>`;
+        return;
+      }
+
+      targetBets.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        const targetDraw = bet.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+
+        let winningComboStr = '<span style="color: var(--text-muted);">Pending</span>';
+        let statusBadge = '';
+        let prizeClaimStatus = '<span style="color: var(--text-muted);">N/A</span>';
+
+        if (bet.paymentStatus === 'PENDING') {
+          statusBadge = `<span class="badge-pending">⏳ PENDING</span>`;
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusBadge = `<span class="badge-rejected">❌ REJECTED</span>`;
+        } else {
+          statusBadge = `<span class="badge-win">✅ CONFIRMED</span>`;
+          if (drawCombo && drawCombo.length === 2) {
+            winningComboStr = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
+            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
+            if (isWin) {
+              if (bet.prizeStatus === 'CONFIRMED_RECEIVED') {
+                prizeClaimStatus = `<span class="badge-win">✅ PRIZE RECEIVED</span>`;
+              } else {
+                prizeClaimStatus = `<span class="badge-pending">🏆 WIN (₱${bet.potentialWin.toLocaleString()})</span>`;
+              }
+            } else {
+              prizeClaimStatus = `<span class="badge-loss">❌ LOSS</span>`;
+            }
+          }
+        }
+
+        const deleteAction = currentRole === 'viewer' ? '' : `<td><button class="btn btn-danger btn-sm" onclick="deleteAdminBet('${bet.id}')">Delete</button></td>`;
+
+        tr.innerHTML = `
+          <td><strong>${bet.bettorName}</strong><br><small style="color:var(--text-muted);">${bet.bettorAccount}</small></td>
+          <td><span class="badge-draw">${targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">${comboStr}</td>
+          <td>${winningComboStr}</td>
+          <td>₱${bet.betAmount.toLocaleString()}</td>
+          <td>${bet.paymentMethod || 'GCash'}</td>
+          <td><code>${bet.refNo}</code></td>
+          <td>${statusBadge}</td>
+          <td>${prizeClaimStatus}</td>
+          ${currentRole === 'viewer' ? '' : deleteAction}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteAdminBet(betId) {
+      if (!confirm("Are you sure you want to delete this bet record?")) return;
+      placedBets = JSON.parse(localStorage.getItem('ez2_placedBets')) || [];
+      placedBets = placedBets.filter(b => b.id !== betId);
+      localStorage.setItem('ez2_placedBets', JSON.stringify(placedBets));
+
+      renderAdminBetsTable();
+      renderAdminPaymentsQueue();
+      updateWinnerTicker();
+      updateAdminNetTotals();
+    }
+
+    function clearAllBetsHistory() {
+      if (!confirm("Are you sure you want to clear all placed bets history?")) return;
+      localStorage.removeItem('ez2_placedBets');
+      placedBets = [];
+      renderAdminBetsTable();
+      renderAdminPaymentsQueue();
+      updateWinnerTicker();
+      updateAdminNetTotals();
+      alert("All bets history cleared.");
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    function copyReferralLink() {
+      const input = document.getElementById('profileReferralLinkInput');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value);
+      alert("📋 Referral link copied to clipboard!");
+    }
+  </script>
+</body>
+</html>
