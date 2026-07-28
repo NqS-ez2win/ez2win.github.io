@@ -68,12 +68,6 @@
     .badge-status.won { background: #166534; color: #86efac; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
     .badge-status.lost { background: #7f1d1d; color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
 
-    .win-ball {
-      display: inline-flex; width: 36px; height: 36px; background: var(--primary); color: #000;
-      border-radius: 50%; align-items: center; justify-content: center; font-weight: bold; margin-right: 4px;
-    }
-    .win-ball.pending { background: #334155; color: var(--text-muted); }
-
     .ticker-wrapper { background: #1e1b4b; border-bottom: 1px solid var(--primary); padding: 8px 16px; margin-bottom: 20px; font-size: 0.9rem; overflow: hidden; }
     .ticker-item { margin-right: 24px; }
     .ticker-tag { background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
@@ -160,7 +154,6 @@
   </div>
 
   <script>
-    // --- Paste your exact Supabase credentials right inside these quotes ---
     const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -216,47 +209,60 @@
     }
 
     async function syncRealtimeData() {
-      const { data: configData } = await supabase.from('app_config').select('');
-      if (configData) {
-        configData.forEach(row => {
-          if (row.id === 'active_draw_id') currentActiveDrawId = row.value;
-          if (row.id === 'draw_status') currentMarketStatus = row.value;
-        });
-      }
+      try {
+        // Fetch app config
+        const { data: configData, error: configError } = await supabase.from('app_config').select('');
+        if (!configError && configData) {
+          configData.forEach(row => {
+            if (row.id === 'active_draw_id') currentActiveDrawId = row.value;
+            if (row.id === 'draw_status') currentMarketStatus = row.value;
+          });
+        }
 
-      const statusBanner = document.getElementById('current-lock-status');
-      if (currentMarketStatus === 'closed') {
-        statusBanner.innerText = "Betting window is locked/closed. Awaiting management drawing results.";
-        statusBanner.style.background = "#7f1d1d";
-        statusBanner.style.borderColor = "#ef4444";
-        statusBanner.style.color = "#fca5a5";
-      } else {
-        statusBanner.innerText = "Betting open for upcoming Draw sequence!";
-        statusBanner.style.background = "#14532d";
-        statusBanner.style.borderColor = "#22c55e";
-        statusBanner.style.color = "#86efac";
-      }
+        const statusBanner = document.getElementById('current-lock-status');
+        if (currentMarketStatus === 'closed') {
+          statusBanner.innerText = "Betting window is locked/closed. Awaiting management drawing results.";
+          statusBanner.style.background = "#7f1d1d";
+          statusBanner.style.borderColor = "#ef4444";
+          statusBanner.style.color = "#fca5a5";
+        } else {
+          statusBanner.innerText = "Betting open for upcoming Draw sequence!";
+          statusBanner.style.background = "#14532d";
+          statusBanner.style.borderColor = "#22c55e";
+          statusBanner.style.color = "#86efac";
+        }
 
-      const { data: tickers } = await supabase.from('winner_ticker').select('message').limit(5);
-      if (tickers && tickers.length > 0) {
-        document.getElementById('ticker-target').innerHTML = tickers.map(t => `<span class="ticker-item"><span class="ticker-tag">LIVE</span> ${t.message}</span>`).join('');
-      }
+        // Fetch winner ticker
+        const { data: tickers } = await supabase.from('winner_ticker').select('message').limit(5);
+        if (tickers && tickers.length > 0) {
+          document.getElementById('ticker-target').innerHTML = tickers.map(t => `<span class="ticker-item"><span class="ticker-tag">LIVE</span> ${t.message}</span>`).join('');
+        }
 
-      const { data: userBets } = await supabase.from('bets').select('').eq('user_id', simulatedUser).order('created_at', { ascending: false });
-      const tableBody = document.getElementById('bets-table-body');
-      if (userBets && userBets.length > 0) {
-        tableBody.innerHTML = userBets.map(bet => `
-          <tr>
-            <td><span class="badge-draw">${bet.draw_id === '1' ? '5:00 PM' : '9:00 PM'}</span></td>
-            <td>${bet.ball_1} - ${bet.ball_2}</td>
-            <td>${bet.bet_type}</td>
-            <td>₱${bet.amount}</td>
-            <td>₱${bet.payout}</td>
-            <td><span class="badge-status ${bet.status}">${bet.status}</span></td>
-          </tr>
-        `).join('');
-      } else {
-        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No recorded bets found.</td></tr>`;
+        // Fetch user bets
+        const { data: userBets, error: betsError } = await supabase.from('bets').select('').eq('user_id', simulatedUser).order('created_at', { ascending: false });
+        const tableBody = document.getElementById('bets-table-body');
+        
+        if (betsError) {
+          tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading bets. Check Supabase tables.</td></tr>`;
+          return;
+        }
+
+        if (userBets && userBets.length > 0) {
+          tableBody.innerHTML = userBets.map(bet => `
+            <tr>
+              <td><span class="badge-draw">${bet.draw_id === '1' ? '5:00 PM' : '9:00 PM'}</span></td>
+              <td>${bet.ball_1} - ${bet.ball_2}</td>
+              <td>${bet.bet_type}</td>
+              <td>₱${bet.amount}</td>
+              <td>₱${bet.payout}</td>
+              <td><span class="badge-status ${bet.status}">${bet.status}</span></td>
+            </tr>
+          `).join('');
+        } else {
+          tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No recorded bets found.</td></tr>`;
+        }
+      } catch (err) {
+        console.error("Sync error:", err);
       }
     }
 
@@ -303,6 +309,8 @@
       if (!error) {
         alert(`Market system toggled to: ${status.toUpperCase()}`);
         syncRealtimeData();
+      } else {
+        alert("Error updating market status: " + error.message);
       }
     }
 
@@ -314,22 +322,6 @@
       if (isNaN(b1) || b1 < 1 || b1 > 31 || isNaN(b2) || b2 < 1 || b2 > 31) {
         alert("Input valid numbers between 1 and 31!");
         return;
-      }
-
-      await supabase.from('draws').update({ ball_1: b1, ball_2: b2, drawn_at: new Date() }).eq('id', drawId);
-
-      const { data: bets } = await supabase.from('bets').select('').eq('draw_id', drawId).eq('status', 'pending');
-      if (bets) {
-        for (const bet of bets) {
-          let isWinner = false;
-          if (bet.bet_type === 'Straight') {
-            if (bet.ball_1 === b1 && bet.ball_2 === b2) isWinner = true;
-          } else if (bet.bet_type === 'Rambol') {
-            if ((bet.ball_1 === b1 && bet.ball_2 === b2) || (bet.ball_1 === b2 && bet.ball_2 === b1)) isWinner = true;
-          }
-          const finalStatus = isWinner ? 'won' : 'lost';
-          await supabase.from('bets').update({ status: finalStatus }).eq('id', bet.id);
-        }
       }
 
       document.getElementById('ball1-input').value = "";
