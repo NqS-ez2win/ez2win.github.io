@@ -1265,7 +1265,7 @@
             guestThreadId = 'guest_' + Date.now();
             await setStorage('ez2_guestThreadId', guestThreadId);
           }
-          headerSub.textContent = Chat with Support (Password Reset Help);
+          headerSub.textContent = "Chat with Support (Password Reset Help)";
 
           const threadMsgs = chatMessages.filter(m => m.clientThread === guestThreadId);
           if (threadMsgs.length === 0) {
