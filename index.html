@@ -470,13 +470,11 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentRole = 'client';
-    let activeAgentIdentity = '';
     let selectedNumbers = [];
     let currentBet = 10;
     let betSlip = [];
     let selectedPaymentMethod = null;
     let activeClient = JSON.parse(sessionStorage.getItem('ez2_activeClient')) || null;
-    let activeChatClientUser = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       renderNumberGrid();
@@ -725,7 +723,15 @@
       tbody.innerHTML = '';
       (bets || []).forEach(b => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><span class="badge-draw">${b.target_draw}</span></td><td>[ ${b.combo.join(' - ')} ]</td><td>₱${b.bet_amount}</td><td>${b.payment_status}</td>`;
+        tr.innerHTML = `
+          <td><span class="badge-draw">${b.target_draw}</span></td>
+          <td>[ ${b.combo.join(' - ')} ]</td>
+          <td>-</td>
+          <td>₱${b.bet_amount}</td>
+          <td>${b.payment_method || 'GCash'}</td>
+          <td>${b.ref_no || '-'}</td>
+          <td>${b.payment_status}</td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -751,7 +757,16 @@
       tbody.innerHTML = '';
       (bets || []).forEach(b => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${b.bettor_name}</td><td>${b.payment_method}</td><td>${b.sender_no}</td><td>${b.ref_no}</td><td>${b.target_draw}</td><td>₱${b.bet_amount}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${b.id}')">Approve</button></td>`;
+        tr.innerHTML = `
+          <td>${b.bettor_name}</td>
+          <td>${b.payment_method}</td>
+          <td>${b.sender_no}</td>
+          <td>${b.ref_no}</td>
+          <td>${b.target_draw}</td>
+          <td>[ ${b.combo.join(' - ')} ]</td>
+          <td>₱${b.bet_amount}</td>
+          <td><button class="btn btn-success btn-sm" onclick="approvePayment('${b.id}')">Approve</button></td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -815,6 +830,7 @@
       document.getElementById('clientView').style.display = currentRole === 'client' ? 'block' : 'none';
       document.getElementById('adminView').style.display = currentRole === 'client' ? 'none' : 'block';
       document.getElementById('viewModeBadge').textContent = currentRole.toUpperCase() + ' PANEL';
+      document.getElementById('roleToggleBtn').textContent = currentRole === 'client' ? 'Staff Portal' : 'Client View';
     }
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
