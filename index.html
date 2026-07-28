@@ -1032,26 +1032,28 @@
   </div>
 
   <script>
-    // Supabase Client Initialization
-    const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
-   
-// Use it later without 'const' or 'let'
-function doSomething() {
-    supabase.from('table').select();
-}
-    // Supabase Storage Helper Functions
-    async function getStorage(key, defaultValue) {
-      const { data, error } = await supabase
+// 1. Get createClient from the global Supabase script object
+const { createClient } = window.supabase;
+
+// 2. Initialize your client instance
+const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 3. Use 'supabaseClient' (or your preferred variable) for your database queries
+async function getStorage(key, defaultValue) {
+    const { data, error } = await supabaseClient
         .from('app_storage')
         .select('value')
         .eq('key', key)
         .single();
-      if (error || !data) {
+        
+    if (error || !data) {
         return defaultValue;
-      }
-      return data.value;
     }
+    return data.value;
+}
+
 
     async function setStorage(key, value) {
       const { error } = await supabase
