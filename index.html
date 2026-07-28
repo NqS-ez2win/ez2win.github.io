@@ -1325,7 +1325,7 @@
         headerSub.textContent = activeChatClientUser ? `Chatting with: ${activeChatClientUser}` : 'Select a conversation chip above';
 
         if (!activeChatClientUser) {
-          body.innerHTML = <div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">Select a client or password-reset guest conversation above to reply.</div>;
+          body.innerHTML = '<div style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-top: 30px;">Select a client or password-reset guest conversation above to reply.</div>';
           return;
         }
 
