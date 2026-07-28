@@ -1,195 +1,830 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EZ2WIN x100 - PCSO 5:00 PM & 9:00 PM Draw</title>
-<!-- Supabase Client CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
---bg-dark: #0f172a;
---card-bg: #1e293b;
---primary: #eab308;
---primary-hover: #ca8a04;
---accent: #22c55e;
---text: #f8fafc;
---text-muted: #94a3b8;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EZ2WIN x100 - PCSO 5:00 PM & 9:00 PM Draw (Supabase Cloud)</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #eab308;
+      --primary-hover: #ca8a04;
+      --accent: #22c55e;
+      --gcash-blue: #007dfe;
+      --maya-green: #00d632;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --agent-purple: #a855f7;
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-body { background-color: var(--bg-dark); color: var(--text); padding-bottom: 50px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text); padding-bottom: 50px; }
 
-header {
-background: var(--card-bg);
-padding: 12px 24px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-border-bottom: 1px solid #334155;
-position: sticky; top: 0; z-index: 10;
-}
+    /* Header */
+    header {
+      background: var(--card-bg);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      position: sticky; top: 0; z-index: 10;
+    }
+    
+    .logo-container { display: flex; align-items: center; gap: 12px; }
+    .logo { display: flex; flex-direction: column; align-items: flex-end; line-height: 1; }
+    .logo-text { font-size: 1.6rem; font-weight: 800; color: var(--primary); letter-spacing: 0.5px; }
+    .logo-multiplier {
+      background: linear-gradient(135deg, #22c55e, #15803d);
+      color: #ffffff; font-size: 0.7rem; padding: 2px 7px; border-radius: 4px;
+      font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); margin-top: 3px;
+    }
+    .badge-mode { font-size: 0.75rem; background: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+    .user-actions { display: flex; align-items: center; gap: 10px; }
+    .user-profile-badge {
+      font-size: 0.85rem; color: var(--primary); font-weight: 700; background: #0f172a;
+      padding: 6px 12px; border-radius: 8px; border: 1px solid #334155;
+    }
 
-.logo-text { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
-.logo-multiplier {
-background: linear-gradient(135deg, #22c55e, #15803d);
-color: #fff; font-size: 0.7rem; padding: 2px 7px; border-radius: 4px; font-weight: 900;
-}
-.user-profile-badge { font-size: 0.85rem; color: var(--primary); font-weight: 700; background: #0f172a; padding: 6px 12px; border-radius: 8px; border: 1px solid #334155; }
+    /* Winner Ticker */
+    .winner-ticker-wrapper {
+      background: linear-gradient(90deg, #1e1b4b, #312e81, #1e1b4b);
+      border-bottom: 1px solid var(--primary); overflow: hidden; white-space: nowrap;
+      padding: 10px 0; font-size: 0.92rem; color: #fef08a; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
+    }
+    .winner-ticker-content { display: inline-block; padding-left: 100%; animation: tickerAnimation 28s linear infinite; font-weight: 700; }
+    .ticker-item { display: inline-flex; align-items: center; margin-right: 40px; gap: 6px; }
+    .ticker-tag { background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
 
-.btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.btn-primary { background: var(--primary); color: #000; width: 100%; font-size: 1rem; }
-.btn-primary:hover { background: var(--primary-hover); }
+    @keyframes tickerAnimation {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+    
+    .btn { padding: 8px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+    .btn-primary { background: var(--primary); color: #000; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #334155; color: var(--text); }
+    .btn-admin { background: #6366f1; color: #fff; }
+    .btn-agent { background: var(--agent-purple); color: #fff; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
 
-.container { max-width: 600px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 850px; margin: 24px auto; padding: 0 16px; }
 
-.card {
-background: var(--card-bg);
-border-radius: 12px;
-padding: 24px;
-margin-bottom: 20px;
-border: 1px solid #334155;
-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-.card-title { font-size: 1.2rem; margin-bottom: 8px; color: var(--primary); }
+    .active-draw-banner {
+      background: #14532d; border: 1px solid #22c55e; color: #86efac;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; text-align: center; font-weight: 600;
+    }
 
-.grid { 
-  display: grid; 
-  grid-template-columns: repeat(6, 1fr); 
-  gap: 10px; 
-  margin: 20px 0; 
-}
-.num-btn {
-  aspect-ratio: 1; 
-  border: 1px solid #475569; 
-  background: #0f172a;
-  color: var(--text); 
-  border-radius: 8px; 
-  font-size: 1.1rem; 
-  font-weight: 700;
-  cursor: pointer; 
-  transition: all 0.15s;
-}
-.num-btn:hover { border-color: var(--primary); }
-.num-btn.selected { background: var(--primary); color: #000; border-color: var(--primary-hover); }
-</style>
+    .draw-banner-grid { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .draw-banner {
+      flex: 1; min-width: 280px; background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border: 1px solid #6366f1; border-radius: 12px; padding: 18px; text-align: center;
+    }
+    .draw-banner h4 { color: #818cf8; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px; }
+    .draw-banner h2 { color: #fff; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
+    .winning-numbers-display { display: flex; justify-content: center; gap: 12px; align-items: center; }
+    .win-ball {
+      width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
+      color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 800; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
+    }
+
+    .card { background: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #334155; }
+    .card-title { font-size: 1.2rem; margin-bottom: 14px; color: var(--primary); }
+
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+    .num-btn {
+      aspect-ratio: 1; border: 1px solid #475569; background: #0f172a;
+      color: var(--text); border-radius: 50%; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+    }
+    .num-btn.selected { background: var(--primary); color: #000; border-color: var(--primary); }
+
+    .bet-options { display: flex; gap: 8px; margin-bottom: 14px; }
+    .bet-btn {
+      flex: 1; padding: 12px 0; background: #0f172a; border: 1px solid #475569;
+      color: var(--text); border-radius: 8px; cursor: pointer; font-weight: 700; text-align: center;
+    }
+    .bet-btn.active { border-color: var(--accent); background: #14532d; color: #fff; }
+
+    .payout-box {
+      background: #0f172a; border: 1px solid #22c55e; border-radius: 8px;
+      padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .payout-tag { font-size: 0.9rem; color: var(--text-muted); }
+    .payout-amount { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+    .play-btn { width: 100%; padding: 14px; font-size: 1.1rem; }
+
+    .bet-slip { background: #0f172a; border: 1px dashed #475569; border-radius: 8px; padding: 12px; margin-bottom: 16px; max-height: 250px; overflow-y: auto; }
+    .slip-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 6px; margin-bottom: 8px; border: 1px solid #334155; }
+    .slip-combo { font-weight: bold; color: var(--primary); font-size: 1rem; }
+    .slip-details { font-size: 0.8rem; color: var(--text-muted); }
+
+    .admin-form { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+    .admin-input { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; font-weight: bold; }
+    .admin-input-num { width: 90px; text-align: center; font-size: 1.1rem; }
+
+    .table-responsive { overflow-x: auto; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #334155; }
+    th { color: var(--text-muted); background: #0f172a; }
+
+    .badge-draw { background: #3b82f6; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+    .badge-win { background: #166534; color: #86efac; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px;
+    }
+    .modal { background: var(--card-bg); padding: 24px; border-radius: 12px; width: 100%; max-width: 520px; border: 1px solid #334155; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+    .tab-btn { background: none; border: none; color: var(--text-muted); font-weight: 700; cursor: pointer; padding: 6px 12px; }
+    .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
+    .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: var(--text); font-size: 1rem; }
+
+    .payment-method-selector { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .payment-method-btn {
+      flex: 1; min-width: 100px; padding: 10px; background: #0f172a; border: 1px solid #475569;
+      border-radius: 8px; color: var(--text); font-weight: 700; cursor: pointer; text-align: center;
+    }
+    .payment-method-btn.active-payment { border-color: var(--primary); background: rgba(234, 179, 8, 0.15); color: var(--primary); }
+
+    .payment-card {
+      border-radius: 12px; padding: 16px; color: #fff; margin-bottom: 16px; text-align: center;
+      background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary);
+    }
+    .payment-number { font-size: 1.5rem; font-weight: 900; letter-spacing: 1px; margin: 8px 0; color: #fef08a; }
+
+    /* Live Chat */
+    .chat-floating-btn {
+      position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: #000;
+      width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; box-shadow: 0 4px 16px rgba(234, 179, 8, 0.4); cursor: pointer; z-index: 1000; border: none;
+    }
+    .chat-window {
+      position: fixed; bottom: 96px; right: 24px; width: 360px; max-width: calc(100vw - 32px); height: 480px;
+      background: var(--card-bg); border: 1px solid #334155; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; z-index: 1000; overflow: hidden;
+    }
+    .chat-header { background: #0f172a; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+    .chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
+    .chat-message { max-width: 80%; padding: 10px 12px; border-radius: 10px; font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
+    .chat-message.incoming { background: #1e293b; color: var(--text); align-self: flex-start; border: 1px solid #334155; }
+    .chat-message.outgoing { background: var(--primary); color: #000; align-self: flex-end; font-weight: 500; }
+    .chat-footer { padding: 12px; background: var(--card-bg); border-top: 1px solid #334155; display: flex; gap: 8px; }
+    .chat-input { flex: 1; padding: 10px; background: #0f172a; border: 1px solid #475569; color: #fff; border-radius: 8px; font-size: 0.9rem; }
+    .chat-sidebar-list { max-height: 100px; overflow-y: auto; background: #1e293b; padding: 6px; border-bottom: 1px solid #334155; display: flex; gap: 6px; flex-wrap: wrap; }
+    .chat-user-chip { background: #0f172a; border: 1px solid #475569; color: var(--text); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; }
+    .chat-user-chip.active { border-color: var(--primary); background: rgba(234, 179, 8, 0.15); color: var(--primary); font-weight: bold; }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-container">
-    <div class="logo" style="display:flex; flex-direction:column; align-items:flex-end;">
-      <span class="logo-text">EZ2WIN</span>
-      <span class="logo-multiplier">x100 PAYOUT</span>
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo">
+        <span class="logo-text">EZ2WIN</span>
+        <span class="logo-multiplier">x100</span>
+      </div>
+      <span class="badge-mode" id="viewModeBadge">CLIENT HOME</span>
+    </div>
+    <div class="user-actions">
+      <div id="clientControls" style="display: flex; gap: 8px; align-items: center;">
+        <span class="user-profile-badge" id="clientHeaderUserDisplay">👤 Guest</span>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('authModal')">Account / Register</button>
+        <button class="btn btn-danger btn-sm" id="clientHeaderLogoutBtn" onclick="logoutClientAccount()" style="display: none;">Logout</button>
+      </div>
+      <button class="btn btn-admin btn-sm" onclick="handleRoleButtonClick()" id="roleToggleBtn">Staff Portal</button>
+    </div>
+  </header>
+
+  <!-- Winner Ticker -->
+  <div class="winner-ticker-wrapper" id="winnerTickerWrapper">
+    <div class="winner-ticker-content" id="winnerTickerContent"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- CLIENT HOME PAGE -->
+    <div id="clientView">
+      <div class="active-draw-banner" id="activeDrawNotice">
+        🎯 Currently Accepting Bets For: <strong>5:00 PM DRAW</strong>
+      </div>
+
+      <div class="draw-banner-grid">
+        <div class="draw-banner">
+          <h4>Official PCSO 5:00 PM Draw Result</h4>
+          <h2>EZ2 Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplay5PM"></div>
+        </div>
+        <div class="draw-banner">
+          <h4>Official PCSO 9:00 PM Draw Result</h4>
+          <h2>EZ2 Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplay9PM"></div>
+        </div>
+      </div>
+      
+      <!-- Bet Slip & Selector Card -->
+      <div class="card">
+        <h2 class="card-title">1. Choose 2 Lucky Numbers (1–31)</h2>
+        <div class="grid" id="numberGrid"></div>
+
+        <h2 class="card-title">2. Select Bet Amount per Combination</h2>
+        <div class="bet-options">
+          <button class="bet-btn active" onclick="setBet(10, this)">₱10</button>
+          <button class="bet-btn" onclick="setBet(20, this)">₱20</button>
+          <button class="bet-btn" onclick="setBet(30, this)">₱30</button>
+          <button class="bet-btn" onclick="setBet(50, this)">₱50</button>
+        </div>
+
+        <div class="payout-box">
+          <div class="payout-tag">Payout Multiplier (100x):</div>
+          <div class="payout-amount">Win ₱<span id="potentialWin">1,000.00</span></div>
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 24px; padding: 12px;" onclick="addCombinationToSlip()">➕ Add Combination to Slip</button>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h2 class="card-title" style="margin-bottom: 0;">🛒 Your Bet Slip (<span id="slipCount">0</span>)</h2>
+          <button class="btn btn-danger btn-sm" onclick="clearBetSlip()">Clear Slip</button>
+        </div>
+
+        <div class="bet-slip" id="betSlipContainer">
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;" id="emptySlipMsg">
+            No combinations added yet. Pick 2 numbers above and click "Add Combination to Slip".
+          </div>
+          <div id="slipItems"></div>
+        </div>
+
+        <div class="payout-box" style="border-color: var(--primary); background: #1e1b4b;">
+          <div class="payout-tag" style="color: #cbd5e1;">Total Slip Amount:</div>
+          <div class="payout-amount" style="color: var(--primary);">₱<span id="totalSlipAmount">0.00</span></div>
+        </div>
+
+        <button class="btn btn-primary play-btn" onclick="initiatePaymentFlow()">Place All Bets for Active Draw</button>
+      </div>
+
+      <!-- Placed Bets & Winning History Table -->
+      <div class="card">
+        <h2 class="card-title">📜 My Placed Bets & Payment Status</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Target Draw</th>
+                <th>Your Combo</th>
+                <th>Winning Combo</th>
+                <th>Bet Amount</th>
+                <th>Method</th>
+                <th>Ref No.</th>
+                <th>Payment / Win Status</th>
+              </tr>
+            </thead>
+            <tbody id="clientBetsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN / AGENT DASHBOARD VIEW -->
+    <div id="adminView" style="display: none;">
+      <!-- Payment Verification Queue -->
+      <div class="card" style="border: 1px solid var(--gcash-blue);">
+        <h2 class="card-title" style="color: var(--gcash-blue);">💳 Payment Pending Approval Queue</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Bettor Name</th>
+                <th>Method</th>
+                <th>Sender Mobile</th>
+                <th>Ref No.</th>
+                <th>Target Draw</th>
+                <th>Combo</th>
+                <th>Total Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPaymentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Winning Combination Panel -->
+      <div class="card" id="winningComboPanel">
+        <h2 class="card-title">⚙️ Set Winning Combinations</h2>
+        <div class="admin-form">
+          <select id="adminDrawSelect" class="admin-input">
+            <option value="5:00 PM">5:00 PM Draw</option>
+            <option value="9:00 PM">9:00 PM Draw</option>
+          </select>
+          <input type="number" id="adminNum1" class="admin-input admin-input-num" min="1" max="31" placeholder="Ball 1">
+          <span>-</span>
+          <input type="number" id="adminNum2" class="admin-input admin-input-num" min="1" max="31" placeholder="Ball 2">
+          <button class="btn btn-primary" onclick="saveAdminWinningCombination()">Publish Result</button>
+        </div>
+      </div>
+
+      <!-- Bet History Table -->
+      <div class="card">
+        <h2 class="card-title">📋 All Place Bet History</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Bettor Name</th>
+                <th>Target Draw</th>
+                <th>Combo</th>
+                <th>Bet Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminBetsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FLOATING CHAT WIDGET -->
+  <button class="chat-floating-btn" onclick="toggleChatWindow()">💬</button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div>
+        <strong style="color: var(--primary);">💬 Live Support Chat</strong>
+      </div>
+      <button class="close-btn" onclick="toggleChatWindow()">&times;</button>
+    </div>
+    <div class="chat-sidebar-list" id="chatSidebarList" style="display: none;"></div>
+    <div class="chat-body" id="chatMessagesBody"></div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chatMessageInput" placeholder="Type message..." onkeypress="handleChatKeypress(event)">
+      <button class="btn btn-primary btn-sm" onclick="sendChatMessage()">Send</button>
     </div>
   </div>
-  <div class="user-actions">
-    <span class="user-profile-badge" id="user-display">Guest</span>
-  </div>
-</header>
 
-<div class="container">
-  <div class="card">
-    <h3 class="card-title">Place Your Bet (Cloud Storage via Supabase)</h3>
-    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Select your 2 numbers and send them directly to the Supabase cloud database.</p>
-    
-    <div class="grid" id="number-grid">
-      <button class="num-btn" type="button">01</button>
-      <button class="num-btn" type="button">02</button>
-      <button class="num-btn" type="button">03</button>
-      <button class="num-btn" type="button">04</button>
-      <button class="num-btn" type="button">05</button>
-      <button class="num-btn" type="button">06</button>
-      <button class="num-btn" type="button">07</button>
-      <button class="num-btn" type="button">08</button>
-      <button class="num-btn" type="button">09</button>
-      <button class="num-btn" type="button">10</button>
-      <button class="num-btn" type="button">11</button>
-      <button class="num-btn" type="button">12</button>
-      <button class="num-btn" type="button">13</button>
-      <button class="num-btn" type="button">14</button>
-      <button class="num-btn" type="button">15</button>
-      <button class="num-btn" type="button">16</button>
-      <button class="num-btn" type="button">17</button>
-      <button class="num-btn" type="button">18</button>
-      <button class="num-btn" type="button">19</button>
-      <button class="num-btn" type="button">20</button>
-      <button class="num-btn" type="button">21</button>
-      <button class="num-btn" type="button">22</button>
-      <button class="num-btn" type="button">23</button>
-      <button class="num-btn" type="button">24</button>
-      <button class="num-btn" type="button">25</button>
-      <button class="num-btn" type="button">26</button>
-      <button class="num-btn" type="button">27</button>
-      <button class="num-btn" type="button">28</button>
-      <button class="num-btn" type="button">29</button>
-      <button class="num-btn" type="button">30</button>
-      <button class="num-btn" type="button">31</button>
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="gcashPaymentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>💙 Payment Confirmation</h3>
+        <button class="close-btn" onclick="closeModal('gcashPaymentModal')">&times;</button>
+      </div>
+      <div class="payment-method-selector" id="paymentMethodSelectorContainer"></div>
+      <div class="payment-card">
+        <div style="font-size: 0.85rem;" id="paymentCardSubtitle">Send Total Payment To:</div>
+        <div class="payment-number" id="adminPaymentNumberDisplay">0927-7668-297</div>
+      </div>
+      <div class="input-group">
+        <label>Your Mobile Number used for Transfer</label>
+        <input type="text" id="clientGcashSenderNo" placeholder="e.g. 09171234567">
+      </div>
+      <div class="input-group">
+        <label>Transaction Reference Number</label>
+        <input type="text" id="clientGcashRefNo" placeholder="e.g. 10023456789">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="confirmGcashPayment()">Submit Payment & Place Bets</button>
     </div>
-
-    <button class="btn btn-primary" id="submit-bet-btn" type="button">Submit Bet to Supabase</button>
   </div>
-</div>
 
-<script>
-  // Initialize Supabase safely
-  let supabase = null;
-  try {
+  <!-- Staff Login Modal -->
+  <div class="modal-overlay" id="staffLoginModal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3>🔐 Staff Portal Login</h3>
+        <button class="close-btn" onclick="closeModal('staffLoginModal')">&times;</button>
+      </div>
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="staffUsernameInput" placeholder="admin">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="staffPasswordInput" placeholder="password">
+      </div>
+      <button class="btn btn-admin" style="width: 100%; padding: 12px;" onclick="authenticateStaff()">Login</button>
+    </div>
+  </div>
+
+  <!-- Client Auth Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>👤 Client Account & Registration</h3>
+        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('loginTab', this)">Login</button>
+        <button class="tab-btn" id="tabBtnRegister" onclick="switchAuthTab('registerTab', this)">Register</button>
+      </div>
+
+      <div id="loginTab">
+        <div class="input-group">
+          <label>Username / Mobile</label>
+          <input type="text" id="clientLoginUsernameInput" placeholder="username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="clientLoginPasswordInput" placeholder="password">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="loginClientAccount()">Login</button>
+      </div>
+
+      <div id="registerTab" style="display: none;">
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="clientRegNameInput" placeholder="Full Name">
+        </div>
+        <div class="input-group">
+          <label>Username / Mobile No.</label>
+          <input type="text" id="clientRegUserInput" placeholder="Username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="clientRegPassInput" placeholder="Password">
+        </div>
+        <button class="btn btn-success" style="width: 100%; padding: 12px;" onclick="registerClientAccount()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Supabase Client
     const SUPABASE_URL = 'https://iiwmghlxxsnxpkgljlml.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r';
-    if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentRole = 'client';
+    let activeAgentIdentity = '';
+    let selectedNumbers = [];
+    let currentBet = 10;
+    let betSlip = [];
+    let selectedPaymentMethod = null;
+    let activeClient = JSON.parse(sessionStorage.getItem('ez2_activeClient')) || null;
+    let activeChatClientUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNumberGrid();
+      await fetchAllSupabaseData();
+    });
+
+    async function fetchAllSupabaseData() {
+      await updateWinningDisplay();
+      await renderClientBetsTable();
+      await renderAdminBetsTable();
+      await renderAdminPaymentsQueue();
+      updateClientAuthUI();
+      renderBetSlip();
+      updateWinnerTicker();
     }
-  } catch (err) {
-    console.error('Supabase Setup Error:', err);
-  }
 
-  let selectedNumbers = [];
+    function getCurrentTargetDraw() {
+      return new Date().getHours() < 17 ? '5:00 PM' : '9:00 PM';
+    }
 
-  // Attach click handlers to the hardcoded buttons
-  document.querySelectorAll('.num-btn').forEach(btn => {
-    btn.onclick = () => {
-      const val = btn.innerText;
-      if (selectedNumbers.includes(val)) {
-        selectedNumbers = selectedNumbers.filter(n => n !== val);
+    function toggleChatWindow() {
+      const chatWin = document.getElementById('chatWindow');
+      chatWin.style.display = chatWin.style.display === 'flex' ? 'none' : 'flex';
+      if (chatWin.style.display === 'flex') renderChatMessages();
+    }
+
+    async function sendChatMessage() {
+      const inputEl = document.getElementById('chatMessageInput');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      const newMsg = {
+        id: 'msg-' + Date.now(),
+        sender_name: activeClient ? activeClient.name : 'Guest',
+        sender_id: activeClient ? activeClient.username : 'guest',
+        recipient_id: 'admin',
+        client_thread: activeClient ? activeClient.username : 'guest_thread',
+        text: text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      await supabase.from('ez2_chat_messages').insert([newMsg]);
+      inputEl.value = '';
+      await renderChatMessages();
+    }
+
+    async function renderChatMessages() {
+      const body = document.getElementById('chatMessagesBody');
+      if (!body) return;
+
+      const { data: messages } = await supabase.from('ez2_chat_messages').select('*');
+      body.innerHTML = '';
+
+      (messages || []).forEach(m => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${m.sender_id === (activeClient?.username || 'guest') ? 'outgoing' : 'incoming'}`;
+        div.innerHTML = `<div><strong>${m.sender_name}</strong> (${m.timestamp})</div><div>${m.text}</div>`;
+        body.appendChild(div);
+      });
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function handleChatKeypress(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function renderNumberGrid() {
+      const grid = document.getElementById('numberGrid');
+      grid.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        if (selectedNumbers.includes(i)) btn.classList.add('selected');
+        btn.textContent = i < 10 ? '0' + i : i;
+        btn.onclick = () => selectNumber(i, btn);
+        grid.appendChild(btn);
+      }
+    }
+
+    function selectNumber(num, btn) {
+      if (selectedNumbers.includes(num)) {
+        selectedNumbers = selectedNumbers.filter(n => n !== num);
         btn.classList.remove('selected');
       } else {
         if (selectedNumbers.length < 2) {
-          selectedNumbers.push(val);
+          selectedNumbers.push(num);
           btn.classList.add('selected');
         } else {
-          alert('You can only select 2 numbers for EZ2!');
+          alert('You can only select 2 numbers.');
         }
       }
-    };
-  });
-
-  // Handle Supabase Cloud Insert
-  document.getElementById('submit-bet-btn').onclick = async () => {
-    if (selectedNumbers.length !== 2) {
-      alert('Please select exactly 2 numbers.');
-      return;
     }
 
-    if (!supabase) {
-      alert('Supabase client failed to initialize.');
-      return;
+    function setBet(amount, element) {
+      currentBet = amount;
+      document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+      element.classList.add('active');
+      document.getElementById('potentialWin').textContent = (amount * 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
     }
 
-    const { data, error } = await supabase
-      .from('bets')
-      .insert([{ numbers: selectedNumbers }]);
-
-    if (error) {
-      console.error('Supabase Error:', error.message);
-      alert('Failed to save bet to Supabase cloud: ' + error.message);
-    } else {
-      alert('Bet successfully stored in Supabase cloud database!');
+    function addCombinationToSlip() {
+      if (selectedNumbers.length !== 2) {
+        alert("Please select exactly 2 numbers.");
+        return;
+      }
+      betSlip.push({
+        id: 'slip-' + Date.now() + '-' + Math.random(),
+        combo: [...selectedNumbers].sort((a, b) => a - b),
+        betAmount: currentBet,
+        potentialWin: currentBet * 100
+      });
       selectedNumbers = [];
-      document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+      renderNumberGrid();
+      renderBetSlip();
     }
-  };
-</script>
 
+    function clearBetSlip() { betSlip = []; renderBetSlip(); }
+    function removeSlipItem(id) { betSlip = betSlip.filter(item => item.id !== id); renderBetSlip(); }
+
+    function renderBetSlip() {
+      const container = document.getElementById('slipItems');
+      const emptyMsg = document.getElementById('emptySlipMsg');
+      const countEl = document.getElementById('slipCount');
+      const totalAmountEl = document.getElementById('totalSlipAmount');
+      if (!container) return;
+
+      countEl.textContent = betSlip.length;
+      container.innerHTML = '';
+      if (betSlip.length === 0) {
+        emptyMsg.style.display = 'block';
+        totalAmountEl.textContent = '0.00';
+        return;
+      }
+      emptyMsg.style.display = 'none';
+      let totalAmount = 0;
+
+      betSlip.forEach(item => {
+        totalAmount += item.betAmount;
+        const div = document.createElement('div');
+        div.className = 'slip-item';
+        div.innerHTML = `<div><div class="slip-combo">[ ${item.combo.map(n => n < 10 ? '0' + n : n).join(' - ')} ]</div></div><button class="btn btn-danger btn-sm" onclick="removeSlipItem('${item.id}')">Remove</button>`;
+        container.appendChild(div);
+      });
+      totalAmountEl.textContent = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+
+    async function initiatePaymentFlow() {
+      if (betSlip.length === 0) { alert("Bet slip is empty."); return; }
+      if (!activeClient) { alert("Please log in first."); openModal('authModal'); return; }
+      
+      const { data: methods } = await supabase.from('ez2_payment_methods').select('*');
+      selectedPaymentMethod = methods?.[0]?.name || 'GCash';
+      document.getElementById('adminPaymentNumberDisplay').textContent = methods?.[0]?.number || '0927-7668-297';
+      openModal('gcashPaymentModal');
+    }
+
+    async function confirmGcashPayment() {
+      const senderNo = document.getElementById('clientGcashSenderNo').value.trim();
+      const refNo = document.getElementById('clientGcashRefNo').value.trim();
+      if (!senderNo || !refNo) { alert("Please enter mobile and reference number."); return; }
+
+      const targetDraw = getCurrentTargetDraw();
+      const newBets = betSlip.map(item => ({
+        id: 'bet-' + Date.now() + '-' + Math.random(),
+        bettor_name: activeClient.name,
+        bettor_account: activeClient.username,
+        referred_by: activeClient.referred_by || 'admin',
+        target_draw: targetDraw,
+        combo: item.combo,
+        bet_amount: item.betAmount,
+        potential_win: item.potentialWin,
+        payment_method: selectedPaymentMethod || 'GCash',
+        sender_no: senderNo,
+        ref_no: refNo,
+        payment_status: 'PENDING',
+        prize_status: 'PENDING',
+        created_at: new Date().toLocaleString()
+      }));
+
+      await supabase.from('ez2_placed_bets').insert(newBets);
+      betSlip = [];
+      renderBetSlip();
+      closeModal('gcashPaymentModal');
+      await fetchAllSupabaseData();
+      alert("Bets submitted successfully!");
+    }
+
+    async function registerClientAccount() {
+      const name = document.getElementById('clientRegNameInput').value.trim();
+      const username = document.getElementById('clientRegUserInput').value.trim();
+      const password = document.getElementById('clientRegPassInput').value.trim();
+      if (!name || !username || !password) { alert("Fill in all fields."); return; }
+
+      const { error } = await supabase.from('ez2_registered_clients').insert([{
+        id: 'cli-' + Date.now(),
+        name, username, password,
+        ref_code: username,
+        referred_by: 'admin',
+        created_at: new Date().toLocaleDateString()
+      }]);
+
+      if (error) { alert("Registration failed: " + error.message); return; }
+      alert("Registered successfully! Please login.");
+      switchAuthTab('loginTab', document.getElementById('tabBtnLogin'));
+    }
+
+    async function loginClientAccount() {
+      const username = document.getElementById('clientLoginUsernameInput').value.trim();
+      const password = document.getElementById('clientLoginPasswordInput').value.trim();
+
+      const { data, error } = await supabase.from('ez2_registered_clients').select('*').eq('username', username).eq('password', password).single();
+      if (error || !data) { alert("Invalid credentials."); return; }
+
+      activeClient = data;
+      sessionStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+      updateClientAuthUI();
+      closeModal('authModal');
+      await fetchAllSupabaseData();
+      alert(`Welcome back, ${activeClient.name}!`);
+    }
+
+    function logoutClientAccount() {
+      activeClient = null;
+      sessionStorage.removeItem('ez2_activeClient');
+      updateClientAuthUI();
+      alert("Logged out.");
+    }
+
+    function updateClientAuthUI() {
+      const userDisplay = document.getElementById('clientHeaderUserDisplay');
+      const logoutBtn = document.getElementById('clientHeaderLogoutBtn');
+      if (activeClient) {
+        userDisplay.textContent = `👤 ${activeClient.name}`;
+        logoutBtn.style.display = 'inline-block';
+      } else {
+        userDisplay.textContent = '👤 Guest';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    async function renderClientBetsTable() {
+      const tbody = document.getElementById('clientBetsTableBody');
+      if (!tbody || !activeClient) return;
+
+      const { data: bets } = await supabase.from('ez2_placed_bets').select('*').eq('bettor_account', activeClient.username);
+      tbody.innerHTML = '';
+      (bets || []).forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><span class="badge-draw">${b.target_draw}</span></td><td>[ ${b.combo.join(' - ')} ]</td><td>₱${b.bet_amount}</td><td>${b.payment_status}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function renderAdminBetsTable() {
+      const tbody = document.getElementById('adminBetsTableBody');
+      if (!tbody) return;
+
+      const { data: bets } = await supabase.from('ez2_placed_bets').select('*');
+      tbody.innerHTML = '';
+      (bets || []).forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${b.bettor_name}</td><td>${b.target_draw}</td><td>[ ${b.combo.join(' - ')} ]</td><td>₱${b.bet_amount}</td><td>${b.payment_status}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function renderAdminPaymentsQueue() {
+      const tbody = document.getElementById('adminPaymentsTableBody');
+      if (!tbody) return;
+
+      const { data: bets } = await supabase.from('ez2_placed_bets').select('*').eq('payment_status', 'PENDING');
+      tbody.innerHTML = '';
+      (bets || []).forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${b.bettor_name}</td><td>${b.payment_method}</td><td>${b.sender_no}</td><td>${b.ref_no}</td><td>${b.target_draw}</td><td>₱${b.bet_amount}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${b.id}')">Approve</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function approvePayment(id) {
+      await supabase.from('ez2_placed_bets').update({ payment_status: 'CONFIRMED' }).eq('id', id);
+      await fetchAllSupabaseData();
+    }
+
+    async function saveAdminWinningCombination() {
+      const draw = document.getElementById('adminDrawSelect').value;
+      const n1 = parseInt(document.getElementById('adminNum1').value);
+      const n2 = parseInt(document.getElementById('adminNum2').value);
+      if (isNaN(n1) || isNaN(n2)) { alert("Enter valid numbers."); return; }
+
+      await supabase.from('ez2_winning_combos').upsert({ draw_name: draw, combo: [n1, n2] });
+      await updateWinningDisplay();
+      alert("Winning combination published!");
+    }
+
+    async function updateWinningDisplay() {
+      const { data: combos } = await supabase.from('ez2_winning_combos').select('*');
+      const map = {};
+      (combos || []).forEach(c => map[c.draw_name] = c.combo);
+
+      ['5:00 PM', '9:00 PM'].forEach(draw => {
+        const el = document.getElementById(draw === '5:00 PM' ? 'clientWinDisplay5PM' : 'clientWinDisplay9PM');
+        if (!el) return;
+        const combo = map[draw];
+        if (combo) {
+          el.innerHTML = combo.map(n => `<div class="win-ball">${n < 10 ? '0' + n : n}</div>`).join('');
+        } else {
+          el.innerHTML = `<span style="color:var(--text-muted)">Pending Draw</span>`;
+        }
+      });
+    }
+
+    function updateWinnerTicker() {
+      const ticker = document.getElementById('winnerTickerContent');
+      if (ticker) ticker.innerHTML = `<div class="ticker-item"><span class="ticker-tag">NOTICE</span><span>Welcome to EZ2WIN Cloud Edition powered by Supabase!</span></div>`;
+    }
+
+    function handleRoleButtonClick() {
+      if (currentRole === 'client') openModal('staffLoginModal');
+      else { currentRole = 'client'; applyRoleUI(); }
+    }
+
+    function authenticateStaff() {
+      const u = document.getElementById('staffUsernameInput').value.trim();
+      const p = document.getElementById('staffPasswordInput').value.trim();
+      if (u === 'admin' && p === 'password') {
+        currentRole = 'admin';
+        closeModal('staffLoginModal');
+        applyRoleUI();
+      } else {
+        alert("Invalid staff credentials.");
+      }
+    }
+
+    function applyRoleUI() {
+      document.getElementById('clientView').style.display = currentRole === 'client' ? 'block' : 'none';
+      document.getElementById('adminView').style.display = currentRole === 'client' ? 'none' : 'block';
+      document.getElementById('viewModeBadge').textContent = currentRole.toUpperCase() + ' PANEL';
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function switchAuthTab(tabId, el) {
+      document.getElementById('loginTab').style.display = tabId === 'loginTab' ? 'block' : 'none';
+      document.getElementById('registerTab').style.display = tabId === 'registerTab' ? 'block' : 'none';
+      document.querySelectorAll('#authModal .tab-btn').forEach(b => b.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+  </script>
 </body>
 </html>
