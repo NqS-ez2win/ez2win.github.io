@@ -1053,49 +1053,16 @@
         return data.value;
     }
 
-    async function getStorage(key, defaultValue) {
-    // 1. Try local storage cache first for instant load & offline resilience
-    try {
-        const localVal = localStorage.getItem(key);
-        if (localVal !== null) {
-            return JSON.parse(localVal);
-        }
-    } catch (e) {}
-
-    // 2. Fetch from Supabase
-    const { data, error } = await supabaseClient
+    async function setStorage(key, value) {
+      const { error } = await supabaseClient
         .from('app_storage')
-        .select('value')
-        .eq('key', key)
-        .maybeSingle();
-        
-    if (error || !data) {
-        return defaultValue;
+        .upsert({ key: key, value: value });
+     
+      if (error) {
+        console.error('Supabase error saving', key, error);
+        alert(`Storage Error (${key}): ${error.message}. Please check your Supabase RLS policies.`);
+      }
     }
-    
-    // Cache locally
-    try {
-        localStorage.setItem(key, JSON.stringify(data.value));
-    } catch (e) {}
-
-    return data.value;
-}
-
-async function setStorage(key, value) {
-  // Save to local storage immediately
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {}
-
-  // Save to Supabase
-  const { error } = await supabaseClient
-    .from('app_storage')
-    .upsert({ key: key, value: value }, { onConflict: 'key' });
- 
-  if (error) {
-    console.error('Supabase storage error on key:', key, error.message);
-  }
-}
 
     let CREDENTIALS = {
       admin: { username: 'admin', password: 'NqS312719', role: 'admin' },
@@ -1135,15 +1102,10 @@ async function setStorage(key, value) {
     let chatMessages = [];
     let activeChatClientUser = null;
 
-     document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       CREDENTIALS = await getStorage('ez2_credentials', CREDENTIALS);
       registeredClients = await getStorage('ez2_registeredClients', registeredClients);
-      try {
-  const savedClient = localStorage.getItem('ez2_activeClient');
-  activeClient = savedClient ? JSON.parse(savedClient) : null;
-} catch (e) {
-  activeClient = null;
-}
+      activeClient = await getStorage('ez2_activeClient', null);
       agentsList = await getStorage('ez2_agents', agentsList);
       paymentMethods = await getStorage('ez2_paymentMethods', paymentMethods);
       winningCombos = await getStorage('ez2_winningCombos', winningCombos);
@@ -1865,7 +1827,7 @@ async function setStorage(key, value) {
 
       const duplicate = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase());
       if (duplicate) {
-        alert(`The Username/Mobile "${username}" is already registered!`);
+        alert(`The Username/Mobile "${username}" is already registered! Please log in or use a different unique Mobile/Username.`);
         return;
       }
 
@@ -1883,8 +1845,7 @@ async function setStorage(key, value) {
       await setStorage('ez2_registeredClients', registeredClients);
 
       activeClient = newClient;
-      // SAVE TO LOCALSTORAGE
-      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+      await setStorage('ez2_activeClient', activeClient);
 
       document.getElementById('clientRegNameInput').value = '';
       document.getElementById('clientRegUserInput').value = '';
@@ -1915,8 +1876,7 @@ async function setStorage(key, value) {
 
       if (foundClient) {
         activeClient = foundClient;
-        // SAVE TO LOCALSTORAGE INSTEAD OF SHARED APP_STORAGE
-        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+        await setStorage('ez2_activeClient', activeClient);
 
         document.getElementById('clientLoginUsernameInput').value = '';
         document.getElementById('clientLoginPasswordInput').value = '';
@@ -1933,8 +1893,7 @@ async function setStorage(key, value) {
 
     async function logoutClientAccount() {
       activeClient = null;
-      // REMOVE FROM LOCALSTORAGE
-      localStorage.removeItem('ez2_activeClient');
+      await setStorage('ez2_activeClient', null);
       updateClientAuthUI();
       renderClientBetsTable();
       alert("You have been successfully logged out.");
