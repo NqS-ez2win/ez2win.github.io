@@ -1040,22 +1040,22 @@
     const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Fetch all registered clients from the dedicated table
-    async function getRegisteredClients() {
+    async function getStorage(key, defaultValue) {
         const { data, error } = await supabaseClient
-            .from('ez2_registered_clients')
-            .select('*')
-        
-        if (error {    
-            console.error('Error fetching registered clients:', error message);
-            return [];
+            .from('app_storage')
+            .select('value')
+            .eq('key', key)
+            .single();
+            
+        if (error || !data) {
+            return defaultValue;
         }
-        return || [];
+        return data.value;
     }
 
-    async function getRegisteredClients(key, value) {
+    async function setStorage(key, value) {
       const { error } = await supabaseClient
-        .from('ez2_registered_clients')
+        .from('app_storage')
         .upsert({ key: key, value: value });
      
       if (error) {
