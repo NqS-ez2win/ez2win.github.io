@@ -1059,8 +1059,10 @@ async function getStorage(key, defaultValue) {
       const { error } = await supabaseClient
         .from('app_storage')
         .upsert({ key: key, value: value });
+     
       if (error) {
         console.error('Supabase error saving', key, error);
+        alert(`Storage Error (${key}): ${error.message}. Please check your Supabase RLS policies.`);
       }
     }
 
