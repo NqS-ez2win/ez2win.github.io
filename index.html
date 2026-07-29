@@ -1103,6 +1103,21 @@
     let activeChatClientUser = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
+  // Check if a user session is saved and active
+  const { data: { session }, error } = await supabase.auth.getSession();
+
+  if (session) {
+    // User is logged in, even after a refresh!
+    console.log("Logged in user:", session.user.email);
+    showDashboard(session.user);
+  } else {
+    // User is logged out
+    console.log("No active session found.");
+    showLoginScreen();
+  }
+});
+
+    document.addEventListener('DOMContentLoaded', async () => {
       CREDENTIALS = await getStorage('ez2_credentials', CREDENTIALS);
       registeredClients = await getStorage('ez2_registeredClients', registeredClients);
       activeClient = await getStorage('ez2_activeClient', null);
