@@ -3,748 +3,288 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EZ2 Betting System & Admin Dashboard</title>
+  <title>EZ2WIN x100 - PCSO Draw Platform</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-dark: #090d16;
-      --bg-card: #111827;
-      --bg-input: #1f2937;
-      --primary: #38bdf8;
-      --primary-hover: #0ea5e9;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --agent-purple: #c084fc;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --border: #374151;
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      padding: 20px;
-      line-height: 1.5;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-    }
-
-    h1, h2, h3 {
-      color: var(--text-main);
-    }
-
-    .card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      color: var(--text-muted);
-      font-size: 0.875rem;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      background-color: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 0.95rem;
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .btn {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      color: #000;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-danger {
-      background-color: var(--danger);
-      color: #fff;
-    }
-
-    .btn-danger:hover {
-      background-color: #dc2626;
-    }
-
-    .btn-sm {
-      padding: 6px 10px;
-      font-size: 0.75rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      color: var(--text-muted);
-      font-weight: 600;
-      background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    .win-ball-container {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .win-ball {
-      width: 45px;
-      height: 45px;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #000;
-      font-weight: bold;
-      font-size: 1.1rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-
-    .win-ball.pending {
-      background: var(--bg-input);
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      width: auto;
-      height: 45px;
-      padding: 0 15px;
-      border-radius: 6px;
-    }
-
-    .admin-status-chip {
-      background: var(--bg-input);
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      display: inline-block;
-      margin-right: 10px;
-      font-size: 0.85rem;
-    }
-
-    .badge-win { color: var(--success); font-weight: bold; }
-    .badge-loss { color: var(--danger); }
-    .badge-pending { color: var(--warning); font-weight: bold; }
-    .badge-awaiting { color: var(--text-muted); }
-    .badge-rejected { color: var(--danger); font-weight: bold; }
-    .badge-draw { background: var(--bg-input); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
-
-    .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 24px;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .flex-row {
-      display: flex;
-      gap: 15px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--card-bg); padding: 1rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    h1 { font-size: 1.5rem; color: var(--primary); }
+    main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 450px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    h2 { margin-bottom: 1.5rem; font-size: 1.25rem; text-align: center; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    input { width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border); border-radius: 6px; color: var(--text-color); font-size: 1rem; }
+    input:focus { outline: none; border-color: var(--primary); }
+    button { width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+    button:hover { background: var(--primary-hover); }
+    .hidden { display: none !important; }
+    .dashboard-container { width: 100%; max-width: 1000px; display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
+    @media(max-width: 768px) { .dashboard-container { grid-template-columns: 1fr; } }
+    .dashboard-main { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    .dashboard-sidebar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
+    .user-info { margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); }
+    .logout-btn { background: #ef4444; margin-top: auto; }
+    .logout-btn:hover { background: #dc2626; }
+    .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 1.5rem 0; }
+    .number-btn { aspect-ratio: 1; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .number-btn.selected { background: var(--primary); border-color: var(--primary); }
+    .ticker { background: var(--border); padding: 0.5rem 1rem; font-size: 0.875rem; white-space: nowrap; overflow: hidden; position: relative; }
+    .auth-toggle { text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }
+    .auth-toggle a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+    .auth-toggle a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>EZ2 Betting System</h1>
-      <div id="userStatusDisplay" style="font-size: 0.9rem; color: var(--text-muted);">
-        Role: <strong id="currentRoleLabel" style="color: var(--primary);">Admin</strong>
-      </div>
-    </header>
-
-    <!-- Draw Results & Winning Display Section -->
-    <div class="card">
-      <h2>Draw Results & Winning Combinations</h2>
-      <div style="display: flex; gap: 30px; margin-top: 15px; flex-wrap: wrap;">
-        <div>
-          <label><strong>5:00 PM Draw Result</strong></label>
-          <div class="win-ball-container" id="clientWinDisplay5PM">
-            <div class="win-ball pending">Awaiting Draw</div>
-          </div>
-        </div>
-        <div>
-          <label><strong>9:00 PM Draw Result</strong></label>
-          <div class="win-ball-container" id="clientWinDisplay9PM">
-            <div class="win-ball pending">Awaiting Draw</div>
-          </div>
-        </div>
-      </div>
-      <div id="adminCurrentWinningDisplay" style="margin-top: 15px;"></div>
-    </div>
-
-    <!-- Admin Controls: Set Winning Combinations -->
-    <div class="card" id="adminWinningCard">
-      <h2>Publish Winning Combination</h2>
-      <div class="flex-row" style="margin-top: 15px; align-items: flex-end;">
-        <div class="form-group" style="flex: 1;">
-          <label for="adminDrawSelect">Select Draw Slot</label>
-          <select id="adminDrawSelect">
-            <option value="5:00 PM">5:00 PM Draw</option>
-            <option value="9:00 PM">9:00 PM Draw</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label for="adminNum1">Winning Ball 1 (1-31)</label>
-          <input type="number" id="adminNum1" min="1" max="31" placeholder="e.g. 12">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label for="adminNum2">Winning Ball 2 (1-31)</label>
-          <input type="number" id="adminNum2" min="1" max="31" placeholder="e.g. 25">
-        </div>
-        <div class="form-group" style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" onclick="saveAdminWinningCombination()">Publish</button>
-          <button class="btn btn-danger btn-sm" onclick="resetAdminWinningCombination()">Reset</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Agent Management Section -->
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2>Agent Accounts & Referral Links</h2>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary btn-sm" onclick="autoGenerateNextAgent()">⚡ Auto-Generate Agent</button>
-        </div>
-      </div>
-
-      <div class="flex-row" style="margin-bottom: 20px; align-items: flex-end;">
-        <div class="form-group" style="flex: 2;">
-          <label for="newAgentNameInput">Agent Name / Station</label>
-          <input type="text" id="newAgentNameInput" placeholder="Enter Agent Name">
-        </div>
-        <div class="form-group" style="flex: 2;">
-          <label for="newAgentPassInput">Custom Password (Optional)</label>
-          <input type="text" id="newAgentPassInput" placeholder="Default: agent123">
-        </div>
-        <div class="form-group">
-          <button class="btn btn-primary" onclick="createNewAgent()">Create Agent</button>
-        </div>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Agent Name</th>
-              <th>Username</th>
-              <th>Password</th>
-              <th>Referral Link</th>
-              <th>Created Date</th>
-              <th id="agentTableActionHeader">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="adminAgentsTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Placed Bets Management -->
-    <div class="card">
-      <h2>All Placed Bets History</h2>
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 10px;">
-        <button class="btn btn-danger btn-sm" onclick="clearAllBetsHistory()">Clear All History</button>
-      </div>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Draw</th>
-              <th>Bettor</th>
-              <th>Combination</th>
-              <th>Bet Amount</th>
-              <th>Potential Win</th>
-              <th>Ref No.</th>
-              <th>Payment & Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="adminBetsTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Client Personal Bets History -->
-    <div class="card">
-      <h2>My Client Bets History</h2>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Draw</th>
-              <th>Combination</th>
-              <th>Winning Combination</th>
-              <th>Bet Amount</th>
-              <th>Payment Method</th>
-              <th>Ref No.</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="clientBetsTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <div class="ticker">
+    <span>📢 Welcome to EZ2WIN x100! PCSO 5:00 PM and 9:00 PM draws active. Multiplier: 100x Payout.</span>
   </div>
 
-  <!-- JavaScript Logic -->
+  <header>
+    <h1>EZ2WIN x100</h1>
+    <div id="header-user" class="hidden">
+      <span id="user-email-display" style="margin-right: 1rem; font-size: 0.9rem;"></span>
+      <button id="header-logout" style="width: auto; padding: 0.4rem 1rem; margin-top: 0;">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Authentication Screen (Login / Register) -->
+    <div id="login-card" class="card">
+      <h2 id="auth-form-title">Client Login</h2>
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" placeholder="user@example.com">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password (min. 6 characters)</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button id="auth-btn">Sign In</button>
+      <div class="auth-toggle">
+        <span id="toggle-prompt">Don't have an account?</span> 
+        <a id="toggle-auth-mode">Register</a>
+      </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="dashboard-container hidden">
+      <div class="dashboard-main">
+        <h2>EZ2 Bet Terminal</h2>
+        <p class="user-info">Select two numbers (1-31) for the upcoming PCSO draw.</p>
+        <div class="grid" id="number-grid"></div>
+        <div style="margin-top: 1.5rem;">
+          <label>Stake Amount (₱)</label>
+          <input type="number" id="stake-amount" value="20" min="10" max="50">
+        </div>
+        <button id="place-bet-btn" style="margin-top: 1.5rem;">Place Bet (100x Payout)</button>
+      </div>
+      <div class="dashboard-sidebar">
+        <div>
+          <h3>Account Panel</h3>
+          <p id="sidebar-email" class="user-info" style="margin-top: 0.5rem;"></p>
+        </div>
+        <button id="sidebar-logout" class="logout-btn">Sign Out</button>
+      </div>
+    </div>
+  </main>
+
   <script>
-    let currentRole = 'admin';
-    let activeClient = { username: 'client_demo', name: 'Demo Bettor' };
-    let placedBets = [];
-    let agentsList = [];
-    let winningCombos = { '5:00 PM': null, '9:00 PM': null };
+    // Supabase Configuration
+    const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
 
-    // Storage helpers using localStorage
-    async function getStorage(key, defaultValue) {
-      const val = localStorage.getItem(key);
-      return val ? JSON.parse(val) : defaultValue;
-    }
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
 
-    async function setStorage(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
+    // DOM Elements
+    const loginCard = document.getElementById('login-card');
+    const dashboardScreen = document.getElementById('dashboard-screen');
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const authBtn = document.getElementById('auth-btn');
+    const authFormTitle = document.getElementById('auth-form-title');
+    const togglePrompt = document.getElementById('toggle-prompt');
+    const toggleAuthMode = document.getElementById('toggle-auth-mode');
+    const headerUser = document.getElementById('header-user');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const sidebarEmail = document.getElementById('sidebar-email');
+    const headerLogout = document.getElementById('header-logout');
+    const sidebarLogout = document.getElementById('sidebar-logout');
+    const numberGrid = document.getElementById('number-grid');
 
-    async function initApp() {
-      placedBets = await getStorage('ez2_placedBets', [
-        { id: 'bet-1', targetDraw: '5:00 PM', bettorAccount: 'client_demo', bettorName: 'Demo Bettor', combo: [5, 12], betAmount: 50, potentialWin: 2000, paymentMethod: 'GCash', refNo: 'REF123456', paymentStatus: 'CONFIRMED' }
-      ]);
-      agentsList = await getStorage('ez2_agents', [
-        { id: 'agent-1', name: 'Main Station', username: 'admin_mainstation', password: 'agent123', createdAt: '2026-07-01' }
-      ]);
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': [5, 12], '9:00 PM': null });
+    // State
+    let isRegisterMode = false;
+    let selectedNumbers = [];
 
-      await updateWinningDisplay();
-      renderAdminAgentsTable();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-    }
+    // Initialize Application & Session Persistence Check on Page Load
+    document.addEventListener("DOMContentLoaded", async () => {
+      buildNumberGrid();
 
-    async function deleteSingleBet(betId) {
-      placedBets = await getStorage('ez2_placedBets', []);
-      placedBets = placedBets.filter(b => b.id !== betId);
-      await setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      updateAdminNetTotals();
-      updateWinnerTicker();
-    }
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) console.error("Session check error:", error);
 
-    async function clearAllBetsHistory() {
-      if (!confirm("Are you sure you want to clear all bets history?")) return;
-      placedBets = [];
-      await setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      updateAdminNetTotals();
-      updateWinnerTicker();
-    }
-
-    async function createNewAgent() {
-      const name = document.getElementById('newAgentNameInput').value.trim();
-      const pass = document.getElementById('newAgentPassInput').value.trim() || 'agent123';
-
-      if (!name) {
-        alert("Please enter an Agent Name.");
-        return;
+        if (session) {
+          handleUserAuthenticated(session.user);
+        } else {
+          handleUserLoggedOut();
+        }
+      } catch (err) {
+        console.error("Initialization exception:", err);
       }
 
-      agentsList = await getStorage('ez2_agents', []);
-      const cleanUsername = 'admin_' + name.toLowerCase().replace(/\s+/g, '');
-
-      const newAgent = {
-        id: 'agent-' + Date.now(),
-        name: name,
-        username: cleanUsername,
-        password: pass,
-        role: 'agent',
-        createdBy: currentRole,
-        createdAt: new Date().toLocaleDateString()
-      };
-
-      agentsList.push(newAgent);
-      await setStorage('ez2_agents', agentsList);
-
-      document.getElementById('newAgentNameInput').value = '';
-      document.getElementById('newAgentPassInput').value = '';
-
-      renderAdminAgentsTable();
-      alert(`✅ Successfully created Agent & Link for "${name}"!\nUsername: ${cleanUsername}\nPassword: ${pass}`);
-    }
-
-    async function autoGenerateNextAgent() {
-      agentsList = await getStorage('ez2_agents', []);
-      const nextNum = agentsList.length + 1;
-      const name = `SubAgent ${nextNum}`;
-      const cleanUsername = 'admin_subagent' + nextNum;
-      const pass = 'agent123';
-
-      const newAgent = {
-        id: 'agent-' + Date.now(),
-        name: name,
-        username: cleanUsername,
-        password: pass,
-        role: 'agent',
-        createdBy: currentRole,
-        createdAt: new Date().toLocaleDateString()
-      };
-
-      agentsList.push(newAgent);
-      await setStorage('ez2_agents', agentsList);
-
-      renderAdminAgentsTable();
-      alert(`⚡ Auto-created Agent "${name}"!\nUsername: ${cleanUsername}\nPassword: ${pass}`);
-    }
-
-    async function deleteAgent(id) {
-      agentsList = await getStorage('ez2_agents', []);
-      if (agentsList.length <= 1) {
-        alert("You must keep at least one active agent/staff.");
-        return;
-      }
-
-      if (!confirm("Are you sure you want to delete this agent?")) return;
-
-      agentsList = agentsList.filter(a => a.id !== id);
-      await setStorage('ez2_agents', agentsList);
-      renderAdminAgentsTable();
-    }
-
-    async function renderAdminAgentsTable() {
-      agentsList = await getStorage('ez2_agents', []);
-      const tbody = document.getElementById('adminAgentsTableBody');
-      const actionHeader = document.getElementById('agentTableActionHeader');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
-
-      if (agentsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 5 : 6}" style="text-align:center; color: var(--text-muted);">No agent accounts configured.</td></tr>`;
-        return;
-      }
-
-      agentsList.forEach(agent => {
-        const tr = document.createElement('tr');
-        const refCode = agent.username || agent.name.toLowerCase().replace(/\s+/g, '');
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
-
-        const deleteAction = `<button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button>`;
-
-        tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--agent-purple);">${agent.name}</td>
-          <td><code>${agent.username}</code></td>
-          <td><code>${agent.password}</code></td>
-          <td>
-            <div style="display: flex; gap: 6px; align-items: center;">
-              <input type="text" readonly value="${refLink}" style="background: #0f172a; border: 1px solid #475569; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; width: 220px;">
-              <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText('${refLink}'); alert('Agent referral link copied to clipboard!');">Copy</button>
-            </div>
-          </td>
-          <td style="font-size: 0.8rem; color: var(--text-muted);">${agent.createdAt || 'N/A'}</td>
-          ${currentRole === 'viewer' ? '' : `<td>${deleteAction}</td>`}
-        `;
-        tbody.appendChild(tr);
+      supabase.auth.onAuthStateChange((event, currentSession) => {
+        if (event === 'SIGNED_IN' && currentSession) {
+          handleUserAuthenticated(currentSession.user);
+        } else if (event === 'SIGNED_OUT') {
+          handleUserLoggedOut();
+        }
       });
-    }
+    });
 
-    async function renderAdminBetsTable() {
-      placedBets = await getStorage('ez2_placedBets', []);
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      const tbody = document.getElementById('adminBetsTableBody');
-      if (!tbody) return;
+    // Toggle between Sign In and Register Mode
+    toggleAuthMode.addEventListener('click', (e) => {
+      e.preventDefault();
+      isRegisterMode = !isRegisterMode;
+      if (isRegisterMode) {
+        authFormTitle.textContent = 'Create Account';
+        authBtn.textContent = 'Register';
+        togglePrompt.textContent = 'Already have an account?';
+        toggleAuthMode.textContent = 'Sign In';
+      } else {
+        authFormTitle.textContent = 'Client Login';
+        authBtn.textContent = 'Sign In';
+        togglePrompt.textContent = "Don't have an account?";
+        toggleAuthMode.textContent = 'Register';
+      }
+    });
 
-      tbody.innerHTML = '';
-      if (placedBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No bets placed yet.</td></tr>`;
+    // Authentication Handler (Handles both Sign In and Sign Up)
+    authBtn.addEventListener('click', async () => {
+      const email = loginEmailInput.value.trim();
+      const password = loginPasswordInput.value.trim();
+
+      if (!email || !password) {
+        alert('Please fill in both email and password.');
         return;
       }
 
-      placedBets.slice().reverse().forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        const targetDraw = bet.targetDraw || '5:00 PM';
-        const drawCombo = winningCombos[targetDraw];
+      if (isRegisterMode && password.length < 6) {
+        alert('Password must be at least 6 characters long.');
+        return;
+      }
 
-        let statusBadge = '<span class="badge-pending">PENDING DRAW</span>';
-        if (drawCombo && drawCombo.length === 2) {
-          const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-          if (isWin) {
-            statusBadge = `<span class="badge-win">🎉 WINNER</span>`;
+      try {
+        if (isRegisterMode) {
+          authBtn.textContent = 'Registering...';
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          authBtn.textContent = 'Register';
+
+          if (error) {
+            alert('Registration failed: ' + error.message);
+            console.error("Supabase SignUp Error:", error);
           } else {
-            statusBadge = `<span class="badge-loss">LOSS</span>`;
+            if (data.session) {
+              handleUserAuthenticated(data.user);
+            } else {
+              alert('Registration successful! Please check your email inbox to confirm your account before logging in.');
+              isRegisterMode = false;
+              authFormTitle.textContent = 'Client Login';
+              authBtn.textContent = 'Sign In';
+              togglePrompt.textContent = "Don't have an account?";
+              toggleAuthMode.textContent = 'Register';
+              loginPasswordInput.value = '';
+            }
+          }
+        } else {
+          authBtn.textContent = 'Signing in...';
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          authBtn.textContent = 'Sign In';
+
+          if (error) {
+            alert('Login failed: ' + error.message);
+            console.error("Supabase SignIn Error:", error);
+          } else {
+            handleUserAuthenticated(data.user);
           }
         }
-
-        let paymentBadge = `<span class="badge-awaiting">PENDING</span>`;
-        if (bet.paymentStatus === 'CONFIRMED') paymentBadge = `<span class="badge-win">PAID</span>`;
-        else if (bet.paymentStatus === 'REJECTED') paymentBadge = `<span class="badge-rejected">REJECTED</span>`;
-
-        tr.innerHTML = `
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td>${bet.bettorName || bet.bettorAccount}</td>
-          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td>₱${bet.betAmount.toLocaleString()}</td>
-          <td>₱${(bet.potentialWin || bet.betAmount * 40).toLocaleString()}</td>
-          <td><code>${bet.refNo || 'N/A'}</code></td>
-          <td>${paymentBadge} / ${statusBadge}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="deleteSingleBet('${bet.id}')">Delete</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function saveAdminWinningCombination() {
-      const drawSelect = document.getElementById('adminDrawSelect').value;
-      const num1 = parseInt(document.getElementById('adminNum1').value);
-      const num2 = parseInt(document.getElementById('adminNum2').value);
-
-      if (isNaN(num1) || isNaN(num2) || num1 < 1 || num1 > 31 || num2 < 1 || num2 > 31) {
-        alert("Please enter valid numbers between 1 and 31 for both balls.");
-        return;
+      } catch (err) {
+        authBtn.textContent = isRegisterMode ? 'Register' : 'Sign In';
+        alert('An unexpected error occurred. Check browser console for details.');
+        console.error("Auth Exception:", err);
       }
+    });
 
-      if (num1 === num2) {
-        alert("The two winning numbers must be different.");
-        return;
+    // Logout Handlers
+    const handleLogout = async () => {
+      await supabase.auth.signOut();
+    };
+
+    headerLogout.addEventListener('click', handleLogout);
+    sidebarLogout.addEventListener('click', handleLogout);
+
+    // View Switchers
+    function handleUserAuthenticated(user) {
+      loginCard.classList.add('hidden');
+      dashboardScreen.classList.remove('hidden');
+      headerUser.classList.remove('hidden');
+      userEmailDisplay.textContent = user.email;
+      sidebarEmail.textContent = `Logged in as: ${user.email}`;
+    }
+
+    function handleUserLoggedOut() {
+      dashboardScreen.classList.add('hidden');
+      headerUser.classList.add('hidden');
+      loginCard.classList.remove('hidden');
+      loginEmailInput.value = '';
+      loginPasswordInput.value = '';
+    }
+
+    // Build Betting Grid (1 to 31)
+    function buildNumberGrid() {
+      numberGrid.innerHTML = '';
+      for (let i = 1; i <= 31; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'number-btn';
+        btn.textContent = i < 10 ? '0' + i : i;
+        btn.addEventListener('click', () => toggleNumberSelection(i, btn));
+        numberGrid.appendChild(btn);
       }
-
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      winningCombos[drawSelect] = [num1, num2].sort((a, b) => a - b);
-      await setStorage('ez2_winningCombos', winningCombos);
-
-      document.getElementById('adminNum1').value = '';
-      document.getElementById('adminNum2').value = '';
-
-      updateWinningDisplay();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-
-      alert(`🎉 Successfully published winning combination for ${drawSelect} Draw: [ ${winningCombos[drawSelect].map(n => n < 10 ? '0' + n : n).join(' - ')} ]`);
     }
 
-    async function resetAdminWinningCombination() {
-      const drawSelect = document.getElementById('adminDrawSelect').value;
-      if (!confirm(`Are you sure you want to reset the winning combination for the ${drawSelect} Draw?`)) return;
-
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      winningCombos[drawSelect] = null;
-      await setStorage('ez2_winningCombos', winningCombos);
-
-      updateWinningDisplay();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-
-      alert(`🔄 Successfully reset winning combination for ${drawSelect} Draw.`);
-    }
-
-    async function updateWinningDisplay() {
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-
-      const display5PM = document.getElementById('clientWinDisplay5PM');
-      const display9PM = document.getElementById('clientWinDisplay9PM');
-      const adminCurrentWinDisplay = document.getElementById('adminCurrentWinningDisplay');
-
-      if (display5PM) {
-        const combo5 = winningCombos['5:00 PM'];
-        if (combo5 && combo5.length === 2) {
-          display5PM.innerHTML = `
-            <div class="win-ball">${combo5[0] < 10 ? '0' + combo5[0] : combo5[0]}</div>
-            <div class="win-ball">${combo5[1] < 10 ? '0' + combo5[1] : combo5[1]}</div>
-          `;
-        } else {
-          display5PM.innerHTML = `<div class="win-ball pending">Awaiting Draw</div>`;
+    function toggleNumberSelection(num, btnElement) {
+      const index = selectedNumbers.indexOf(num);
+      if (index > -1) {
+        selectedNumbers.splice(index, 1);
+        btnElement.classList.remove('selected');
+      } else {
+        if (selectedNumbers.length >= 2) {
+          alert('You can only select exactly 2 numbers for EZ2!');
+          return;
         }
-      }
-
-      if (display9PM) {
-        const combo9 = winningCombos['9:00 PM'];
-        if (combo9 && combo9.length === 2) {
-          display9PM.innerHTML = `
-            <div class="win-ball">${combo9[0] < 10 ? '0' + combo9[0] : combo9[0]}</div>
-            <div class="win-ball">${combo9[1] < 10 ? '0' + combo9[1] : combo9[1]}</div>
-          `;
-        } else {
-          display9PM.innerHTML = `<div class="win-ball pending">Awaiting Draw</div>`;
-        }
-      }
-
-      if (adminCurrentWinDisplay) {
-        const c5 = winningCombos['5:00 PM'];
-        const c9 = winningCombos['9:00 PM'];
-        adminCurrentWinDisplay.innerHTML = `
-          <div class="admin-status-chip">
-            <strong>5:00 PM Result:</strong> ${c5 && c5.length === 2 ? '[ ' + c5.map(n => n < 10 ? '0' + n : n).join(' - ') + ' ]' : 'Not Set'}
-          </div>
-          <div class="admin-status-chip">
-            <strong>9:00 PM Result:</strong> ${c9 && c9.length === 2 ? '[ ' + c9.map(n => n < 10 ? '0' + n : n).join(' - ') + ' ]' : 'Not Set'}
-          </div>
-        `;
+        selectedNumbers.push(num);
+        btnElement.classList.add('selected');
       }
     }
-
-    async function renderClientBetsTable() {
-      const tbody = document.getElementById('clientBetsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      if (!activeClient) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please log in to view your placed bets history.</td></tr>`;
-        return;
-      }
-
-      placedBets = await getStorage('ez2_placedBets', []);
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-
-      const clientBets = placedBets.filter(b => b.bettorAccount === activeClient.username || b.bettorName === activeClient.name);
-
-      if (clientBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">You haven't placed any bets yet.</td></tr>`;
-        return;
-      }
-
-      clientBets.slice().reverse().forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        const targetDraw = bet.targetDraw || '5:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-
-        let winningComboStr = '<span class="badge-awaiting">Awaiting Draw</span>';
-        let statusBadge = '<span class="badge-pending">PENDING DRAW</span>';
-
-        if (drawCombo && drawCombo.length === 2) {
-          winningComboStr = `<strong style="color: #fef08a;">[ ${drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ')} ]</strong>`;
-          const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-          if (isWin) {
-            statusBadge = `<span class="badge-win">🎉 WINNER (₱${(bet.potentialWin || bet.betAmount * 40).toLocaleString()})</span>`;
-          } else {
-            statusBadge = `<span class="badge-loss">LOSS</span>`;
-          }
-        }
-
-        let paymentBadge = `<span class="badge-awaiting">PENDING APPROVAL</span>`;
-        if (bet.paymentStatus === 'CONFIRMED') paymentBadge = `<span class="badge-win">CONFIRMED PAID</span>`;
-        else if (bet.paymentStatus === 'REJECTED') paymentBadge = `<span class="badge-rejected">REJECTED</span>`;
-
-        tr.innerHTML = `
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td>${winningComboStr}</td>
-          <td style="font-weight: bold;">₱${bet.betAmount.toLocaleString()}</td>
-          <td>${bet.paymentMethod || 'GCash'}</td>
-          <td><code>${bet.refNo || 'N/A'}</code></td>
-          <td>${paymentBadge}<br>${statusBadge}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="deleteClientBet('${bet.id}')">Cancel</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function deleteClientBet(id) {
-      placedBets = await getStorage('ez2_placedBets', []);
-      const bet = placedBets.find(b => b.id === id);
-      if (!bet) return;
-
-      if (bet.paymentStatus === 'CONFIRMED') {
-        alert("Confirmed bets cannot be cancelled.");
-        return;
-      }
-
-      if (!confirm("Are you sure you want to cancel and delete this bet?")) return;
-
-      placedBets = placedBets.filter(b => b.id !== id);
-      await setStorage('ez2_placedBets', placedBets);
-
-      renderClientBetsTable();
-      renderAdminBetsTable();
-    }
-
-    function openModal(modalId) {
-      const el = document.getElementById(modalId);
-      if (el) el.style.display = 'flex';
-    }
-
-    function closeModal(modalId) {
-      const el = document.getElementById(modalId);
-      if (el) el.style.display = 'none';
-    }
-
-    // Initialize on load
-    window.onload = initApp;
   </script>
 </body>
 </html>
-
