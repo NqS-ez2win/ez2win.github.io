@@ -1056,7 +1056,7 @@ async function getStorage(key, defaultValue) {
 
 
     async function setStorage(key, value) {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('app_storage')
         .upsert({ key: key, value: value });
       if (error) {
