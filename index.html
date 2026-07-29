@@ -1070,13 +1070,14 @@
 }
 
    // 2. Save or update storage in Supabase
-   async function setStorage(key, value) {
+   async function saveStorage(key, value) {
     const { error } = await supabaseClient
         .from('app_storage')
         .upsert({ key: key, value: value }, { onConflict: 'key' });
 
     if (error) {
-        console.error(`Supabase Error:`, error.message);
+        console.error(`Error saving ${key} to Supabase:`, error.message);
+    }
 }
 
     let CREDENTIALS = {
@@ -1201,7 +1202,7 @@
       inputEl.focus();
     }
 
-    sendChatMessage() {
+    async function sendChatMessage() {
       const inputEl = document.getElementById('chatMessageInput');
       const text = inputEl.value.trim();
       if (!text) return;
@@ -1267,7 +1268,7 @@
       }
     }
 
-    renderChatMessages() {
+    async function renderChatMessages() {
       const body = document.getElementById('chatMessagesBody');
       const sidebar = document.getElementById('chatSidebarList');
       const headerSub = document.getElementById('chatHeaderSubtitle');
@@ -1371,7 +1372,7 @@
       updateChatBadge();
     }
 
-    renderChatSidebar() {
+    async function renderChatSidebar() {
       const sidebar = document.getElementById('chatSidebarList');
       if (!sidebar) return;
       sidebar.innerHTML = '';
@@ -1431,7 +1432,7 @@
       });
     }
 
-    updateChatBadge() {
+    async function updateChatBadge() {
       const badge = document.getElementById('chatUnreadBadge');
       if (!badge) return;
 
@@ -1565,7 +1566,7 @@
       totalAmountEl.textContent = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
     }
 
-    initiatePaymentFlow() {
+    async function initiatePaymentFlow() {
       if (betSlip.length === 0) {
         alert("Your bet slip is empty! Please add at least one combination.");
         return;
@@ -1591,7 +1592,7 @@
       openModal('gcashPaymentModal');
     }
 
-    confirmGcashPayment() {
+    async function confirmGcashPayment() {
       const senderNo = document.getElementById('clientGcashSenderNo').value.trim();
       const refNo = document.getElementById('clientGcashRefNo').value.trim();
 
@@ -1649,7 +1650,7 @@
       }
     }
 
-    authenticateStaff() {
+    async function authenticateStaff() {
       const u = document.getElementById('staffUsernameInput').value.trim();
       const p = document.getElementById('staffPasswordInput').value.trim();
 
@@ -1816,7 +1817,7 @@
       document.getElementById(tabId).style.display = 'block';
     }
 
-    registerClientAccount() {
+    async function registerClientAccount() {
       const name = document.getElementById('clientRegNameInput').value.trim();
       const username = document.getElementById('clientRegUserInput').value.trim();
       const pass = document.getElementById('clientRegPassInput').value.trim();
@@ -1874,7 +1875,7 @@
       alert(`🎉 Registration successful! Welcome ${name}.\nYour account is successfully linked to Semi-Admin / Agent: "${refCode}".\nYour personal referral link is ready in your profile.`);
     }
 
-    loginClientAccount() {
+    async function loginClientAccount() {
       const username = document.getElementById('clientLoginUsernameInput').value.trim();
       const pass = document.getElementById('clientLoginPasswordInput').value.trim();
 
@@ -1906,7 +1907,7 @@
       }
     }
 
-    logoutClientAccount() {
+    async function logoutClientAccount() {
       activeClient = null;
       await setStorage('ez2_activeClient', null);
       updateClientAuthUI();
@@ -1914,7 +1915,7 @@
       alert("You have been successfully logged out.");
     }
 
-    updateClientAuthUI() {
+    async function updateClientAuthUI() {
       const userDisplay = document.getElementById('clientHeaderUserDisplay');
       const headerLogoutBtn = document.getElementById('clientHeaderLogoutBtn');
 
