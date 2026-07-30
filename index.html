@@ -1032,24 +1032,28 @@
   </div>
 
   <script>
-    const { createClient } = window.supabase;
+// 1. Get createClient from the global Supabase script object
+const { createClient } = window.supabase;
 
-    const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 2. Initialize your client instance
+const SUPABASE_URL = "https://iiwmghlxxsnxpkgljlml.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r";
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function getStorage(key, defaultValue) {
-        const { data, error } = await supabaseClient
-            .from('app_storage')
-            .select('value')
-            .eq('key', key)
-            .single();
-            
-        if (error || !data) {
-            return defaultValue;
-        }
-        return data.value;
+// 3. Use 'supabaseClient' (or your preferred variable) for your database queries
+async function getStorage(key, defaultValue) {
+    const { data, error } = await supabaseClient
+        .from('app_storage')
+        .select('value')
+        .eq('key', key)
+        .single();
+        
+    if (error || !data) {
+        return defaultValue;
     }
+    return data.value;
+}
+
 
     async function setStorage(key, value) {
       const { error } = await supabaseClient
@@ -1804,20 +1808,16 @@
       const username = document.getElementById('clientRegUserInput').value.trim();
       const pass = document.getElementById('clientRegPassInput').value.trim();
       const confirmPass = document.getElementById('clientRegConfirmPassInput').value.trim();
-      const refCode = document.getElementById('clientRegReferralInput').value.trim() || 'admin';
+      
+      let refCode = document.getElementById('clientRegReferralInput')?.value?.trim() || await getStorage('ez2_pendingRef', null) || 'admin';
 
-      if (!name || !username || !pass || !confirmPass) {
+      if (!name || !username || !pass) {
         alert("Please fill in all registration fields.");
         return;
       }
 
       if (pass !== confirmPass) {
-        alert("Passwords do not match.");
-        return;
-      }
-
-      if (pass.length < 6) {
-        alert("Password must be at least 6 characters long.");
+        alert("Passwords do not match. Please verify.");
         return;
       }
 
@@ -1890,11 +1890,16 @@
     }
 
     async function logoutClientAccount() {
+      if (!confirm("Are you sure you want to log out of your account?")) return;
+
       activeClient = null;
       await setStorage('ez2_activeClient', null);
+
       updateClientAuthUI();
       renderClientBetsTable();
-      alert("You have been successfully logged out.");
+
+      closeModal('authModal');
+      alert("You have logged out successfully.");
     }
 
     async function updateClientAuthUI() {
@@ -2310,56 +2315,336 @@
       tbody.innerHTML = '';
       if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
 
-      let pendingBets = placedBets.filter(b => b.paymentStatus === 'PENDING');
+      let pendingPayments = placedBets.filter(b => b.paymentStatus === 'PENDING');
 
       if (currentRole === 'agent') {
         const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
         const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
         const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
-        pendingBets = pendingBets.filter(b => {
+
+        pendingPayments = pendingPayments.filter(b => {
           const refBy = (b.referredBy || '').toLowerCase().trim();
           return refBy === agentIdentifier || refBy === agentName || refBy === activeAgentIdentity.toLowerCase();
         });
       }
 
-      if (pendingBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 7 : 8}" style="text-align: center; color: var(--text-muted);">No pending payments in queue.</td></tr>`;
+      if (pendingPayments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 7 : 8}" style="text-align: center; color: var(--text-muted);">No pending payments in the queue.</td></tr>`;
         return;
       }
 
-      pendingBets.forEach(bet => {
+      pendingPayments.forEach(bet => {
         const tr = document.createElement('tr');
         const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        
         const actionButtons = currentRole === 'viewer' ? '' : `
-          <button class="btn btn-success btn-sm" onclick="updateBetPaymentStatus('${bet.id}', 'CONFIRMED')">Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="updateBetPaymentStatus('${bet.id}', 'REJECTED')">Reject</button>
+          <td>
+            <button class="btn btn-success btn-sm" onclick="approvePayment('${bet.id}')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectPayment('${bet.id}')">Reject</button>
+          </td>
         `;
 
         tr.innerHTML = `
-          <td>${bet.bettorName}</td>
-          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
+          <td><strong>${bet.bettorName}</strong><br><small style="color: var(--text-muted);">${bet.bettorAccount}</small></td>
+          <td><span class="badge-draw">${bet.paymentMethod}</span></td>
           <td><code>${bet.senderNo}</code></td>
           <td><code>${bet.refNo}</code></td>
-          <td><span class="badge-draw">${bet.targetDraw || '5:00 PM'}</span></td>
+          <td><span class="badge-draw">${bet.targetDraw || '9:00 PM'}</span></td>
           <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td style="color: var(--accent);">₱${bet.betAmount.toLocaleString()}</td>
-          ${currentRole === 'viewer' ? '' : `<td>${actionButtons}</td>`}
+          <td style="color: var(--accent); font-weight: bold;">₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          ${actionButtons}
         `;
         tbody.appendChild(tr);
       });
     }
 
-    async function updateBetPaymentStatus(betId, status) {
+    async function approvePayment(betId) {
       placedBets = await getStorage('ez2_placedBets', []);
       const bet = placedBets.find(b => b.id === betId);
-      if (bet) {
-        bet.paymentStatus = status;
-        await setStorage('ez2_placedBets', placedBets);
-        renderAdminPaymentsQueue();
-        renderAdminBetsTable();
-        renderClientBetsTable();
-        updateAdminNetTotals();
-        updateWinnerTicker();
+      if (!bet) return;
+
+      bet.paymentStatus = 'CONFIRMED';
+      await setStorage('ez2_placedBets', placedBets);
+
+      renderAdminPaymentsQueue();
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      updateAdminNetTotals();
+      updateWinnerTicker();
+      alert(`✅ Payment approved for ${bet.bettorName}! Bet is now confirmed.`);
+    }
+
+    async function rejectPayment(betId) {
+      if (!confirm("Are you sure you want to reject this payment?")) return;
+      placedBets = await getStorage('ez2_placedBets', []);
+      const bet = placedBets.find(b => b.id === betId);
+      if (!bet) return;
+
+      bet.paymentStatus = 'REJECTED';
+      await setStorage('ez2_placedBets', placedBets);
+
+      renderAdminPaymentsQueue();
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      alert(`❌ Payment rejected for ${bet.bettorName}.`);
+    }
+
+    async function renderAdminBetsTable() {
+      placedBets = await getStorage('ez2_placedBets', []);
+      agentsList = await getStorage('ez2_agents', []);
+      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
+
+      const tbody = document.getElementById('adminBetsTableBody');
+      const actionHeader = document.getElementById('betHistoryActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
+
+      let betsList = [...placedBets].reverse();
+
+      if (currentRole === 'agent') {
+        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
+        const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
+
+        betsList = betsList.filter(b => {
+          const refBy = (b.referredBy || '').toLowerCase().trim();
+          return refBy === agentIdentifier || refBy === agentName || refBy === activeAgentIdentity.toLowerCase();
+        });
+      }
+
+      if (betsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 9 : 10}" style="text-align: center; color: var(--text-muted);">No bet history recorded yet.</td></tr>`;
+        return;
+      }
+
+      betsList.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        
+        const targetDraw = bet.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+        let resultStr = '<span style="color: var(--text-muted);">Pending</span>';
+        let statusBadge = '';
+
+        if (bet.paymentStatus === 'CONFIRMED') {
+          statusBadge = `<span class="badge-win">CONFIRMED</span>`;
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusBadge = `<span class="badge-rejected">REJECTED</span>`;
+        } else {
+          statusBadge = `<span class="badge-pending">PENDING</span>`;
+        }
+
+        if (drawCombo && drawCombo.length === 2) {
+          const formattedDrawCombo = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
+          resultStr = `<strong style="color: var(--primary);">${formattedDrawCombo}</strong>`;
+
+          if (bet.paymentStatus === 'CONFIRMED') {
+            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
+            if (isWin) {
+              statusBadge += `<br><span class="badge-win" style="margin-top: 4px; display:inline-block;">🏆 WON ₱${bet.potentialWin.toLocaleString()}</span>`;
+            } else {
+              statusBadge += `<br><span class="badge-loss" style="margin-top: 4px; display:inline-block;">LOSS</span>`;
+            }
+          }
+        }
+
+        let prizeClaimedHtml = bet.prizeStatus === 'CONFIRMED_RECEIVED' ? `<span class="badge-win">✅ RECEIVED</span>` : `<span style="color: var(--text-muted);">---</span>`;
+
+        const deleteAction = currentRole === 'viewer' ? '' : `<td><button class="btn btn-danger btn-sm" onclick="deleteBetRecord('${bet.id}')">Delete</button></td>`;
+
+        tr.innerHTML = `
+          <td><strong>${bet.bettorName}</strong><br><small style="color: var(--text-muted);">${bet.bettorAccount}</small></td>
+          <td><span class="badge-draw">${targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
+          <td>${resultStr}</td>
+          <td style="font-weight: bold;">₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td>${bet.paymentMethod || 'GCash'}</td>
+          <td><code>${bet.refNo || 'N/A'}</code></td>
+          <td>${statusBadge}</td>
+          <td>${prizeClaimedHtml}</td>
+          ${deleteAction}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteBetRecord(id) {
+      if (!confirm("Are you sure you want to delete this bet record?")) return;
+      placedBets = await getStorage('ez2_placedBets', []);
+      placedBets = placedBets.filter(b => b.id !== id);
+      await setStorage('ez2_placedBets', placedBets);
+
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      updateAdminNetTotals();
+    }
+
+    async function clearAllBetsHistory() {
+      if (!confirm("⚠️ Are you sure you want to clear ALL bets history? This cannot be undone!")) return;
+      placedBets = [];
+      await setStorage('ez2_placedBets', []);
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      updateAdminNetTotals();
+      alert("All bets history has been cleared.");
+    }
+
+    async function renderClientBetsTable() {
+      placedBets = await getStorage('ez2_placedBets', []);
+      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
+
+      const tbody = document.getElementById('clientBetsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!activeClient) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please log in to view your placed bets history.</td></tr>`;
+        return;
+      }
+
+      const clientBets = placedBets.filter(b => b.bettorAccount === activeClient.username || b.bettorName === activeClient.name);
+
+      if (clientBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">You have not placed any bets yet.</td></tr>`;
+        return;
+      }
+
+      clientBets.reverse().forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        
+        const targetDraw = bet.targetDraw || '9:00 PM';
+        const drawCombo = winningCombos[targetDraw];
+        let winningComboDisplay = `<span style="color: var(--text-muted);">Awaiting Draw</span>`;
+        let statusHtml = '';
+
+        if (bet.paymentStatus === 'CONFIRMED') {
+          statusHtml = `<span class="badge-win">PAYMENT CONFIRMED</span>`;
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusHtml = `<span class="badge-rejected">PAYMENT REJECTED</span>`;
+        } else {
+          statusHtml = `<span class="badge-awaiting">PENDING VERIFICATION</span>`;
+        }
+
+        if (drawCombo && drawCombo.length === 2) {
+          winningComboDisplay = `<strong style="color: var(--primary);">${drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ')}</strong>`;
+
+          if (bet.paymentStatus === 'CONFIRMED') {
+            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
+            if (isWin) {
+              statusHtml = `<span class="badge-win">🎉 WON ₱${bet.potentialWin.toLocaleString()}</span>`;
+            } else {
+              statusHtml = `<span class="badge-loss">NON-WINNER</span>`;
+            }
+          }
+        }
+
+        tr.innerHTML = `
+          <td><span class="badge-draw">${targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
+          <td>${winningComboDisplay}</td>
+          <td style="font-weight: bold;">₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td>${bet.paymentMethod || 'GCash'}</td>
+          <td><code>${bet.refNo}</code></td>
+          <td>${statusHtml}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="alert('Bet Ref: ${bet.refNo}\\nStatus: ${bet.paymentStatus}')">Details</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveAdminWinningCombination() {
+      const drawName = document.getElementById('adminDrawSelect').value;
+      const n1 = parseInt(document.getElementById('adminNum1').value);
+      const n2 = parseInt(document.getElementById('adminNum2').value);
+
+      if (isNaN(n1) || isNaN(n2) || n1 < 1 || n1 > 31 || n2 < 1 || n2 > 31) {
+        alert("Please enter valid numbers between 1 and 31 for both balls.");
+        return;
+      }
+
+      if (n1 === n2) {
+        alert("EZ2 winning combination numbers must be distinct (Ball 1 cannot equal Ball 2).");
+        return;
+      }
+
+      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
+      winningCombos[drawName] = [Math.min(n1, n2), Math.max(n1, n2)];
+
+      await setStorage('ez2_winningCombos', winningCombos);
+
+      document.getElementById('adminNum1').value = '';
+      document.getElementById('adminNum2').value = '';
+
+      updateWinningDisplay();
+      renderAdminBetsTable();
+      updateWinnerTicker();
+
+      alert(`✅ Successfully published winning combination for ${drawName} Draw: [ ${winningCombos[drawName].map(n => n < 10 ? '0' + n : n).join(' - ')} ]`);
+    }
+
+    async function resetAdminWinningCombination() {
+      const drawName = document.getElementById('adminDrawSelect').value;
+      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
+      winningCombos[drawName] = null;
+
+      await setStorage('ez2_winningCombos', winningCombos);
+
+      updateWinningDisplay();
+      renderAdminBetsTable();
+      updateWinnerTicker();
+
+      alert(`🔄 Reset winning combination for ${drawName} Draw.`);
+    }
+
+    async function updateWinningDisplay() {
+      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
+
+      const disp5 = document.getElementById('clientWinDisplay5PM');
+      const disp9 = document.getElementById('clientWinDisplay9PM');
+      const adminCurrentDisplay = document.getElementById('adminCurrentWinningDisplay');
+
+      if (disp5) {
+        const combo5 = winningCombos['5:00 PM'];
+        if (combo5 && combo5.length === 2) {
+          disp5.innerHTML = `
+            <div class="win-ball">${combo5[0] < 10 ? '0' + combo5[0] : combo5[0]}</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">-</div>
+            <div class="win-ball">${combo5[1] < 10 ? '0' + combo5[1] : combo5[1]}</div>
+          `;
+        } else {
+          disp5.innerHTML = `<div class="win-ball pending">Awaiting 5PM Draw Result</div>`;
+        }
+      }
+
+      if (disp9) {
+        const combo9 = winningCombos['9:00 PM'];
+        if (combo9 && combo9.length === 2) {
+          disp9.innerHTML = `
+            <div class="win-ball">${combo9[0] < 10 ? '0' + combo9[0] : combo9[0]}</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">-</div>
+            <div class="win-ball">${combo9[1] < 10 ? '0' + combo9[1] : combo9[1]}</div>
+          `;
+        } else {
+          disp9.innerHTML = `<div class="win-ball pending">Awaiting 9PM Draw Result</div>`;
+        }
+      }
+
+      if (adminCurrentDisplay) {
+        const c5 = winningCombos['5:00 PM'];
+        const c9 = winningCombos['9:00 PM'];
+        adminCurrentDisplay.innerHTML = `
+          <div style="background: #0f172a; padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; flex: 1;">
+            <div style="font-size: 0.75rem; color: var(--text-muted);">5:00 PM Result</div>
+            <div style="font-weight: bold; color: var(--primary); font-size: 1.1rem; margin-top: 2px;">${c5 ? c5.map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}</div>
+          </div>
+          <div style="background: #0f172a; padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; flex: 1;">
+            <div style="font-size: 0.75rem; color: var(--text-muted);">9:00 PM Result</div>
+            <div style="font-weight: bold; color: var(--primary); font-size: 1.1rem; margin-top: 2px;">${c9 ? c9.map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}</div>
+          </div>
+        `;
       }
     }
 
@@ -2368,37 +2653,37 @@
       const pass = document.getElementById('newAgentPassInput').value.trim() || 'agent123';
 
       if (!name) {
-        alert("Please enter an agent name.");
+        alert("Please enter an Agent Name.");
         return;
       }
 
       agentsList = await getStorage('ez2_agents', []);
-      const username = 'admin_' + name.toLowerCase().replace(/\s+/g, '');
+      const cleanUsername = 'admin_' + name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      const duplicate = agentsList.find(a => a.username === username);
+      const duplicate = agentsList.find(a => a.username.toLowerCase() === cleanUsername);
       if (duplicate) {
         alert("An agent with this name already exists.");
         return;
       }
 
-      const newAgent = {
+      const newAgentObj = {
         id: 'agent-' + Date.now(),
         name: name,
-        username: username,
+        username: cleanUsername,
         password: pass,
         role: 'agent',
-        createdBy: currentRole,
+        createdBy: activeAgentIdentity || 'admin',
         createdAt: new Date().toLocaleDateString()
       };
 
-      agentsList.push(newAgent);
+      agentsList.push(newAgentObj);
       await setStorage('ez2_agents', agentsList);
 
       document.getElementById('newAgentNameInput').value = '';
       document.getElementById('newAgentPassInput').value = '';
 
       renderAdminAgentsTable();
-      alert(`✅ Successfully created Agent: ${name} (${username})`);
+      alert(`✅ Successfully created agent "${name}"!\nUsername: ${cleanUsername}\nPassword: ${pass}`);
     }
 
     async function autoGenerateNextAgent() {
@@ -2408,25 +2693,25 @@
       const username = `admin_subagent${nextNum}`;
       const pass = 'agent123';
 
-      const newAgent = {
+      const newAgentObj = {
         id: 'agent-' + Date.now(),
         name: name,
         username: username,
         password: pass,
         role: 'agent',
-        createdBy: currentRole,
+        createdBy: activeAgentIdentity || 'admin',
         createdAt: new Date().toLocaleDateString()
       };
 
-      agentsList.push(newAgent);
+      agentsList.push(newAgentObj);
       await setStorage('ez2_agents', agentsList);
 
       renderAdminAgentsTable();
-      alert(`⚡ Auto-generated Agent: ${name} (${username})`);
+      alert(`⚡ Auto-created agent "${name}"!\nUsername: ${username}\nPassword: ${pass}`);
     }
 
     async function deleteAgent(id) {
-      if (!confirm("Are you sure you want to delete this agent?")) return;
+      if (!confirm("Are you sure you want to delete this agent account?")) return;
       agentsList = await getStorage('ez2_agents', []);
       agentsList = agentsList.filter(a => a.id !== id);
       await setStorage('ez2_agents', agentsList);
@@ -2440,287 +2725,29 @@
       if (!tbody) return;
 
       tbody.innerHTML = '';
-      if (actionHeader) actionHeader.style.display = (currentRole === 'viewer' || currentRole === 'agent') ? 'none' : '';
+      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
 
       if (agentsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${(currentRole === 'viewer' || currentRole === 'agent') ? 5 : 6}" style="text-align: center; color: var(--text-muted);">No agents registered.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 5 : 6}" style="text-align: center; color: var(--text-muted);">No agent accounts created yet.</td></tr>`;
         return;
       }
 
       agentsList.forEach(agent => {
         const tr = document.createElement('tr');
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.name)}`;
-        const deleteAction = currentRole === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button>` : '';
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.username)}`;
+        
+        const deleteAction = currentRole === 'viewer' ? '' : `<td><button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button></td>`;
 
         tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--agent-purple);">${agent.name}</td>
+          <td style="font-weight: bold; color: var(--agent-purple);">${agent.name}</td>
           <td><code>${agent.username}</code></td>
           <td><code>${agent.password}</code></td>
-          <td><input type="text" readonly value="${refLink}" style="width: 200px; background: #0f172a; border: 1px solid #475569; color: var(--primary); padding: 4px; border-radius: 4px; font-size: 0.75rem;" onclick="this.select()"></td>
-          <td>${agent.createdAt}</td>
-          ${(currentRole === 'viewer' || currentRole === 'agent') ? '' : `<td>${deleteAction}</td>`}
+          <td><input type="text" readonly value="${refLink}" style="background: #0f172a; border: 1px solid #475569; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.78rem; width: 220px;" onclick="this.select()"></td>
+          <td>${agent.createdAt || 'N/A'}</td>
+          ${deleteAction}
         `;
         tbody.appendChild(tr);
       });
-    }
-
-    async function saveAdminWinningCombination() {
-      const draw = document.getElementById('adminDrawSelect').value;
-      const n1 = parseInt(document.getElementById('adminNum1').value);
-      const n2 = parseInt(document.getElementById('adminNum2').value);
-
-      if (isNaN(n1) || isNaN(n2) || n1 < 1 || n1 > 31 || n2 < 1 || n2 > 31) {
-        alert("Please enter valid numbers between 1 and 31 for the winning combination.");
-        return;
-      }
-
-      if (n1 === n2) {
-        alert("Winning numbers must be unique.");
-        return;
-      }
-
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      winningCombos[draw] = [n1, n2].sort((a, b) => a - b);
-      await setStorage('ez2_winningCombos', winningCombos);
-
-      document.getElementById('adminNum1').value = '';
-      document.getElementById('adminNum2').value = '';
-
-      updateWinningDisplay();
-      updateWinnerTicker();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      alert(`✅ Successfully published winning combination for ${draw}!`);
-    }
-
-    async function resetAdminWinningCombination() {
-      const draw = document.getElementById('adminDrawSelect').value;
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      winningCombos[draw] = null;
-      await setStorage('ez2_winningCombos', winningCombos);
-
-      updateWinningDisplay();
-      updateWinnerTicker();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      alert(`Reset winning combination for ${draw}.`);
-    }
-
-    async function updateWinningDisplay() {
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-
-      const clientDisp5 = document.getElementById('clientWinDisplay5PM');
-      const clientDisp9 = document.getElementById('clientWinDisplay9PM');
-      const adminCurrDisplay = document.getElementById('adminCurrentWinningDisplay');
-
-      if (clientDisp5) {
-        const c5 = winningCombos['5:00 PM'];
-        clientDisp5.innerHTML = c5 ? c5.map(n => `<div class="win-ball">${n < 10 ? '0' + n : n}</div>`).join('') : '<div class="win-ball pending">Awaiting Draw</div>';
-      }
-
-      if (clientDisp9) {
-        const c9 = winningCombos['9:00 PM'];
-        clientDisp9.innerHTML = c9 ? c9.map(n => `<div class="win-ball">${n < 10 ? '0' + n : n}</div>`).join('') : '<div class="win-ball pending">Awaiting Draw</div>';
-      }
-
-      if (adminCurrDisplay) {
-        adminCurrDisplay.innerHTML = `
-          <div class="admin-status-chip">
-            <span>5:00 PM Result: <strong>${winningCombos['5:00 PM'] ? winningCombos['5:00 PM'].join(' - ') : 'Not Set'}</strong></span>
-          </div>
-          <div class="admin-status-chip">
-            <span>9:00 PM Result: <strong>${winningCombos['9:00 PM'] ? winningCombos['9:00 PM'].join(' - ') : 'Not Set'}</strong></span>
-          </div>
-        `;
-      }
-    }
-
-    async function renderClientBetsTable() {
-      const tbody = document.getElementById('clientBetsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      if (!activeClient) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please log in to view your placed bets.</td></tr>`;
-        return;
-      }
-
-      placedBets = await getStorage('ez2_placedBets', []);
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-
-      const clientBets = placedBets.filter(b => b.bettorAccount === activeClient.username || b.bettorName === activeClient.name);
-
-      if (clientBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No bets placed yet.</td></tr>`;
-        return;
-      }
-
-      clientBets.forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        
-        const targetDraw = bet.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-
-        let winStatusHtml = '';
-        let winComboStr = '<span class="badge-awaiting">Awaiting Draw</span>';
-
-        if (bet.paymentStatus === 'PENDING') {
-          winStatusHtml = `<span class="badge-pending">⏳ Payment Pending</span>`;
-        } else if (bet.paymentStatus === 'REJECTED') {
-          winStatusHtml = `<span class="badge-rejected">❌ Payment Rejected</span>`;
-        } else {
-          if (drawCombo && drawCombo.length === 2) {
-            winComboStr = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
-            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-            if (isWin) {
-              winStatusHtml = `<span class="badge-win">🎉 WINNER (₱${bet.potentialWin.toLocaleString()})</span>`;
-            } else {
-              winStatusHtml = `<span class="badge-loss">❌ Non-Winner</span>`;
-            }
-          } else {
-            winStatusHtml = `<span class="badge-awaiting">💳 Confirmed / Awaiting Draw</span>`;
-          }
-        }
-
-        tr.innerHTML = `
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td>${winComboStr}</td>
-          <td style="color: var(--accent);">₱${bet.betAmount.toLocaleString()}</td>
-          <td>${bet.paymentMethod || 'GCash'}</td>
-          <td><code>${bet.refNo}</code></td>
-          <td>${winStatusHtml}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="cancelClientBet('${bet.id}')">Cancel</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function cancelClientBet(betId) {
-      placedBets = await getStorage('ez2_placedBets', []);
-      const bet = placedBets.find(b => b.id === betId);
-      if (!bet) return;
-
-      if (bet.paymentStatus === 'CONFIRMED') {
-        alert("Cannot cancel a bet with confirmed payment. Contact support.");
-        return;
-      }
-
-      if (!confirm("Are you sure you want to cancel this bet?")) return;
-
-      placedBets = placedBets.filter(b => b.id !== betId);
-      await setStorage('ez2_placedBets', placedBets);
-
-      renderClientBetsTable();
-      renderAdminBetsTable();
-      renderAdminPaymentsQueue();
-      updateAdminNetTotals();
-    }
-
-    async function renderAdminBetsTable() {
-      placedBets = await getStorage('ez2_placedBets', []);
-      winningCombos = await getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-      agentsList = await getStorage('ez2_agents', []);
-
-      const tbody = document.getElementById('adminBetsTableBody');
-      const actionHeader = document.getElementById('betHistoryActionHeader');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-      if (actionHeader) actionHeader.style.display = currentRole === 'viewer' ? 'none' : '';
-
-      let displayBets = [...placedBets];
-
-      if (currentRole === 'agent') {
-        const currentAgent = agentsList.find(a => a.name.toLowerCase() === activeAgentIdentity.toLowerCase() || a.username.toLowerCase() === activeAgentIdentity.toLowerCase());
-        const agentIdentifier = currentAgent ? currentAgent.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const agentName = currentAgent ? currentAgent.name.toLowerCase() : '';
-
-        displayBets = displayBets.filter(b => {
-          const refBy = (b.referredBy || '').toLowerCase().trim();
-          return refBy === agentIdentifier || refBy === agentName || refBy === activeAgentIdentity.toLowerCase();
-        });
-      }
-
-      if (displayBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${currentRole === 'viewer' ? 9 : 10}" style="text-align: center; color: var(--text-muted);">No bet history found.</td></tr>`;
-        return;
-      }
-
-      displayBets.forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        const targetDraw = bet.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-
-        let winComboStr = '<span class="badge-awaiting">Awaiting</span>';
-        let statusHtml = '';
-        let prizeClaimedHtml = '<span class="badge-pending">N/A</span>';
-
-        if (bet.paymentStatus === 'PENDING') {
-          statusHtml = `<span class="badge-pending">⏳ PENDING PAYMENT</span>`;
-        } else if (bet.paymentStatus === 'REJECTED') {
-          statusHtml = `<span class="badge-rejected">❌ REJECTED</span>`;
-        } else {
-          statusHtml = `<span class="badge-win">✅ CONFIRMED</span>`;
-          if (drawCombo && drawCombo.length === 2) {
-            winComboStr = drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
-            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-            if (isWin) {
-              if (bet.prizeStatus === 'CONFIRMED_RECEIVED') {
-                prizeClaimedHtml = `<span class="badge-win">✅ PRIZE CLAIMED</span>`;
-              } else {
-                prizeClaimedHtml = `<span class="badge-awaiting">🎉 WIN (Unclaimed)</span>`;
-              }
-            } else {
-              prizeClaimedHtml = `<span class="badge-loss">Non-Winner</span>`;
-            }
-          }
-        }
-
-        const deleteAction = currentRole === 'viewer' ? '' : `<button class="btn btn-danger btn-sm" onclick="deleteAdminBet('${bet.id}')">Delete</button>`;
-
-        tr.innerHTML = `
-          <td>${bet.bettorName}</td>
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td>${winComboStr}</td>
-          <td style="color: var(--accent);">₱${bet.betAmount.toLocaleString()}</td>
-          <td>${bet.paymentMethod || 'GCash'}</td>
-          <td><code>${bet.refNo}</code></td>
-          <td>${statusHtml}</td>
-          <td>${prizeClaimedHtml}</td>
-          ${currentRole === 'viewer' ? '' : `<td>${deleteAction}</td>`}
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function deleteAdminBet(id) {
-      if (!confirm("Are you sure you want to delete this bet record?")) return;
-      placedBets = await getStorage('ez2_placedBets', []);
-      placedBets = placedBets.filter(b => b.id !== id);
-      await setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderAdminPaymentsQueue();
-      updateAdminNetTotals();
-      updateWinnerTicker();
-    }
-
-    async function clearAllBetsHistory() {
-      if (currentRole !== 'admin') {
-        alert("Only Super Admin can clear all bets history.");
-        return;
-      }
-      if (!confirm("Are you sure you want to clear ALL bet history? This action cannot be undone.")) return;
-      placedBets = [];
-      await setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderAdminPaymentsQueue();
-      updateAdminNetTotals();
-      updateWinnerTicker();
-      alert("All bets history has been cleared.");
     }
 
     function openModal(modalId) {
@@ -2733,7 +2760,6 @@
 
     function copyReferralLink() {
       const input = document.getElementById('profileReferralLinkInput');
-      if (!input) return;
       input.select();
       input.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(input.value);
