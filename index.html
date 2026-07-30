@@ -1054,29 +1054,45 @@
     }
 
     async function getStorage(key, defaultValue) {
-      try {
-        const localVal = localStorage.getItem(key);
-        if (localVal !== null) {
-          return JSON.parse(localVal);
-        }
-      } catch (e) {}
-
-      const { data, error } = await supabase
-        .from('app_storage')
-        .select('value')
-        .eq('key', key)
-        .maybeSingle();
-        
-      if (error || !data) {
-        return defaultValue;
-      }
+     // Always fetch critical shared records directly from Supabase to prevent multi-device sync issues
+     if (key === 'ez2_placedBets' || key === 'ez2_winningCombos') {
+       const { data, error } = await supabase
+         .from('app_storage')
+         .select('value')
+         .eq('key', key)
+         .maybeSingle();
       
-      try {
-        localStorage.setItem(key, JSON.stringify(data.value));
-      } catch (e) {}
+       if (!error && data && data.value) {
+         try {
+           localStorage.setItem(key, JSON.stringify(data.value));
+         } catch (e) {}
+         return data.value;
+       }
+     }
 
-      return data.value;
-    }
+     try {
+       const localVal = localStorage.getItem(key);
+       if (localVal !== null) {
+         return JSON.parse(localVal);
+       }
+     } catch (e) {}
+
+     const { data, error } = await supabase
+       .from('app_storage')
+       .select('value')
+       .eq('key', key)
+       .maybeSingle();
+    
+     if (error || !data) {
+       return defaultValue;
+     }
+  
+     try {
+       localStorage.setItem(key, JSON.stringify(data.value));
+     } catch (e) {}
+
+     return data.value;
+   }
 
     async function setStorage(key, value) {
       try {
@@ -1094,8 +1110,25 @@
 
     window.getStorage = getStorage;
     window.setStorage = setStorage;
-  </script>
 
+    // 🟢 Insert the realtime listener here:
+    supabase
+       .channel('public:app_storage')
+       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_storage' }, async (payload) => {
+         if (payload.new && payload.new.key) {
+           localStorage.setItem(payload.new.key, JSON.stringify(payload.new.value));
+           if (payload.new.key === 'ez2_placedBets') {
+             placedBets = payload.new.value;
+             if (typeof renderAdminPaymentsQueue === 'function') renderAdminPaymentsQueue();
+             if (typeof renderAdminBetsTable === 'function') renderAdminBetsTable();
+             if (typeof updateAdminNetTotals === 'function') updateAdminNetTotals();
+          }
+        }
+      })
+      .subscribe();
+
+    </script>
+  
   <!-- Application Logic Script -->
   <script>
     let paymentMethods = [
