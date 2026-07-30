@@ -1034,10 +1034,10 @@
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
     // Replace with your actual Supabase URL and Public Anon Key
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const SUPABASE_URL = 'https://iiwmghlxxsnxpkgljlml.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VmBHMGt3DPBxgJcq87FLUA_0geoq9-r';
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
     window.supabaseClient = supabase;
 
     // Check active session on initial load and extract user role using user.app_metadata.role or session.user.app_metadata.role
@@ -1147,7 +1147,7 @@
       const refParam = urlParams.get('ref') || urlParams.get('agent');
       
       if (refParam) {
-        await window.setStorage('ez2_pendingRef', refParam);
+        localStorage.setItem('ez2_pendingRef', refParam);
       }
 
       const pendingRefCode = refParam || await window.getStorage('ez2_pendingRef', null);
@@ -1662,8 +1662,8 @@
     }
 
     async function authenticateStaff() {
-      const email = document.getElementById('staffUsernameInput').value.trim();
-      const password = document.getElementById('staffPasswordInput').value.trim();
+      const email = document.getElementById('staffUsernameInput').value;
+      const password = document.getElementById('staffPasswordInput').value;
 
       if (!email || !password) {
         alert("Please enter both email and password.");
@@ -1678,12 +1678,11 @@
 
       if (error) {
         alert("Authentication Failed: " + error.message);
-        return;
+      } else {
+          location.reload(); // Refresh to apply admin role
       }
-
-      const user = data.user;
-      const session = data.session;
-      
+   }
+            
       // Match user role using user.app_metadata.role or session.user.app_metadata.role
       const role = user?.app_metadata?.role || session?.user?.app_metadata?.role || 'admin';
 
@@ -1693,7 +1692,6 @@
       document.getElementById('staffUsernameInput').value = '';
       document.getElementById('staffPasswordInput').value = '';
       applyRoleUI();
-    }
 
     function applyRoleUI() {
       const clientView = document.getElementById('clientView');
