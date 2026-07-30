@@ -1710,7 +1710,7 @@
       const profileAccountRole = document.getElementById('profileAccountRole');
       const profileStatusVal = document.getElementById('profileStatusVal');
 
-      if (currentRole === 'admin') {
+      if (currentRole === 'admin' || currentRole === 'super_admin') {
         clientView.style.display = 'none';
         adminView.style.display = 'block';
         clientControls.style.display = 'none';
