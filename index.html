@@ -1041,19 +1041,30 @@
     window.supabaseClient = supabase;
 
     // Check active session on initial load and extract user role using user.app_metadata.role or session.user.app_metadata.role
+    
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
+  
       if (session && session.user) {
         const user = session.user;
-        const role = user?.app_metadata?.role || session?.user?.app_metadata?.role || 'admin';
-        window.initialSupabaseRole = role;
+    
+        // Safely extract role from metadata and fallback to 'client'
+        const userRole = user.app_metadata?.role || user.user_metadata?.role || 'client';
+    
+        window.initialSupabaseRole = userRole;
         window.initialSupabaseEmail = user.email;
+        localStorage.setItem('user_role', userRole);
+        localStorage.setItem('user_email', user.email);
+
+        console.log("Logged in as:", user.email, "Role:", userRole);
+      } else {
+        window.initialSupabaseRole = 'client';
       }
     } catch (e) {
       console.error('Error fetching Supabase session:', e);
     }
-
-    async function getStorage(key, defaultValue) {
+  
+     async function getStorage(key, defaultValue) {
      // Always fetch critical shared records directly from Supabase to prevent multi-device sync issues
      if (key === 'ez2_placedBets' || key === 'ez2_winningCombos') {
        const { data, error } = await supabase
@@ -1703,22 +1714,34 @@
         return;
       }
 
-      // Authenticate using Supabase Email Auth
-      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+     // Authenticate using Supabase Email Auth (matching your window.supabaseClient)
+     const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+       email: email,
+       password: password
+     });
 
-      if (error) {
-        alert("Authentication Failed: " + error.message);
-      } else {
-          location.reload(); // Refresh to apply admin role
-      }
+     if (error) {
+       alert("Authentication Failed: " + error.message);
+       return;
+     }
+
+     // Check role directly from the login response
+     const loggedInUser = data.user;
+     const role = loggedInUser.app_metadata?.role || loggedInUser.user_metadata?.role || 'client';
+
+     // Save to localStorage so it works seamlessly across any browser/computer
+     localStorage.setItem('user_role', role);
+     localStorage.setItem('user_email', loggedInUser.email);
+
+     if (role === 'super-admin' || role === 'admin' || role === 'semi-admin') {
+       // Redirect to your admin dashboard page
+       window.location.href = 'admin.html'; 
+     } else {
+       // Redirect regular clients to the betting/client page
+       window.location.href = 'index.html';
+     }
    }
-            
-      // Match user role using user.app_metadata.role or session.user.app_metadata.role
-      const role = user?.app_metadata?.role || session?.user?.app_metadata?.role || 'admin';
-
+           
       currentRole = role;
       activeAgentIdentity = user.email;
       closeModal('staffLoginModal');
