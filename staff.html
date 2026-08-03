@@ -131,6 +131,82 @@
       <div id="subAdminRevenueBreakdownContainer" style="margin-top: 20px;"></div>
     </div>
 
+    <!-- Separated Super Admin Dedicated Card: Detailed Bet History (Unreferred / Direct Clients) -->
+    <div class="card" id="superAdminUnreferredCard" style="display: none; border: 1px solid var(--primary);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <h2 class="card-title" style="margin-bottom: 0; color: var(--primary);">📜 Detailed Bet History (Unreferred / Direct Clients)</h2>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <div style="font-size: 0.95rem; font-weight: bold; color: var(--accent);" id="unreferredTotalRevenueDisplay">Total Revenue: ₱0.00</div>
+          <button class="btn btn-danger btn-sm" onclick="clearAllUnreferredBets()">🗑️ Clear All Unreferred Bets</button>
+        </div>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Direct clients or users registered without any referral code under Super Admin management.</div>
+      
+      <div style="font-size: 0.82rem; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Direct / Unreferred Clients Summary</div>
+      <div class="table-responsive" style="margin-bottom: 16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Client Name</th>
+              <th>Client Username</th>
+              <th>5:00 PM Draw</th>
+              <th>9:00 PM Draw</th>
+              <th>Total Revenue</th>
+            </tr>
+          </thead>
+          <tbody id="unreferredClientsSummaryTableBody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No unreferred or direct clients recorded.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="font-size: 0.82rem; font-weight: bold; color: var(--primary); margin-bottom: 6px; text-transform: uppercase;">📜 Detailed Bet History Records</div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Target Draw</th>
+              <th>Combination</th>
+              <th>Bet Amount</th>
+              <th>Payment Method</th>
+              <th>Status</th>
+              <th>Timestamp / Ref</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="unreferredBetsTableBody">
+            <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No bet history available for unreferred clients.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Registered Clients Directory Card -->
+    <div class="card" id="adminClientsDirectoryCard">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <h2 class="card-title" style="margin-bottom: 0;">👥 Registered Clients Directory</h2>
+        <div style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted);" id="totalClientsCountDisplay">Total Clients: 0</div>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Complete directory of all registered client accounts across the platform and their referral assignments.</div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Client Name</th>
+              <th>Username / Mobile</th>
+              <th>Password</th>
+              <th>Referred By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminClientsDirectoryTableBody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No registered clients found.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Payment Verification Queue -->
     <div class="card" style="border: 1px solid var(--gcash-blue);">
       <h2 class="card-title" style="color: var(--gcash-blue);">💳 Payment Pending Approval Queue</h2>
@@ -181,34 +257,22 @@
       </div>
     </div>
 
-    <!-- Multi-Admin Management (Super Admin) -->
+    <!-- Sub-Admin Accounts Management -->
     <div class="card" id="adminAgentManagementCard">
-      <h2 class="card-title">👥 Multi-Admin Accounts & Referral Hierarchy</h2>
+      <h2 class="card-title">👥 Sub-Admin Accounts & Referral Hierarchy</h2>
       <div class="admin-form" id="agentManagementForm">
         <input type="text" id="newAgentNameInput" class="admin-input" placeholder="Admin Name" style="flex: 1;">
         <input type="text" id="newAgentUserInput" class="admin-input" placeholder="Username" style="flex: 1;">
         <input type="text" id="newAgentPassInput" class="admin-input" placeholder="Password" style="flex: 1;">
-        <select id="newAgentRoleSelect" class="admin-input" style="cursor: pointer; flex: 1;">
-          <option value="admin">Sub-Admin</option>
-          <option value="super_admin">Super Admin</option>
+        <select id="newAgentRoleSelect" class="admin-input" style="cursor: pointer; flex: 1; display: none;">
+          <option value="admin" selected>Sub-Admin</option>
         </select>
-        <button class="btn btn-agent" onclick="createNewAgent()">➕ Create Admin</button>
+        <button class="btn btn-agent" onclick="createNewAgent()">➕ Create Sub-Admin</button>
       </div>
       <div class="table-responsive">
         <table>
           <thead><tr><th>Name</th><th>Username</th><th>Password</th><th>Role</th><th>Referral Link</th><th>Action</th></tr></thead>
           <tbody id="adminAgentsTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Registered Clients Directory -->
-    <div class="card">
-      <h2 class="card-title">👥 Registered Clients Directory</h2>
-      <div class="table-responsive">
-        <table>
-          <thead><tr><th>Client Name</th><th>Username / Mobile</th><th>Referred By</th><th>Registration Date</th><th>Action</th></tr></thead>
-          <tbody id="adminClientsTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -337,14 +401,19 @@
       document.getElementById('viewModeBadge').textContent = currentRole === 'super_admin' ? 'SUPER ADMIN PORTAL' : 'SUB-ADMIN PORTAL';
       document.getElementById('profileCardTitle').textContent = `👤 ${currentRole === 'super_admin' ? 'Super Admin' : 'Sub-Admin'} Profile (${activeAgentIdentity})`;
       document.getElementById('profileAccountRole').textContent = currentRole === 'super_admin' ? 'Super Administrator' : 'Sub-Admin';
-      if (currentRole !== 'super_admin') {
+      
+      const unreferredCard = document.getElementById('superAdminUnreferredCard');
+      if (currentRole === 'super_admin') {
+        if (unreferredCard) unreferredCard.style.display = 'block';
+      } else {
+        if (unreferredCard) unreferredCard.style.display = 'none';
         document.getElementById('adminAgentManagementCard').style.display = 'none';
       }
 
       renderAdminPaymentsQueue();
       renderAdminPaymentMethodsTable();
       renderAdminAgentsTable();
-      renderAdminClientsTable();
+      renderRegisteredClientsDirectory();
       renderCurrentWinningDisplay();
       updateAdminNetTotals();
       renderAdminChatSidebar();
@@ -363,6 +432,180 @@
       document.getElementById('adminNet9PMDisplay').textContent = '₱' + t9.toLocaleString('en-US', { minimumFractionDigits: 2 });
       
       await renderSubAdminRevenueBreakdown();
+      if (currentRole === 'super_admin') {
+        await renderSuperAdminUnreferredCard();
+      }
+    }
+
+    async function deletePlacedBet(id) {
+      if (!confirm("Are you sure you want to delete this bet record?")) return;
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      placedBets = placedBets.filter(b => b.id !== id);
+      await window.setStorage('ez2_placedBets', placedBets);
+      await updateAdminNetTotals();
+      renderAdminPaymentsQueue();
+      alert("Bet record deleted successfully.");
+    }
+
+    async function clearAllUnreferredBets() {
+      if (!confirm("Are you sure you want to delete all unreferred / direct client bet records?")) return;
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', role: 'super_admin' }]);
+
+      let clientMap = {};
+      registeredClients.forEach(c => {
+        const refBy = (c.referredBy || '').trim().toLowerCase();
+        if (c.username) clientMap[c.username.toLowerCase()] = { username: c.username, referredBy: refBy };
+        if (c.name) clientMap[c.name.toLowerCase()] = { username: c.username, referredBy: refBy };
+      });
+
+      let adminUsernames = {};
+      agentsList.filter(a => a.username).forEach(a => {
+        adminUsernames[a.username.toLowerCase()] = true;
+      });
+
+      let remainingBets = [];
+      placedBets.forEach(b => {
+        const bettorKey = (b.bettorName || '').toLowerCase();
+        let cli = clientMap[bettorKey];
+        if (cli) {
+          let refAdmin = cli.referredBy;
+          if (refAdmin && adminUsernames[refAdmin] && refAdmin !== 'superadmin') {
+            remainingBets.push(b);
+          }
+        } else {
+          // Unreferred/direct bet is omitted (deleted)
+        }
+      });
+
+      placedBets = remainingBets;
+      await window.setStorage('ez2_placedBets', placedBets);
+      await updateAdminNetTotals();
+      renderAdminPaymentsQueue();
+      alert("All unreferred / direct client bets have been deleted successfully.");
+    }
+
+    async function renderSuperAdminUnreferredCard() {
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', role: 'super_admin' }]);
+
+      let clientMap = {};
+      registeredClients.forEach(c => {
+        const refBy = (c.referredBy || '').trim().toLowerCase();
+        if (c.username) clientMap[c.username.toLowerCase()] = { name: c.name, username: c.username, referredBy: refBy };
+        if (c.name) clientMap[c.name.toLowerCase()] = { name: c.name, username: c.username, referredBy: refBy };
+      });
+
+      let adminUsernames = {};
+      agentsList.forEach(a => {
+        if (a.username) adminUsernames[a.username.toLowerCase()] = true;
+      });
+
+      let unreferredClientsData = {};
+      registeredClients.forEach(c => {
+        const ref = (c.referredBy || '').trim().toLowerCase();
+        if (!ref || !adminUsernames[ref] || ref === 'superadmin') {
+          unreferredClientsData[c.username.toLowerCase()] = {
+            name: c.name,
+            username: c.username,
+            draw5: 0,
+            draw9: 0,
+            total: 0
+          };
+        }
+      });
+
+      let unreferredBetsList = [];
+      let unReferredGrandTotal = 0;
+
+      placedBets.forEach(b => {
+        const bettorKey = (b.bettorName || '').toLowerCase();
+        let cli = clientMap[bettorKey];
+        const amt = Number(b.betAmount) || 0;
+
+        if (cli) {
+          let refAdmin = cli.referredBy;
+          if (!refAdmin || !adminUsernames[refAdmin] || refAdmin === 'superadmin') {
+            let targetClientKey = cli.username.toLowerCase();
+            if (!unreferredClientsData[targetClientKey]) {
+              unreferredClientsData[targetClientKey] = {
+                name: cli.name,
+                username: cli.username,
+                draw5: 0,
+                draw9: 0,
+                total: 0
+              };
+            }
+            if (b.paymentStatus === 'CONFIRMED') {
+              if (b.targetDraw === '5:00 PM') {
+                unreferredClientsData[targetClientKey].draw5 += amt;
+              } else {
+                unreferredClientsData[targetClientKey].draw9 += amt;
+              }
+              unreferredClientsData[targetClientKey].total += amt;
+              unReferredGrandTotal += amt;
+            }
+            unreferredBetsList.push({
+              ...b,
+              clientName: cli.name,
+              clientUsername: cli.username
+            });
+          }
+        } else {
+          if (b.paymentStatus === 'CONFIRMED') {
+            unReferredGrandTotal += amt;
+          }
+          unreferredBetsList.push({
+            ...b,
+            clientName: b.bettorName || 'Guest/Direct',
+            clientUsername: b.bettorName || 'direct'
+          });
+        }
+      });
+
+      document.getElementById('unreferredTotalRevenueDisplay').textContent = `Total Revenue: ₱${unReferredGrandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+
+      let unrefClientRows = '';
+      Object.keys(unreferredClientsData).forEach(ck => {
+        const cl = unreferredClientsData[ck];
+        unrefClientRows += `
+          <tr>
+            <td>${cl.name}</td>
+            <td><code>${cl.username}</code></td>
+            <td>₱${cl.draw5.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+            <td>₱${cl.draw9.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+            <td style="font-weight:bold; color:var(--accent);">₱${cl.total.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          </tr>
+        `;
+      });
+      if (!unrefClientRows) {
+        unrefClientRows = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No unreferred or direct clients recorded.</td></tr>`;
+      }
+      document.getElementById('unreferredClientsSummaryTableBody').innerHTML = unrefClientRows;
+
+      let unrefBetHistoryRows = '';
+      unreferredBetsList.sort((x, y) => new Date(y.approvedAt || 0) - new Date(x.approvedAt || 0)).forEach(b => {
+        const comboStr = Array.isArray(b.combo) ? b.combo.map(n => n < 10 ? '0' + n : n).join(' - ') : b.combo;
+        const statusColor = b.paymentStatus === 'CONFIRMED' ? 'var(--accent)' : b.paymentStatus === 'REJECTED' ? 'var(--danger)' : 'var(--primary)';
+        unrefBetHistoryRows += `
+          <tr>
+            <td>${b.clientName} (<code style="font-size:0.75rem;">${b.clientUsername}</code>)</td>
+            <td><span class="badge-draw">${b.targetDraw}</span></td>
+            <td><code>${comboStr}</code></td>
+            <td style="font-weight:bold; color:var(--accent);">₱${Number(b.betAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+            <td>${b.paymentMethod}</td>
+            <td><span style="color: ${statusColor}; font-weight:bold; font-size:0.78rem;">${b.paymentStatus}</span></td>
+            <td style="font-size:0.78rem; color:var(--text-muted);">${b.approvedAt || b.id || 'N/A'}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="deletePlacedBet('${b.id}')">Delete</button></td>
+          </tr>
+        `;
+      });
+      if (!unrefBetHistoryRows) {
+        unrefBetHistoryRows = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No bet history available for unreferred clients.</td></tr>`;
+      }
+      document.getElementById('unreferredBetsTableBody').innerHTML = unrefBetHistoryRows;
     }
 
     async function renderSubAdminRevenueBreakdown() {
@@ -378,12 +621,13 @@
       registeredClients = await window.getStorage('ez2_registeredClients', []);
       agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', role: 'super_admin' }]);
 
-      let html = `<h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px; border-top: 1px solid #334155; padding-top: 14px;">📊 Sub-Admin Revenue & Referred Client Bet History (Super Admin View)</h3>`;
+      let html = `<h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px; border-top: 1px solid #334155; padding-top: 14px;">📊 Sub-Admin Referral Revenue & Bet Breakdown</h3>`;
       
       let clientMap = {};
       registeredClients.forEach(c => {
-        if (c.username) clientMap[c.username.toLowerCase()] = { name: c.name, username: c.username, referredBy: c.referredBy || 'superadmin' };
-        if (c.name) clientMap[c.name.toLowerCase()] = { name: c.name, username: c.username, referredBy: c.referredBy || 'superadmin' };
+        const refBy = (c.referredBy || '').trim().toLowerCase();
+        if (c.username) clientMap[c.username.toLowerCase()] = { name: c.name, username: c.username, referredBy: refBy };
+        if (c.name) clientMap[c.name.toLowerCase()] = { name: c.name, username: c.username, referredBy: refBy };
       });
 
       let adminGroups = {};
@@ -400,7 +644,7 @@
       });
 
       registeredClients.forEach(c => {
-        const ref = (c.referredBy || 'superadmin').toLowerCase();
+        const ref = (c.referredBy || '').trim().toLowerCase();
         if (adminGroups[ref]) {
           adminGroups[ref].clients[c.username.toLowerCase()] = {
             name: c.name,
@@ -415,8 +659,10 @@
       placedBets.forEach(b => {
         const bettorKey = (b.bettorName || '').toLowerCase();
         let cli = clientMap[bettorKey];
+        const amt = Number(b.betAmount) || 0;
+
         if (cli) {
-          let refAdmin = (cli.referredBy || '').toLowerCase();
+          let refAdmin = cli.referredBy;
           if (adminGroups[refAdmin]) {
             let targetClientKey = cli.username.toLowerCase();
             if (!adminGroups[refAdmin].clients[targetClientKey]) {
@@ -428,7 +674,6 @@
                 total: 0
               };
             }
-            const amt = Number(b.betAmount) || 0;
             if (b.paymentStatus === 'CONFIRMED') {
               if (b.targetDraw === '5:00 PM') {
                 adminGroups[refAdmin].clients[targetClientKey].draw5 += amt;
@@ -448,8 +693,10 @@
 
       let tablesHtml = '';
       const subAdminKeys = Object.keys(adminGroups);
+
       if (subAdminKeys.length === 0) {
-        tablesHtml = `<div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 10px;">No Sub-Admin accounts registered yet.</div>`;
+        container.innerHTML = html + `<div style="color:var(--text-muted); font-size:0.85rem;">No Sub-Admin accounts created yet.</div>`;
+        return;
       }
 
       subAdminKeys.forEach(admKey => {
@@ -489,12 +736,13 @@
               <td>${b.paymentMethod}</td>
               <td><span style="color: ${statusColor}; font-weight:bold; font-size:0.78rem;">${b.paymentStatus}</span></td>
               <td style="font-size:0.78rem; color:var(--text-muted);">${b.approvedAt || b.id || 'N/A'}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deletePlacedBet('${b.id}')">Delete</button></td>
             </tr>
           `;
         });
 
         if (!betHistoryRows) {
-          betHistoryRows = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No bet history available for referred clients under this Sub-Admin.</td></tr>`;
+          betHistoryRows = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No bet history available for referred clients under this Sub-Admin.</td></tr>`;
         }
 
         tablesHtml += `
@@ -534,6 +782,7 @@
                     <th>Payment Method</th>
                     <th>Status</th>
                     <th>Timestamp / Ref</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -546,6 +795,68 @@
       });
 
       container.innerHTML = html + tablesHtml;
+    }
+
+    async function renderRegisteredClientsDirectory() {
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', role: 'super_admin' }]);
+      const tbody = document.getElementById('adminClientsDirectoryTableBody');
+      const countDisplay = document.getElementById('totalClientsCountDisplay');
+      if (!tbody) return;
+
+      if (countDisplay) countDisplay.textContent = `Total Clients: ${registeredClients.length}`;
+
+      let adminUsernames = {};
+      agentsList.forEach(a => {
+        if (a.username) adminUsernames[a.username.toLowerCase()] = a.name;
+      });
+
+      const currentU = (localStorage.getItem('user_username') || activeUsername || '').toLowerCase();
+      let visibleClients = registeredClients;
+
+      if (currentRole !== 'super_admin') {
+        visibleClients = registeredClients.filter(c => {
+          const ref = (c.referredBy || '').trim().toLowerCase();
+          return ref === currentU;
+        });
+      }
+
+      if (visibleClients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No registered clients found.</td></tr>`;
+        return;
+      }
+
+      let rows = '';
+      visibleClients.forEach(c => {
+        const refByVal = (c.referredBy || '').trim().toLowerCase();
+        let refDisplay = 'Direct / Unreferred';
+        if (refByVal) {
+          refDisplay = adminUsernames[refByVal] ? `${adminUsernames[refByVal]} (${c.referredBy})` : c.referredBy;
+        }
+
+        rows += `
+          <tr>
+            <td style="font-weight:bold; color:var(--primary);">${c.name || 'N/A'}</td>
+            <td><code>${c.username || 'N/A'}</code></td>
+            <td><code>${c.password || 'N/A'}</code></td>
+            <td>${refDisplay}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteRegisteredClient('${c.username}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = rows;
+    }
+
+    async function deleteRegisteredClient(username) {
+      if (!confirm(`Are you sure you want to delete client account: ${username}?`)) return;
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      registeredClients = registeredClients.filter(c => c.username !== username);
+      await window.setStorage('ez2_registeredClients', registeredClients);
+      renderRegisteredClientsDirectory();
+      await updateAdminNetTotals();
+      alert("Client account deleted successfully.");
     }
 
     async function renderAdminPaymentsQueue() {
@@ -714,45 +1025,35 @@
       const tbody = document.getElementById('adminAgentsTableBody');
       if (!tbody) return;
       tbody.innerHTML = '';
-      agentsList.forEach(a => {
+      agentsList.filter(a => a.username.toLowerCase() !== 'superadmin' && a.role !== 'super_admin').forEach(a => {
         const link = `${window.location.origin}/?ref=${encodeURIComponent(a.username)}`;
-        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--primary);">${a.name}</td><td><code>${a.username}</code></td><td><code>${a.password}</code></td><td>${a.role}</td><td><input type="text" readonly value="${link}" style="background:#1e293b; border:1px solid #475569; color:var(--primary); padding:2px 6px; font-size:0.75rem; width:160px;"></td><td>-</td></tr>`;
+        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--primary);">${a.name}</td><td><code>${a.username}</code></td><td><code>${a.password}</code></td><td>${a.role}</td><td><input type="text" readonly value="${link}" style="background:#1e293b; border:1px solid #475569; color:var(--primary); padding:2px 6px; font-size:0.75rem; width:160px;"></td><td><button class="btn btn-danger btn-sm" onclick="deleteAgent('${a.id}')">Delete</button></td></tr>`;
       });
+    }
+
+    async function deleteAgent(id) {
+      if (!confirm("Are you sure you want to delete this Sub-Admin account?")) return;
+      agentsList = await window.getStorage('ez2_agents', []);
+      agentsList = agentsList.filter(a => a.id !== id);
+      await window.setStorage('ez2_agents', agentsList);
+      renderAdminAgentsTable();
+      alert("Sub-Admin deleted successfully.");
     }
 
     async function createNewAgent() {
       const name = document.getElementById('newAgentNameInput').value.trim();
       const username = document.getElementById('newAgentUserInput').value.trim();
       const password = document.getElementById('newAgentPassInput').value.trim();
-      const role = document.getElementById('newAgentRoleSelect').value;
+      const role = 'admin';
       if (!name || !username || !password) { alert("Fill all fields."); return; }
       agentsList = await window.getStorage('ez2_agents', []);
       agentsList.push({ id: 'ag-' + Date.now(), name, username, password, role });
       await window.setStorage('ez2_agents', agentsList);
+      document.getElementById('newAgentNameInput').value = '';
+      document.getElementById('newAgentUserInput').value = '';
+      document.getElementById('newAgentPassInput').value = '';
       renderAdminAgentsTable();
-      alert("Admin account created successfully.");
-    }
-
-    async function renderAdminClientsTable() {
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-      const tbody = document.getElementById('adminClientsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      if (registeredClients.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No registered clients.</td></tr>`;
-        return;
-      }
-      registeredClients.forEach(c => {
-        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--primary);">${c.name}</td><td><code>${c.username}</code></td><td><span class="badge-draw">${c.referredBy || 'superadmin'}</span></td><td>${c.createdAt || 'N/A'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteClientUser('${c.id}')">Delete</button></td></tr>`;
-      });
-    }
-
-    async function deleteClientUser(id) {
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-      registeredClients = registeredClients.filter(c => c.id !== id);
-      await window.setStorage('ez2_registeredClients', registeredClients);
-      renderAdminClientsTable();
-      alert("Client deleted.");
+      alert("Sub-Admin account created successfully.");
     }
 
     async function updateReferredClientPassword() {
@@ -827,4 +1128,4 @@
     function handleAdminChatKey(e) { if (e.key === 'Enter') sendAdminChatMessage(); }
   </script>
 </body>
-</html>
+  </html>
