@@ -403,7 +403,10 @@
         <div class="input-group"><label>Username / Mobile No.</label><input type="text" id="clientRegUserInput" placeholder="e.g. 09171234567"></div>
         <div class="input-group"><label>Unique Password</label><input type="password" id="clientRegPassInput" placeholder="Create unique password"></div>
         <div class="input-group"><label>Confirm Password</label><input type="password" id="clientRegConfirmPassInput" placeholder="Confirm password"></div>
-        <div class="input-group"><label>Referral Code / Admin</label><input type="text" id="clientRegReferralInput" placeholder="e.g. superadmin"></div>
+        <div class="input-group">
+          <label>Referral Code / Admin <span style="font-size: 0.75rem; color: var(--text-muted);">(Leave blank to register directly under Super Admin)</span></label>
+          <input type="text" id="clientRegReferralInput" placeholder="Leave blank for Super Admin">
+        </div>
         <button class="btn btn-success" style="width: 100%; margin-top: 8px; padding: 12px;" onclick="registerClientAccount()">Create Account & Generate Referral Link</button>
       </div>
 
@@ -414,7 +417,7 @@
           <div style="font-size: 1.1rem; font-weight: 700; color: #fff;" id="profileViewName">---</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Username / Mobile No.</div>
           <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);" id="profileViewUsername">---</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Referred By (Admin)</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Referred By / Admin</div>
           <div style="font-size: 0.95rem; font-weight: 700; color: var(--agent-purple); margin-top: 2px;" id="profileViewReferredBy">---</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Your Personal Referral Link</div>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
@@ -688,6 +691,8 @@
       document.getElementById('gcashModalComboCount').textContent = betSlip.length;
       document.getElementById('gcashModalTotalAmount').textContent = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2 });
       paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
+      
+      // If client has no referral or is directly under superadmin, ensure default admin payment details display
       selectPaymentMethod(paymentMethods[0] ? paymentMethods[0].name : 'GCash');
       openModal('gcashPaymentModal');
     }
@@ -700,8 +705,8 @@
       paymentMethods.forEach(pm => {
         container.innerHTML += `<button class="payment-method-btn ${pm.name === name ? 'active-payment' : ''}" onclick="selectPaymentMethod('${pm.name}')">${pm.name}</button>`;
       });
-      document.getElementById('adminPaymentNumberDisplay').textContent = m.number;
-      document.getElementById('paymentCardAccountName').textContent = `Account Name: ${m.accountName}`;
+      document.getElementById('adminPaymentNumberDisplay').textContent = m ? m.number : '0927-7668-297';
+      document.getElementById('paymentCardAccountName').textContent = `Account Name: ${m ? m.accountName : 'EZ2WIN OFFICIAL ADMIN'}`;
     }
 
     async function confirmGcashPayment() {
@@ -832,15 +837,27 @@
       const username = document.getElementById('clientRegUserInput').value.trim();
       const pass = document.getElementById('clientRegPassInput').value.trim();
       const confirm = document.getElementById('clientRegConfirmPassInput').value.trim();
-      const ref = document.getElementById('clientRegReferralInput').value.trim() || 'superadmin';
+      
+      // Check referral input: if empty or whitespace, automatically route to 'superadmin'
+      const refInputVal = document.getElementById('clientRegReferralInput').value.trim();
+      const ref = refInputVal === '' ? 'superadmin' : refInputVal;
 
-      if (!name || !username || !pass) { alert("Please fill in all fields."); return; }
+      if (!name || !username || !pass) { alert("Please fill in all required fields."); return; }
       if (pass !== confirm) { alert("Passwords do not match."); return; }
 
       let clients = await window.getStorage('ez2_registeredClients', []);
       if (clients.find(c => c.username.toLowerCase() === username.toLowerCase())) { alert("Username already registered!"); return; }
 
-      const newCli = { id: 'cli-' + Date.now(), name, username, password: pass, refCode: username, referredBy: ref, createdAt: getPhilippineTimeDate().toLocaleDateString() };
+      const newCli = { 
+        id: 'cli-' + Date.now(), 
+        name, 
+        username, 
+        password: pass, 
+        refCode: username, 
+        referredBy: ref, 
+        createdAt: getPhilippineTimeDate().toLocaleDateString() 
+      };
+      
       clients.push(newCli);
       await window.setStorage('ez2_registeredClients', clients);
 
@@ -848,7 +865,7 @@
       localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
       closeModal('authModal');
       updateClientAuthUI();
-      alert(`🎉 Registration successful! Welcome ${name}.`);
+      alert(`🎉 Registration successful! Welcome ${name}.${ref === 'superadmin' ? ' You are registered directly under Super Admin.' : ''}`);
     }
 
     async function loginClientAccount() {
