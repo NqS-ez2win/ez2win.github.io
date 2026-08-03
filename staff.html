@@ -275,6 +275,7 @@
   <script>
     let currentRole = localStorage.getItem('user_role') || 'client';
     let activeAgentIdentity = localStorage.getItem('user_email') || '';
+    let activeUsername = localStorage.getItem('user_username') || '';
     let placedBets = [];
     let paymentMethods = [];
     let winningCombos = { '5:00 PM': null, '9:00 PM': null };
@@ -302,8 +303,10 @@
       if (found) {
         currentRole = found.role || 'admin';
         activeAgentIdentity = found.name;
+        activeUsername = found.username;
         localStorage.setItem('user_role', currentRole);
         localStorage.setItem('user_email', activeAgentIdentity);
+        localStorage.setItem('user_username', activeUsername);
         document.getElementById('staffLoginModal').style.display = 'none';
         await initAdminDashboard();
         alert(`Successfully logged in as ${currentRole === 'super_admin' ? 'Super Admin' : 'Sub-Admin'}`);
@@ -315,12 +318,17 @@
     function staffLogout() {
       localStorage.removeItem('user_role');
       localStorage.removeItem('user_email');
+      localStorage.removeItem('user_username');
       window.location.href = '/';
     }
 
     async function initAdminDashboard() {
+      currentRole = localStorage.getItem('user_role') || 'client';
+      activeAgentIdentity = localStorage.getItem('user_email') || '';
+      activeUsername = localStorage.getItem('user_username') || '';
+
       placedBets = await window.getStorage('ez2_placedBets', []);
-      paymentMethods = await window.getStorage('ez2_paymentMethods', [{ name: 'GCash', number: '0927-7668-297', accountName: 'EZ2WIN ADMIN' }]);
+      paymentMethods = await window.getStorage('ez2_paymentMethods', [{ id: 'pm-default', name: 'GCash', number: '0927-7668-297', accountName: 'EZ2WIN ADMIN', createdBy: 'superadmin' }]);
       winningCombos = await window.getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
       agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', password: 'password123', role: 'super_admin' }]);
       registeredClients = await window.getStorage('ez2_registeredClients', []);
@@ -354,7 +362,6 @@
       document.getElementById('adminNet5PMDisplay').textContent = '₱' + t5.toLocaleString('en-US', { minimumFractionDigits: 2 });
       document.getElementById('adminNet9PMDisplay').textContent = '₱' + t9.toLocaleString('en-US', { minimumFractionDigits: 2 });
       
-      // Render Sub-Admin Revenue Breakdown visible only to Super Admin
       await renderSubAdminRevenueBreakdown();
     }
 
@@ -371,7 +378,7 @@
       registeredClients = await window.getStorage('ez2_registeredClients', []);
       agentsList = await window.getStorage('ez2_agents', [{ id: 'ag-root', name: 'Super Admin', username: 'superadmin', role: 'super_admin' }]);
 
-      let html = `<h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px; border-top: 1px solid #334155; padding-top: 14px;">📊 Sub-Admin Revenue Computation per Referral Client (Super Admin View)</h3>`;
+      let html = `<h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px; border-top: 1px solid #334155; padding-top: 14px;">📊 Sub-Admin Revenue & Referred Client Bet History (Super Admin View)</h3>`;
       
       let clientMap = {};
       registeredClients.forEach(c => {
@@ -381,13 +388,13 @@
 
       let adminGroups = {};
       agentsList.forEach(a => {
-        // Filter out Super Admin if we only want Sub-Admins, or keep sub-admins grouped
         if (a.role === 'admin' || a.username.toLowerCase() !== 'superadmin') {
           adminGroups[a.username.toLowerCase()] = {
             name: a.name,
             username: a.username,
             role: a.role,
-            clients: {}
+            clients: {},
+            bets: []
           };
         }
       });
@@ -406,7 +413,6 @@
       });
 
       placedBets.forEach(b => {
-        if (b.paymentStatus !== 'CONFIRMED') return;
         const bettorKey = (b.bettorName || '').toLowerCase();
         let cli = clientMap[bettorKey];
         if (cli) {
@@ -423,12 +429,19 @@
               };
             }
             const amt = Number(b.betAmount) || 0;
-            if (b.targetDraw === '5:00 PM') {
-              adminGroups[refAdmin].clients[targetClientKey].draw5 += amt;
-            } else {
-              adminGroups[refAdmin].clients[targetClientKey].draw9 += amt;
+            if (b.paymentStatus === 'CONFIRMED') {
+              if (b.targetDraw === '5:00 PM') {
+                adminGroups[refAdmin].clients[targetClientKey].draw5 += amt;
+              } else {
+                adminGroups[refAdmin].clients[targetClientKey].draw9 += amt;
+              }
+              adminGroups[refAdmin].clients[targetClientKey].total += amt;
             }
-            adminGroups[refAdmin].clients[targetClientKey].total += amt;
+            adminGroups[refAdmin].bets.push({
+              ...b,
+              clientName: cli.name,
+              clientUsername: cli.username
+            });
           }
         }
       });
@@ -442,15 +455,11 @@
       subAdminKeys.forEach(admKey => {
         const adm = adminGroups[admKey];
         const clientKeys = Object.keys(adm.clients);
-        let admTotal5 = 0;
-        let admTotal9 = 0;
         let admGrandTotal = 0;
 
         let clientRows = '';
         clientKeys.forEach(ck => {
           const cl = adm.clients[ck];
-          admTotal5 += cl.draw5;
-          admTotal9 += cl.draw9;
           admGrandTotal += cl.total;
           clientRows += `
             <tr>
@@ -467,13 +476,36 @@
           clientRows = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No referral client bets recorded for this Sub-Admin.</td></tr>`;
         }
 
+        let betHistoryRows = '';
+        adm.bets.sort((x, y) => new Date(y.approvedAt || 0) - new Date(x.approvedAt || 0)).forEach(b => {
+          const comboStr = Array.isArray(b.combo) ? b.combo.map(n => n < 10 ? '0' + n : n).join(' - ') : b.combo;
+          const statusColor = b.paymentStatus === 'CONFIRMED' ? 'var(--accent)' : b.paymentStatus === 'REJECTED' ? 'var(--danger)' : 'var(--primary)';
+          betHistoryRows += `
+            <tr>
+              <td>${b.clientName} (<code style="font-size:0.75rem;">${b.clientUsername}</code>)</td>
+              <td><span class="badge-draw">${b.targetDraw}</span></td>
+              <td><code>${comboStr}</code></td>
+              <td style="font-weight:bold; color:var(--accent);">₱${Number(b.betAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+              <td>${b.paymentMethod}</td>
+              <td><span style="color: ${statusColor}; font-weight:bold; font-size:0.78rem;">${b.paymentStatus}</span></td>
+              <td style="font-size:0.78rem; color:var(--text-muted);">${b.approvedAt || b.id || 'N/A'}</td>
+            </tr>
+          `;
+        });
+
+        if (!betHistoryRows) {
+          betHistoryRows = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No bet history available for referred clients under this Sub-Admin.</td></tr>`;
+        }
+
         tablesHtml += `
-          <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
               <h4 style="color: var(--primary); font-size: 0.95rem;">👤 Sub-Admin: ${adm.name} (<code style="font-size:0.8rem;">${adm.username}</code>)</h4>
-              <div style="font-size: 0.9rem; font-weight: bold; color: var(--accent);">Total Sub-Admin Revenue: ₱${admGrandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+              <div style="font-size: 0.9rem; font-weight: bold; color: var(--accent);">Total Revenue: ₱${admGrandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}</div>
             </div>
-            <div class="table-responsive">
+            
+            <div style="font-size: 0.82rem; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Referred Clients Revenue Summary</div>
+            <div class="table-responsive" style="margin-bottom: 14px;">
               <table>
                 <thead>
                   <tr>
@@ -486,6 +518,26 @@
                 </thead>
                 <tbody>
                   ${clientRows}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="font-size: 0.82rem; font-weight: bold; color: var(--primary); margin-bottom: 6px; text-transform: uppercase;">📜 Detailed Bet History (Referred Clients)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Target Draw</th>
+                    <th>Combination</th>
+                    <th>Bet Amount</th>
+                    <th>Payment Method</th>
+                    <th>Status</th>
+                    <th>Timestamp / Ref</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${betHistoryRows}
                 </tbody>
               </table>
             </div>
@@ -587,12 +639,39 @@
     }
 
     async function renderAdminPaymentMethodsTable() {
-      paymentMethods = await window.getStorage('ez2_paymentMethods', []);
+      paymentMethods = await window.getStorage('ez2_paymentMethods', [{ id: 'pm-default', name: 'GCash', number: '0927-7668-297', accountName: 'EZ2WIN ADMIN', createdBy: 'superadmin' }]);
       const tbody = document.getElementById('adminPaymentMethodsTableBody');
       if (!tbody) return;
       tbody.innerHTML = '';
-      paymentMethods.forEach(m => {
-        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--primary);">${m.name}</td><td><code>${m.number}</code></td><td>${m.accountName}</td><td><button class="btn btn-danger btn-sm" onclick="deletePaymentMethod('${m.id}')">Delete</button></td></tr>`;
+
+      const currentU = (localStorage.getItem('user_username') || activeUsername || '').toLowerCase();
+      let visibleMethods = paymentMethods;
+
+      if (currentRole !== 'super_admin') {
+        visibleMethods = paymentMethods.filter(m => {
+          const creator = (m.createdBy || 'superadmin').toLowerCase();
+          return creator === currentU;
+        });
+      }
+
+      if (visibleMethods.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No payment methods created yet.</td></tr>`;
+        return;
+      }
+
+      visibleMethods.forEach(m => {
+        let creatorInfo = '';
+        if (currentRole === 'super_admin') {
+          creatorInfo = ` <span style="font-size: 0.75rem; color: var(--text-muted);">(${m.createdBy || 'superadmin'})</span>`;
+        }
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-weight:bold; color:var(--primary);">${m.name}${creatorInfo}</td>
+            <td><code>${m.number}</code></td>
+            <td>${m.accountName}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="deletePaymentMethod('${m.id}')">Delete</button></td>
+          </tr>
+        `;
       });
     }
 
@@ -600,12 +679,26 @@
       const name = document.getElementById('newMethodNameInput').value.trim();
       const number = document.getElementById('newMethodNumberInput').value.trim();
       const accountName = document.getElementById('newMethodAccountNameInput').value.trim() || 'EZ2WIN ADMIN';
-      if (!name || !number) { alert("Enter name and number."); return; }
-      paymentMethods = await window.getStorage('ez2_paymentMethods', []);
-      paymentMethods.push({ id: 'pm-' + Date.now(), name, number, accountName });
+      if (!name || !number) { alert("Enter method name and account number."); return; }
+      
+      const currentU = (localStorage.getItem('user_username') || activeUsername || 'superadmin').toLowerCase();
+
+      paymentMethods = await window.getStorage('ez2_paymentMethods', [{ id: 'pm-default', name: 'GCash', number: '0927-7668-297', accountName: 'EZ2WIN ADMIN', createdBy: 'superadmin' }]);
+      paymentMethods.push({ 
+        id: 'pm-' + Date.now(), 
+        name, 
+        number, 
+        accountName, 
+        createdBy: currentU 
+      });
       await window.setStorage('ez2_paymentMethods', paymentMethods);
+      
+      document.getElementById('newMethodNameInput').value = '';
+      document.getElementById('newMethodNumberInput').value = '';
+      document.getElementById('newMethodAccountNameInput').value = '';
+
       renderAdminPaymentMethodsTable();
-      alert("Payment method added.");
+      alert("Payment method added successfully.");
     }
 
     async function deletePaymentMethod(id) {
@@ -613,6 +706,7 @@
       paymentMethods = paymentMethods.filter(m => m.id !== id);
       await window.setStorage('ez2_paymentMethods', paymentMethods);
       renderAdminPaymentMethodsTable();
+      alert("Payment method deleted.");
     }
 
     async function renderAdminAgentsTable() {
@@ -645,7 +739,7 @@
       if (!tbody) return;
       tbody.innerHTML = '';
       if (registeredClients.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No registered clients.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No registered clients.</td></tr>`;
         return;
       }
       registeredClients.forEach(c => {
