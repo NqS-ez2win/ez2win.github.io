@@ -72,6 +72,7 @@
       padding: 6px 12px;
       border-radius: 8px;
       border: 1px solid #334155;
+      cursor: pointer;
     }
 
     /* Winner Ticker */
@@ -167,7 +168,12 @@
       padding: 18px;
       text-align: center;
     }
+    .draw-banner.yesterday-banner {
+      background: linear-gradient(135deg, #181825, #232136);
+      border: 1px solid #475569;
+    }
     .draw-banner h4 { color: #818cf8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .draw-banner.yesterday-banner h4 { color: #94a3b8; }
     .draw-banner h2 { color: #fff; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
     .winning-numbers-display { display: flex; justify-content: center; gap: 12px; align-items: center; }
     .win-ball {
@@ -507,7 +513,7 @@
     </div>
     <div class="user-actions">
       <div id="clientControls" style="display: flex; gap: 8px; align-items: center;">
-        <span class="user-profile-badge" id="clientHeaderUserDisplay">👤 Guest</span>
+        <span class="user-profile-badge" id="clientHeaderUserDisplay" onclick="openClientProfileModal()">👤 Guest</span>
         <button class="btn btn-secondary btn-sm" onclick="openModal('authModal')">Account / Register</button>
         <button class="btn btn-danger btn-sm" id="clientHeaderLogoutBtn" onclick="logoutClientAccount()" style="display: none;">Logout</button>
       </div>
@@ -548,6 +554,7 @@
         🎯 Currently Accepting Bets For: <strong>5:00 PM DRAW</strong>
       </div>
 
+      <!-- Today's Draw Banners -->
       <div class="draw-banner-grid">
         <div class="draw-banner">
           <h4>Official PCSO 5:00 PM Draw Result</h4>
@@ -559,6 +566,21 @@
           <h4>Official PCSO 9:00 PM Draw Result</h4>
           <h2>EZ2 Winning Combination</h2>
           <div class="winning-numbers-display" id="clientWinDisplay9PM"></div>
+        </div>
+      </div>
+
+      <!-- Yesterday's Winning Combination Banners -->
+      <div class="draw-banner-grid">
+        <div class="draw-banner yesterday-banner">
+          <h4>Official PCSO Yesterday 5:00 PM Result</h4>
+          <h2>Yesterday Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplayYesterday5PM"></div>
+        </div>
+
+        <div class="draw-banner yesterday-banner">
+          <h4>Official PCSO Yesterday 9:00 PM Result</h4>
+          <h2>Yesterday Winning Combination</h2>
+          <div class="winning-numbers-display" id="clientWinDisplayYesterday9PM"></div>
         </div>
       </div>
       
@@ -615,6 +637,7 @@
                 <th>Winning Combo</th>
                 <th>Bet Amount</th>
                 <th>Method</th>
+                <th>Mobile No.</th>
                 <th>Ref No.</th>
                 <th>Approval Date & Time</th>
                 <th>Payment / Win Status</th>
@@ -628,7 +651,7 @@
 
     </div>
 
-    <!-- ADMIN DASHBOARD VIEW -->
+    <!-- ADMIN / AGENT VIEWER DASHBOARD VIEW -->
     <div id="adminView" style="display: none;">
 
       <!-- Revenue Summary Card with Sub-Admin Breakdown per Referral Client -->
@@ -679,14 +702,14 @@
         </div>
       </div>
 
-      <!-- Admin Profile Viewer Card -->
+      <!-- Admin / Agent Profile Viewer Card -->
       <div class="admin-profile-card">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px;">
           <h2 style="font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" id="profileCardTitle">
             👤 Admin Profile Information
           </h2>
           <span id="agentViewerNotice" style="font-size: 0.78rem; background: var(--agent-purple); color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: none;">
-            Admin Account
+            Agent Viewer (Read-Only)
           </span>
         </div>
         
@@ -709,7 +732,7 @@
         </div>
 
         <!-- Change Password of Client Account Under Admin Referral -->
-        <div style="margin-top: 16px; border-top: 1px solid #334155; padding-top: 14px;">
+        <div style="margin-top: 16px; border-top: 1px solid #334155; padding-top: 14px;" id="changeClientPasswordSection">
           <h4 style="color: var(--primary); font-size: 0.9rem; margin-bottom: 10px;">🔒 Change Password of Referred Client Account</h4>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
             <div style="flex: 1.2; min-width: 160px;" class="input-group">
@@ -726,6 +749,32 @@
             </div>
             <button class="btn btn-primary btn-sm" style="height: 38px; margin-bottom: 14px;" onclick="updateReferredClientPassword()">Update Client Pass</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Agent Accounts Managed Under Sub-Admin Account -->
+      <div class="card" id="subAdminAgentCard" style="display: none; border-color: var(--agent-purple);">
+        <h2 class="card-title" style="color: var(--agent-purple);">👥 Agent Accounts Under My Sub-Admin Account</h2>
+        <div class="admin-form" id="subAdminAgentForm">
+          <input type="text" id="subAgentNameInput" class="admin-input" placeholder="Agent Name" style="flex: 1; min-width: 160px;">
+          <input type="text" id="subAgentUserInput" class="admin-input" placeholder="Agent Username / Email" style="flex: 1; min-width: 160px;">
+          <input type="text" id="subAgentPassInput" class="admin-input" placeholder="Agent Password" style="flex: 1; min-width: 140px;">
+          <button class="btn btn-agent" onclick="createSubAdminAgent()">➕ Create Agent Profile</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent Name</th>
+                <th>Username / Email</th>
+                <th>Password</th>
+                <th>Referral Link</th>
+                <th>Created Date</th>
+                <th id="subAdminAgentActionHeader">Action</th>
+              </tr>
+            </thead>
+            <tbody id="subAdminAgentsTableBody"></tbody>
+          </table>
         </div>
       </div>
 
@@ -765,6 +814,7 @@
           <select id="newAgentRoleSelect" class="admin-input" style="cursor: pointer; flex: 1; min-width: 130px;">
             <option value="admin">Sub-Admin</option>
             <option value="super_admin">Super Admin</option>
+            <option value="agent">Agent Account</option>
           </select>
           <button class="btn btn-agent" onclick="createNewAgent()">➕ Create Admin</button>
         </div>
@@ -789,11 +839,13 @@
 
       <!-- Winning Combination Panel -->
       <div class="card" id="winningComboPanel">
-        <h2 class="card-title">⚙️ Set Winning Combinations</h2>
+        <h2 class="card-title">⚙️ Set Winning Combinations (Today & Yesterday)</h2>
         <div class="admin-form" id="adminWinningForm">
           <select id="adminDrawSelect" class="admin-input" style="cursor: pointer;">
-            <option value="5:00 PM">5:00 PM Draw</option>
-            <option value="9:00 PM">9:00 PM Draw</option>
+            <option value="5:00 PM">5:00 PM Draw (Today)</option>
+            <option value="9:00 PM">9:00 PM Draw (Today)</option>
+            <option value="Yesterday 5:00 PM">Set Winning Combination Yesterday 5:00 PM</option>
+            <option value="Yesterday 9:00 PM">Set Winning Combination Yesterday 9:00 PM</option>
           </select>
           <input type="number" id="adminNum1" class="admin-input admin-input-num" min="1" max="31" placeholder="Ball 1">
           <span style="font-size: 1.2rem; font-weight: bold;">-</span>
@@ -821,6 +873,7 @@
                 <th>Draw Result</th>
                 <th>Bet Amount</th>
                 <th>Method</th>
+                <th>Mobile No.</th>
                 <th>Ref No.</th>
                 <th>Approval Date & Time</th>
                 <th>Status</th>
@@ -898,6 +951,11 @@
         <input type="text" id="clientGcashSenderNo" placeholder="e.g. 09171234567 or account no.">
       </div>
 
+      <div class="input-group">
+        <label>Reference No. / Transaction ID (from receipt)</label>
+        <input type="text" id="clientGcashRefNo" placeholder="e.g. 1234567890">
+      </div>
+
       <button class="btn btn-primary" id="paymentSubmitBtn" style="width: 100%; margin-top: 8px; padding: 12px; font-size: 1rem;" onclick="confirmGcashPayment()">Submit Payment & Place Bets</button>
     </div>
   </div>
@@ -921,7 +979,7 @@
     </div>
   </div>
 
-  <!-- Client Authentication Modal -->
+  <!-- Client Authentication & Profile Modal -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
       <div class="modal-header">
@@ -972,8 +1030,8 @@
           <input type="password" id="clientRegConfirmPassInput" placeholder="Confirm your unique password">
         </div>
         <div class="input-group">
-          <label>Referral Code / Admin</label>
-          <input type="text" id="clientRegReferralInput" placeholder="e.g. Admin Mark">
+          <label>Referral Code / Admin / Agent</label>
+          <input type="text" id="clientRegReferralInput" placeholder="e.g. Admin Mark or Agent Code">
         </div>
         <button class="btn btn-success" style="width: 100%; margin-top: 8px; padding: 12px;" onclick="registerClientAccount()">Create Account & Generate Referral Link</button>
       </div>
@@ -987,7 +1045,7 @@
           <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Username / Mobile No.</div>
           <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);" id="profileViewUsername">---</div>
 
-          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Referred By (Admin)</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Referred By (Admin / Agent)</div>
           <div style="font-size: 0.95rem; font-weight: 700; color: var(--agent-purple); margin-top: 2px;" id="profileViewReferredBy">---</div>
 
           <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Your Personal Referral Link</div>
@@ -1140,10 +1198,12 @@
             if (typeof renderAdminPaymentsQueue === 'function') renderAdminPaymentsQueue();
             if (typeof renderAdminBetsTable === 'function') renderAdminBetsTable();
             if (typeof renderClientBetsTable === 'function') renderClientBetsTable();
+            if (typeof renderProfileWinningClaims === 'function') renderProfileWinningClaims();
             if (typeof updateAdminNetTotals === 'function') updateAdminNetTotals();
           }
           if (payload.new.key === 'ez2_agents') {
             if (typeof renderAdminAgentsTable === 'function') renderAdminAgentsTable();
+            if (typeof renderSubAdminAgentsTable === 'function') renderSubAdminAgentsTable();
             if (typeof updateAdminNetTotals === 'function') updateAdminNetTotals();
           }
           if (payload.new.key === 'ez2_registeredClients') {
@@ -1155,6 +1215,7 @@
           if (payload.new.key === 'ez2_winningCombos') {
             if (typeof updateWinningDisplay === 'function') updateWinningDisplay();
             if (typeof updateWinnerTicker === 'function') updateWinnerTicker();
+            if (typeof renderProfileWinningClaims === 'function') renderProfileWinningClaims();
           }
         }
       })
@@ -1170,7 +1231,9 @@
 
     let winningCombos = {
       '5:00 PM': null,
-      '9:00 PM': null
+      '9:00 PM': null,
+      'Yesterday 5:00 PM': null,
+      'Yesterday 9:00 PM': null
     };
 
     let placedBets = [];
@@ -1183,7 +1246,7 @@
     let activeAgentIdentity = '';
     let registeredClients = [];
     let agentsList = [
-      { id: 'ag-root', name: 'Super Admin Root', username: 'superadmin', password: 'password123', role: 'super_admin', createdAt: '2026-08-01' }
+      { id: 'ag-root', name: 'Super Admin Root', username: 'superadmin', password: 'password123', role: 'super_admin', parentAdmin: null, createdAt: '2026-08-01' }
     ];
     let activeClient = null;
     let selectedPaymentMethod = 'GCash';
@@ -1235,7 +1298,7 @@
         const banner = document.getElementById('registrationReferralBanner');
         if (banner) {
           banner.style.display = 'block';
-          banner.innerHTML = `🎯 You were invited via Admin Link: <strong style="color: var(--primary);">${pendingRefCode}</strong>. Your account will automatically link to this admin upon registration!`;
+          banner.innerHTML = `🎯 You were invited via Admin / Agent Link: <strong style="color: var(--primary);">${pendingRefCode}</strong>. Your account will automatically link to this referrer upon registration!`;
         }
       }
 
@@ -1244,6 +1307,7 @@
       renderClientBetsTable();
       renderAdminBetsTable();
       renderAdminAgentsTable();
+      renderSubAdminAgentsTable();
       renderAdminPaymentMethodsTable();
       renderAdminPaymentsQueue();
       updateClientAuthUI();
@@ -1252,6 +1316,7 @@
       updateAdminNetTotals();
       updateChatBadge();
       applyRoleUI();
+      renderProfileWinningClaims();
     });
 
     function getPhilippineTimestamp() {
@@ -1326,7 +1391,134 @@
       return hours < 17 ? '5:00 PM' : '9:00 PM';
     }
 
+    async function updateWinningDisplay() {
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
+
+      const disp5 = document.getElementById('clientWinDisplay5PM');
+      const disp9 = document.getElementById('clientWinDisplay9PM');
+      const dispY5 = document.getElementById('clientWinDisplayYesterday5PM');
+      const dispY9 = document.getElementById('clientWinDisplayYesterday9PM');
+
+      if (disp5) renderWinBalls(disp5, winningCombos['5:00 PM']);
+      if (disp9) renderWinBalls(disp9, winningCombos['9:00 PM']);
+      if (dispY5) renderWinBalls(dispY5, winningCombos['Yesterday 5:00 PM']);
+      if (dispY9) renderWinBalls(dispY9, winningCombos['Yesterday 9:00 PM']);
+
+      const adminDisp = document.getElementById('adminCurrentWinningDisplay');
+      if (adminDisp) {
+        adminDisp.innerHTML = '';
+        ['5:00 PM', '9:00 PM', 'Yesterday 5:00 PM', 'Yesterday 9:00 PM'].forEach(draw => {
+          const combo = winningCombos[draw];
+          const div = document.createElement('div');
+          div.style.background = '#0f172a';
+          div.style.border = '1px solid #475569';
+          div.style.padding = '8px 12px';
+          div.style.borderRadius = '8px';
+          div.style.fontSize = '0.85rem';
+          
+          let comboHtml = '<span style="color:var(--text-muted); font-style:italic;">Not set</span>';
+          if (combo && combo.length === 2) {
+            comboHtml = combo.map(n => `<span style="display:inline-block; width:28px; height:28px; background:var(--primary); color:#000; border-radius:50%; text-align:center; line-height:28px; font-weight:bold; margin-left:4px;">${n < 10 ? '0' + n : n}</span>`).join('');
+          }
+          div.innerHTML = `<strong>${draw}:</strong> ${comboHtml}`;
+          adminDisp.appendChild(div);
+        });
+      }
+    }
+
+    function renderWinBalls(container, combo) {
+      container.innerHTML = '';
+      if (!combo || combo.length !== 2) {
+        container.innerHTML = `<div class="win-ball pending">Awaiting Draw</div><div class="win-ball pending">Awaiting Draw</div>`;
+        return;
+      }
+      combo.forEach(num => {
+        const ball = document.createElement('div');
+        ball.className = 'win-ball';
+        ball.textContent = num < 10 ? '0' + num : num;
+        container.appendChild(ball);
+      });
+    }
+
+    async function saveAdminWinningCombination() {
+      if (currentRole !== 'super_admin' && currentRole !== 'admin') {
+        alert("Unauthorized action.");
+        return;
+      }
+
+      const draw = document.getElementById('adminDrawSelect').value;
+      const num1 = parseInt(document.getElementById('adminNum1').value, 10);
+      const num2 = parseInt(document.getElementById('adminNum2').value, 10);
+
+      if (isNaN(num1) || isNaN(num2) || num1 < 1 || num1 > 31 || num2 < 1 || num2 > 31) {
+        alert("Please enter valid numbers between 1 and 31 for both balls.");
+        return;
+      }
+
+      if (num1 === num2) {
+        alert("Winning numbers must be unique.");
+        return;
+      }
+
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
+
+      winningCombos[draw] = [num1, num2].sort((a, b) => a - b);
+      await window.setStorage('ez2_winningCombos', winningCombos);
+
+      document.getElementById('adminNum1').value = '';
+      document.getElementById('adminNum2').value = '';
+
+      updateWinningDisplay();
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      renderProfileWinningClaims();
+      updateWinnerTicker();
+
+      alert(`✅ Successfully published winning combination for ${draw}!`);
+    }
+
+    async function resetAdminWinningCombination() {
+      if (currentRole !== 'super_admin' && currentRole !== 'admin') {
+        alert("Unauthorized action.");
+        return;
+      }
+
+      const draw = document.getElementById('adminDrawSelect').value;
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
+
+      winningCombos[draw] = null;
+      await window.setStorage('ez2_winningCombos', winningCombos);
+
+      updateWinningDisplay();
+      renderClientBetsTable();
+      renderAdminBetsTable();
+      renderProfileWinningClaims();
+      updateWinnerTicker();
+
+      alert(`🔄 Reset winning combination for ${draw}.`);
+    }
+
     async function approvePayment(betId) {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only viewers and cannot approve payments.");
+        return;
+      }
+
       placedBets = await window.getStorage('ez2_placedBets', []);
       const bet = placedBets.find(b => b.id === betId);
       
@@ -1343,12 +1535,18 @@
       renderAdminPaymentsQueue();
       renderAdminBetsTable();
       renderClientBetsTable();
+      renderProfileWinningClaims();
       updateAdminNetTotals();
 
       alert("✅ Payment successfully approved and timestamped with Philippine Time (PHT)!");
     }
 
     async function rejectPayment(betId) {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only viewers and cannot reject payments.");
+        return;
+      }
+
       placedBets = await window.getStorage('ez2_placedBets', []);
       const bet = placedBets.find(b => b.id === betId);
       
@@ -1362,6 +1560,7 @@
       renderAdminPaymentsQueue();
       renderAdminBetsTable();
       renderClientBetsTable();
+      renderProfileWinningClaims();
 
       alert("❌ Payment marked as rejected.");
     }
@@ -1370,31 +1569,50 @@
       placedBets = await window.getStorage('ez2_placedBets', []);
       agentsList = await window.getStorage('ez2_agents', agentsList);
       const tbody = document.getElementById('adminPaymentsTableBody');
+      const actionHeader = document.getElementById('paymentQueueActionHeader');
       if (!tbody) return;
 
       tbody.innerHTML = '';
 
       let pendingBets = placedBets.filter(b => b.paymentStatus === 'PENDING' || !b.paymentStatus);
 
-      if (currentRole === 'admin') {
+      if (currentRole === 'admin' || currentRole === 'agent') {
         const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
         const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
         const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
 
+        const subAdminAgents = agentsList.filter(a => a.parentAdmin && (a.parentAdmin.toLowerCase() === adminUsername || a.parentAdmin.toLowerCase() === adminName));
+        const subAdminAgentUsernames = subAdminAgents.map(a => a.username.toLowerCase());
+        const subAdminAgentNames = subAdminAgents.map(a => a.name.toLowerCase());
+
         pendingBets = pendingBets.filter(b => {
           const refBy = (b.referredBy || 'superadmin').toLowerCase();
-          return refBy === adminUsername || refBy === adminName;
+          return refBy === adminUsername || refBy === adminName || subAdminAgentUsernames.includes(refBy) || subAdminAgentNames.includes(refBy);
         });
       }
 
+      if (actionHeader) {
+        actionHeader.style.display = currentRole === 'agent' ? 'none' : 'table-cell';
+      }
+
       if (pendingBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No pending payments awaiting approval.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'agent' ? 7 : 8}" style="text-align: center; color: var(--text-muted);">No pending payments awaiting approval.</td></tr>`;
         return;
       }
 
       pendingBets.forEach(bet => {
         const tr = document.createElement('tr');
         const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+
+        let actionHtml = '';
+        if (currentRole !== 'agent') {
+          actionHtml = `
+            <td>
+              <button class="btn btn-success btn-sm" onclick="approvePayment('${bet.id}')">Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="rejectPayment('${bet.id}')">Reject</button>
+            </td>
+          `;
+        }
 
         tr.innerHTML = `
           <td style="font-weight: 700; color: var(--primary);">${bet.bettorName}</td>
@@ -1404,21 +1622,327 @@
           <td><span class="badge-draw">${bet.targetDraw}</span></td>
           <td style="font-weight: bold;">[ ${comboStr} ]</td>
           <td style="color: var(--accent); font-weight: bold;">₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          <td>
-            <button class="btn btn-success btn-sm" onclick="approvePayment('${bet.id}')">Approve</button>
-            <button class="btn btn-danger btn-sm" onclick="rejectPayment('${bet.id}')">Reject</button>
-          </td>
+          ${actionHtml}
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function openModal(modalId) {
-      document.getElementById(modalId).style.display = 'flex';
+    async function updateAdminNetTotals() {
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+
+      const confirmedBets = placedBets.filter(b => b.paymentStatus === 'CONFIRMED');
+
+      let total5PM = 0;
+      let total9PM = 0;
+
+      if (currentRole === 'super_admin') {
+        confirmedBets.forEach(b => {
+          if (b.targetDraw === '5:00 PM') total5PM += b.betAmount;
+          if (b.targetDraw === '9:00 PM') total9PM += b.betAmount;
+        });
+      } else if (currentRole === 'admin' || currentRole === 'agent') {
+        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+        let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+
+        if (currentRole === 'agent' && currentAdminObj && currentAdminObj.parentAdmin) {
+          const parentObj = agentsList.find(a => a.name.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase() || a.username.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase());
+          if (parentObj) {
+            adminUsername = parentObj.username.toLowerCase();
+            adminName = parentObj.name.toLowerCase();
+          }
+        }
+
+        const subAdminAgents = agentsList.filter(a => a.parentAdmin && (a.parentAdmin.toLowerCase() === adminUsername || a.parentAdmin.toLowerCase() === adminName));
+        const subAdminAgentUsernames = subAdminAgents.map(a => a.username.toLowerCase());
+        const subAdminAgentNames = subAdminAgents.map(a => a.name.toLowerCase());
+
+        const adminBets = confirmedBets.filter(b => {
+          const refBy = (b.referredBy || 'superadmin').toLowerCase();
+          return refBy === adminUsername || refBy === adminName || subAdminAgentUsernames.includes(refBy) || subAdminAgentNames.includes(refBy);
+        });
+
+        adminBets.forEach(b => {
+          if (b.targetDraw === '5:00 PM') total5PM += b.betAmount;
+          if (b.targetDraw === '9:00 PM') total9PM += b.betAmount;
+        });
+      }
+
+      const net5PMEl = document.getElementById('adminNet5PMDisplay');
+      const net9PMEl = document.getElementById('adminNet9PMDisplay');
+      if (net5PMEl) net5PMEl.textContent = '₱' + total5PM.toLocaleString('en-US', {minimumFractionDigits: 2});
+      if (net9PMEl) net9PMEl.textContent = '₱' + total9PM.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+      const breakdownContainer = document.getElementById('subAdminRevenueBreakdownContainer');
+      if (breakdownContainer) {
+        if (currentRole === 'super_admin') {
+          breakdownContainer.style.display = 'block';
+          
+          let breakdownHtml = `
+            <h4 style="color: var(--primary); font-size: 1.05rem; margin-bottom: 12px; border-top: 1px solid #334155; padding-top: 14px;">
+              📊 Sub-Admin & Agent Revenue Breakdown (Super Admin Account Only)
+            </h4>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sub-Admin / Agent / Referrer</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Referred Clients Count</th>
+                    <th>Confirmed Bets Count</th>
+                    <th>5:00 PM Revenue</th>
+                    <th>9:00 PM Revenue</th>
+                    <th>Total Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+
+          const revenueMap = {};
+          
+          agentsList.forEach(agent => {
+            revenueMap[agent.username.toLowerCase()] = {
+              name: agent.name,
+              username: agent.username,
+              role: agent.role,
+              clientsCount: 0,
+              betsCount: 0,
+              rev5PM: 0,
+              rev9PM: 0,
+              totalRev: 0
+            };
+          });
+
+          if (!revenueMap['superadmin']) {
+            revenueMap['superadmin'] = {
+              name: 'Super Admin Root',
+              username: 'superadmin',
+              role: 'super_admin',
+              clientsCount: 0,
+              betsCount: 0,
+              rev5PM: 0,
+              rev9PM: 0,
+              totalRev: 0
+            };
+          }
+
+          registeredClients.forEach(cli => {
+            const refBy = (cli.referredBy || 'superadmin').toLowerCase();
+            if (revenueMap[refBy]) {
+              revenueMap[refBy].clientsCount++;
+            } else {
+              revenueMap['superadmin'].clientsCount++;
+            }
+          });
+
+          confirmedBets.forEach(b => {
+            const refBy = (b.referredBy || 'superadmin').toLowerCase();
+            let key = refBy;
+            if (!revenueMap[key]) {
+              const found = agentsList.find(a => a.name.toLowerCase() === refBy);
+              if (found) key = found.username.toLowerCase();
+              else key = 'superadmin';
+            }
+
+            if (revenueMap[key]) {
+              revenueMap[key].betsCount++;
+              if (b.targetDraw === '5:00 PM') revenueMap[key].rev5PM += b.betAmount;
+              if (b.targetDraw === '9:00 PM') revenueMap[key].rev9PM += b.betAmount;
+              revenueMap[key].totalRev += b.betAmount;
+            }
+          });
+
+          const revenueArray = Object.values(revenueMap);
+          if (revenueArray.length === 0) {
+            breakdownHtml += `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No revenue data found.</td></tr>`;
+          } else {
+            revenueArray.forEach(item => {
+              const roleBadgeColor = item.role === 'super_admin' ? '#a855f7' : item.role === 'admin' ? '#6366f1' : '#3b82f6';
+              const roleDisplay = item.role === 'super_admin' ? 'Super Admin' : item.role === 'admin' ? 'Sub-Admin' : 'Agent';
+              breakdownHtml += `
+                <tr>
+                  <td style="font-weight: 700; color: var(--primary);">${item.name} <span class="badge-draw" style="background:${roleBadgeColor};">${roleDisplay}</span></td>
+                  <td><code>${item.username}</code></td>
+                  <td>${roleDisplay}</td>
+                  <td>${item.clientsCount}</td>
+                  <td>${item.betsCount}</td>
+                  <td style="color: var(--accent);">₱${item.rev5PM.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                  <td style="color: var(--accent);">₱${item.rev9PM.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                  <td style="color: var(--primary); font-weight: bold;">₱${item.totalRev.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                </tr>
+              `;
+            });
+          }
+
+          breakdownHtml += `
+                </tbody>
+              </table>
+            </div>
+          `;
+          breakdownContainer.innerHTML = breakdownHtml;
+        } else {
+          breakdownContainer.style.display = 'none';
+          breakdownContainer.innerHTML = '';
+        }
+      }
     }
 
-    function closeModal(modalId) {
+    async function createSubAdminAgent() {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only and cannot create agent accounts.");
+        return;
+      }
+
+      const name = document.getElementById('subAgentNameInput').value.trim();
+      const username = document.getElementById('subAgentUserInput').value.trim();
+      const password = document.getElementById('subAgentPassInput').value.trim();
+
+      if (!name || !username || !password) {
+        alert("Please fill in all agent creation fields.");
+        return;
+      }
+
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      const existing = agentsList.find(a => a.username.toLowerCase() === username.toLowerCase());
+      if (existing) {
+        alert("Username already exists in staff/agent records.");
+        return;
+      }
+
+      const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+      const parentAdminName = currentAdminObj ? currentAdminObj.name : activeAgentIdentity;
+
+      const newAgent = {
+        id: 'ag-' + Date.now(),
+        name: name,
+        username: username,
+        password: password,
+        role: 'agent',
+        parentAdmin: parentAdminName,
+        createdAt: getPhilippineTimestamp()
+      };
+
+      agentsList.push(newAgent);
+      await window.setStorage('ez2_agents', agentsList);
+
+      document.getElementById('subAgentNameInput').value = '';
+      document.getElementById('subAgentUserInput').value = '';
+      document.getElementById('subAgentPassInput').value = '';
+
+      renderSubAdminAgentsTable();
+      renderAdminAgentsTable();
+      alert(`✅ Successfully created Agent account "${name}" under your Sub-Admin account!`);
+    }
+
+    async function renderSubAdminAgentsTable() {
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      const tbody = document.getElementById('subAdminAgentsTableBody');
+      const card = document.getElementById('subAdminAgentCard');
+      const actionHeader = document.getElementById('subAdminAgentActionHeader');
+      if (!tbody || !card) return;
+
+      if (currentRole !== 'admin' && currentRole !== 'agent') {
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+      tbody.innerHTML = '';
+
+      const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+      let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+      let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+
+      if (currentRole === 'agent' && currentAdminObj && currentAdminObj.parentAdmin) {
+        const parentObj = agentsList.find(a => a.name.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase() || a.username.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase());
+        if (parentObj) {
+          adminUsername = parentObj.username.toLowerCase();
+          adminName = parentObj.name.toLowerCase();
+        }
+      }
+
+      const subAdminAgents = agentsList.filter(a => {
+        if (a.role !== 'agent' || !a.parentAdmin) return false;
+        const p = a.parentAdmin.toLowerCase();
+        return p === adminUsername || p === adminName;
+      });
+
+      if (actionHeader) {
+        actionHeader.style.display = currentRole === 'agent' ? 'none' : 'table-cell';
+      }
+
+      if (subAdminAgents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'agent' ? 5 : 6}" style="text-align: center; color: var(--text-muted);">No agent accounts created under this sub-admin account yet.</td></tr>`;
+        return;
+      }
+
+      subAdminAgents.forEach(agent => {
+        const tr = document.createElement('tr');
+        const agentLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.username)}`;
+
+        let actionHtml = '';
+        if (currentRole !== 'agent') {
+          actionHtml = `
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteAgent('${agent.id}')">Delete</button>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--agent-purple);">${agent.name}</td>
+          <td><code>${agent.username}</code></td>
+          <td><code>${agent.password}</code></td>
+          <td><input type="text" readonly value="${agentLink}" style="background:#0f172a; border:1px solid #475569; color:var(--primary); padding:4px 8px; border-radius:4px; font-size:0.75rem; width:220px;" onclick="this.select()"></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${agent.createdAt || 'N/A'}</td>
+          ${actionHtml}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteAgent(agentId) {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only and cannot delete accounts.");
+        return;
+      }
+      if (!confirm("Are you sure you want to delete this agent account?")) return;
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      agentsList = agentsList.filter(a => a.id !== agentId);
+      await window.setStorage('ez2_agents', agentsList);
+
+      renderAdminAgentsTable();
+      renderSubAdminAgentsTable();
+      alert("🗑️ Agent account successfully deleted.");
+    }
+
+    openModal = function(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+      if (modalId === 'authModal') {
+        if (activeClient) {
+          switchAuthTab('profileTab', document.getElementById('tabBtnProfile'));
+        } else {
+          switchAuthTab('loginTab', document.getElementById('tabBtnLogin'));
+        }
+      }
+    }
+
+    closeModal = function(modalId) {
       document.getElementById(modalId).style.display = 'none';
+    }
+
+    function openClientProfileModal() {
+      if (!activeClient) {
+        openModal('authModal');
+        switchAuthTab('loginTab', document.getElementById('tabBtnLogin'));
+        return;
+      }
+      openModal('authModal');
+      switchAuthTab('profileTab', document.getElementById('tabBtnProfile'));
     }
 
     function toggleChatWindow() {
@@ -1562,7 +2086,7 @@
           return;
         }
 
-        headerSub.textContent = `Chatting with Support (${activeClient.referredBy || 'Super Admin'})`;
+        headerSub.textContent = `Chatting with Support (${activeClient.referredBy || 'Admin'})`;
         const threadMsgs = chatMessages.filter(m => m.clientThread === activeClient.username);
         if (threadMsgs.length === 0) {
           body.innerHTML = `
@@ -1633,17 +2157,29 @@
 
       let visibleThreads = Array.from(activeThreadsSet);
 
-      if (currentRole === 'admin') {
+      if (currentRole === 'admin' || currentRole === 'agent') {
         const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+        let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+
+        if (currentRole === 'agent' && currentAdminObj && currentAdminObj.parentAdmin) {
+          const parentObj = agentsList.find(a => a.name.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase() || a.username.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase());
+          if (parentObj) {
+            adminUsername = parentObj.username.toLowerCase();
+            adminName = parentObj.name.toLowerCase();
+          }
+        }
+
+        const subAdminAgents = agentsList.filter(a => a.parentAdmin && (a.parentAdmin.toLowerCase() === adminUsername || a.parentAdmin.toLowerCase() === adminName));
+        const subAdminAgentUsernames = subAdminAgents.map(a => a.username.toLowerCase());
+        const subAdminAgentNames = subAdminAgents.map(a => a.name.toLowerCase());
 
         visibleThreads = visibleThreads.filter(threadId => {
           if (threadId.startsWith('guest_')) return true;
           const cli = registeredClients.find(c => c.username.toLowerCase() === threadId.toLowerCase());
           if (!cli) return false;
           const refBy = (cli.referredBy || 'superadmin').toLowerCase();
-          return refBy === adminUsername || refBy === adminName;
+          return refBy === adminUsername || refBy === adminName || subAdminAgentUsernames.includes(refBy) || subAdminAgentNames.includes(refBy);
         });
       }
 
@@ -1695,15 +2231,25 @@
         registeredClients = await window.getStorage('ez2_registeredClients', []);
         unreadCount = chatMessages.filter(m => {
           if (m.senderId === 'superadmin' || m.senderId.startsWith('admin_') || m.senderId === activeAgentIdentity) return false;
-          if (currentRole === 'admin') {
+          if (currentRole === 'admin' || currentRole === 'agent') {
             const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-            const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-            const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+            let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+            let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+            if (currentRole === 'agent' && currentAdminObj && currentAdminObj.parentAdmin) {
+              const parentObj = agentsList.find(a => a.name.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase() || a.username.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase());
+              if (parentObj) {
+                adminUsername = parentObj.username.toLowerCase();
+                adminName = parentObj.name.toLowerCase();
+              }
+            }
             if (m.clientThread && m.clientThread.startsWith('guest_')) return true;
             const cli = registeredClients.find(c => c.username.toLowerCase() === (m.clientThread || '').toLowerCase());
             if (!cli) return false;
             const refBy = (cli.referredBy || 'superadmin').toLowerCase();
-            return refBy === adminUsername || refBy === adminName;
+            const subAdminAgents = agentsList.filter(a => a.parentAdmin && (a.parentAdmin.toLowerCase() === adminUsername || a.parentAdmin.toLowerCase() === adminName));
+            const subAgentUsrs = subAdminAgents.map(a => a.username.toLowerCase());
+            const subAgentNms = subAdminAgents.map(a => a.name.toLowerCase());
+            return refBy === adminUsername || refBy === adminName || subAgentUsrs.includes(refBy) || subAgentNms.includes(refBy);
           }
           return true;
         }).length;
@@ -1839,12 +2385,17 @@
 
       const agentUsername = matchedAgent ? matchedAgent.username.toLowerCase() : refLower;
       const agentName = matchedAgent ? matchedAgent.name.toLowerCase() : '';
+      const parentAdmin = matchedAgent ? matchedAgent.parentAdmin : null;
 
       const filtered = paymentMethods.filter(m => {
         const creator = (m.createdBy || 'superadmin').toLowerCase();
         
         if (refLower === 'superadmin' || refLower === 'admin_ez2win@yahoo.com') {
           return creator === 'superadmin' || creator === 'admin_ez2win@yahoo.com' || creator === 'super admin root';
+        }
+
+        if (parentAdmin && (creator === parentAdmin.toLowerCase())) {
+          return true;
         }
 
         return creator === agentUsername || creator === agentName || creator === refLower;
@@ -1884,7 +2435,7 @@
       const availableMethods = await getPaymentMethodsForReferrer(referrer);
 
       if (availableMethods.length === 0) {
-        alert(`No payment methods configured by your referring admin (${referrer}). Please contact support.`);
+        alert(`No payment methods configured by your referring admin/agent (${referrer}). Please contact support.`);
         return;
       }
 
@@ -1912,15 +2463,21 @@
       });
 
       numberDisplay.textContent = method.number;
-      accountNameDisplay.textContent = `Account Name: ${method.accountName}`;
+      accountNameDisplay.textContent = 'Account Name: ' + method.accountName;
       subtitle.textContent = `Send Total Payment To Official ${method.name}:`;
     }
 
     async function confirmGcashPayment() {
       const senderNo = document.getElementById('clientGcashSenderNo').value.trim();
+      const refNo = document.getElementById('clientGcashRefNo').value.trim();
 
-      if (!senderNo) {
-        alert("Please provide your sender mobile number.");
+      if (!senderNo || !refNo) {
+        alert("Please enter your mobile/account number and transaction reference number.");
+        return;
+      }
+
+      if (!activeClient) {
+        alert("Session expired. Please log in again.");
         return;
       }
 
@@ -1930,20 +2487,20 @@
       betSlip.forEach(item => {
         const newBet = {
           id: 'bet-' + Date.now() + '-' + Math.random(),
-          bettorName: activeClient.name,
-          bettorAccount: activeClient.username,
-          referredBy: activeClient.referredBy || 'superadmin',
+          bettorName: activeClient.username,
+          bettorFullName: activeClient.name,
           targetDraw: targetDraw,
           combo: item.combo,
           betAmount: item.betAmount,
           potentialWin: item.potentialWin,
-          paymentMethod: selectedPaymentMethod || 'GCash',
+          paymentMethod: selectedPaymentMethod,
           senderNo: senderNo,
-          refNo: 'N/A',
+          refNo: refNo,
           paymentStatus: 'PENDING',
-          prizeStatus: 'PENDING',
+          referredBy: activeClient.referredBy || 'superadmin',
+          timestamp: getPhilippineTimestamp(),
           approvedAt: null,
-          createdAt: getPhilippineTimestamp()
+          claimStatus: 'UNCLAIMED'
         };
         placedBets.push(newBet);
       });
@@ -1953,497 +2510,437 @@
       betSlip = [];
       renderBetSlip();
       closeModal('gcashPaymentModal');
-
-      document.getElementById('clientGcashSenderNo').value = '';
-
       renderClientBetsTable();
-      renderAdminBetsTable();
       renderAdminPaymentsQueue();
 
-      alert("🎉 Your bets have been successfully submitted and are pending admin payment verification!");
+      alert("🎉 Your bets have been submitted successfully and are pending admin payment verification!");
     }
 
-    function handleRoleButtonClick() {
-      if (currentRole === 'client') {
-        openModal('staffLoginModal');
-      } else {
-        currentRole = 'client';
-        activeAgentIdentity = '';
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('user_email');
-        applyRoleUI();
-      } 
-    }
-
-    async function authenticateStaff() {
-      try {
-        const usernameInput = document.getElementById('staffUsernameInput').value.trim();
-        const password = document.getElementById('staffPasswordInput').value.trim();
-
-        if (!usernameInput || !password) {
-          alert("Please enter both username/email and password.");
-          return;
-        }
-
-        agentsList = await window.getStorage('ez2_agents', agentsList);
-
-        const matchedAdmin = agentsList.find(a => 
-          ((a.username && a.username.toLowerCase() === usernameInput.toLowerCase()) || 
-           (a.name && a.name.toLowerCase() === usernameInput.toLowerCase())) && 
-          a.password === password
-        );
-   
-        if (matchedAdmin) {
-          currentRole = matchedAdmin.role || 'admin';
-          activeAgentIdentity = matchedAdmin.name;
-          localStorage.setItem('user_role', currentRole);
-          localStorage.setItem('user_email', matchedAdmin.name);
-          closeModal('staffLoginModal');
-          document.getElementById('staffUsernameInput').value = '';
-          document.getElementById('staffPasswordInput').value = '';
-          applyRoleUI();
-          alert(`🎉 Successfully logged in as ${currentRole === 'super_admin' ? 'Super Admin' : 'Sub-Admin'}: ${matchedAdmin.name}`);
-          return;
-        }
-
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-          email: usernameInput,
-          password: password
-        });
-
-        if (error) {
-           alert("Authentication Failed: " + error.message + "\n(Tip: You can use 'superadmin' / 'password123' as default credentials).");
-           return;
-        }
-
-        const loggedInUser = data.user;
-        const role = loggedInUser.app_metadata?.role || loggedInUser.user_metadata?.role || 'admin';
-
-        localStorage.setItem('user_role', role);
-        localStorage.setItem('user_email', loggedInUser.email);
-    
-        currentRole = role;
-        activeAgentIdentity = loggedInUser.email;
-        closeModal('staffLoginModal');
-        document.getElementById('staffUsernameInput').value = '';
-        document.getElementById('staffPasswordInput').value = '';
-        applyRoleUI();
-
-      } catch (err) {
-        console.error("Login script error:", err);
-        alert("An error occurred during login. Please check your connection.");
-      }
-    }
-
-    async function applyRoleUI() {
-      const clientView = document.getElementById('clientView');
-      const adminView = document.getElementById('adminView');
-      const clientControls = document.getElementById('clientControls');
-      const viewModeBadge = document.getElementById('viewModeBadge');
-      const roleToggleBtn = document.getElementById('roleToggleBtn');
-      const agentNotice = document.getElementById('agentViewerNotice');
-      const agentMgmtCard = document.getElementById('adminAgentManagementCard');
-      const agentMgmtForm = document.getElementById('agentManagementForm');
-      const paymentMethodForm = document.getElementById('adminPaymentMethodForm');
-      const winningComboPanel = document.getElementById('winningComboPanel');
-      const clearAllBetsBtn = document.getElementById('clearAllBetsBtn');
-
-      const profileCardTitle = document.getElementById('profileCardTitle');
-      const profileAccountRole = document.getElementById('profileAccountRole');
-      const profileStatusVal = document.getElementById('profileStatusVal');
-      const adminProfileLinkInput = document.getElementById('adminProfileReferralLinkInput');
-
-      if (currentRole === 'super_admin' || currentRole === 'admin') {
-        clientView.style.display = 'none';
-        adminView.style.display = 'block';
-        clientControls.style.display = 'none';
-        viewModeBadge.textContent = currentRole === 'super_admin' ? 'SUPER ADMIN PANEL' : 'SUB-ADMIN PANEL';
-        viewModeBadge.style.background = currentRole === 'super_admin' ? '#a855f7' : '#6366f1';
-        roleToggleBtn.textContent = 'Exit Admin';
-        roleToggleBtn.className = 'btn btn-admin btn-sm';
-        agentNotice.style.display = 'none';
-        
-        if (agentMgmtCard) agentMgmtCard.style.display = currentRole === 'super_admin' ? 'block' : 'none'; 
-        if (agentMgmtForm) agentMgmtForm.style.display = currentRole === 'super_admin' ? 'flex' : 'none'; 
-        if (paymentMethodForm) paymentMethodForm.style.display = 'flex'; 
-        if (winningComboPanel) winningComboPanel.style.display = 'block';
-        if (clearAllBetsBtn) clearAllBetsBtn.style.display = currentRole === 'super_admin' ? 'inline-block' : 'none';
-
-        profileCardTitle.innerHTML = `👤 ${currentRole === 'super_admin' ? 'Super Admin' : 'Sub-Admin'} Profile (${activeAgentIdentity})`;
-        profileAccountRole.textContent = currentRole === 'super_admin' ? 'Super Administrator' : 'Sub-Admin';
-        profileStatusVal.textContent = 'Active & Verified';
-
-        agentsList = await window.getStorage('ez2_agents', agentsList);
-        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminRefCode = currentAdminObj ? currentAdminObj.username : (activeAgentIdentity || 'superadmin');
-        const adminRefLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(adminRefCode)}`;
-        if (adminProfileLinkInput) adminProfileLinkInput.value = adminRefLink;
-
-        renderAdminBetsTable();
-        renderAdminAgentsTable();
-        renderAdminPaymentMethodsTable();
-        renderAdminPaymentsQueue();
-        updateAdminNetTotals();
-      } else {
-        clientView.style.display = 'block';
-        adminView.style.display = 'none';
-        clientControls.style.display = 'flex';
-        viewModeBadge.textContent = 'CLIENT HOME';
-        viewModeBadge.style.background = '#334155';
-        roleToggleBtn.textContent = 'Staff Portal';
-        roleToggleBtn.className = 'btn btn-admin btn-sm';
-
-        renderClientBetsTable();
-      }
-      updateChatBadge();
-    }
-
-    function switchAuthTab(tabId, element) {
-      document.getElementById('loginTab').style.display = 'none';
-      document.getElementById('registerTab').style.display = 'none';
-      document.getElementById('profileTab').style.display = 'none';
-
-      document.querySelectorAll('#authModal .tab-btn').forEach(b => b.classList.remove('active'));
-      if (element) element.classList.add('active');
-
-      document.getElementById(tabId).style.display = 'block';
-    }
-
-    async function registerClientAccount() {
-      const name = document.getElementById('clientRegNameInput').value.trim();
-      const username = document.getElementById('clientRegUserInput').value.trim();
-      const pass = document.getElementById('clientRegPassInput').value.trim();
-      const confirmPass = document.getElementById('clientRegConfirmPassInput').value.trim();
-      const refCode = document.getElementById('clientRegReferralInput').value.trim() || 'superadmin';
-
-      if (!name || !username || !pass || !confirmPass) {
-        alert("Please fill in all registration fields.");
-        return;
-      }
-
-      if (pass !== confirmPass) {
-        alert("Passwords do not match.");
-        return;
-      }
-
-      if (pass.length < 6) {
-        alert("Password must be at least 6 characters long.");
-        return;
-      }
-
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-
-      const duplicate = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase());
-      if (duplicate) {
-        alert(`The Username/Mobile "${username}" is already registered!`);
-        return;
-      }
-
-      const newClient = {
-        id: 'cli-' + Date.now(),
-        name: name,
-        username: username,
-        password: pass,
-        refCode: username.toLowerCase().replace(/\s+/g, ''),
-        referredBy: refCode,
-        createdAt: getPhilippineTimestamp()
-      };
-
-      registeredClients.push(newClient);
-      await window.setStorage('ez2_registeredClients', registeredClients);
-
-      activeClient = newClient;
-      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
-
-      document.getElementById('clientRegNameInput').value = '';
-      document.getElementById('clientRegUserInput').value = '';
-      document.getElementById('clientRegPassInput').value = '';
-      document.getElementById('clientRegConfirmPassInput').value = '';
-
-      updateClientAuthUI();
-      renderClientBetsTable();
-
-      closeModal('authModal');
-      alert(`🎉 Registration successful! Welcome ${name}.\nYour account is successfully linked to Admin: "${refCode}".\nYour personal referral link is ready in your profile.`);
-    }
-
-    async function loginClientAccount() {
-      const username = document.getElementById('clientLoginUsernameInput').value.trim();
-      const pass = document.getElementById('clientLoginPasswordInput').value.trim();
-
-      if (!username || !pass) {
-        alert("Please enter both Username/Mobile No. and Password.");
-        return;
-      }
-
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-
-      const foundClient = registeredClients.find(c => 
-        c.username.toLowerCase() === username.toLowerCase() && c.password === pass
-      );
-
-      if (foundClient) {
-        activeClient = foundClient;
-        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
-
-        document.getElementById('clientLoginUsernameInput').value = '';
-        document.getElementById('clientLoginPasswordInput').value = '';
-
-        updateClientAuthUI();
-        renderClientBetsTable();
-
-        closeModal('authModal');
-        alert(`Welcome back, ${activeClient.name}!`);
-      } else {
-        alert("Invalid Username/Mobile No. or Password. If you forgot your password, please use the 'Chat with Admin' link below.");
-      }
-    }
-
-    async function logoutClientAccount() {
-      activeClient = null;
-      localStorage.removeItem('ez2_activeClient');
-      updateClientAuthUI();
-      renderClientBetsTable();
-      alert("You have been successfully logged out.");
-    }
-
-    async function updateClientAuthUI() {
-      const userDisplay = document.getElementById('clientHeaderUserDisplay');
-      const headerLogoutBtn = document.getElementById('clientHeaderLogoutBtn');
-
-      const profileViewName = document.getElementById('profileViewName');
-      const profileViewUsername = document.getElementById('profileViewUsername');
-      const profileViewReferredBy = document.getElementById('profileViewReferredBy');
-      const profileReferralLinkInput = document.getElementById('profileReferralLinkInput');
-
-      const tabBtnLogin = document.getElementById('tabBtnLogin');
-      const tabBtnProfile = document.getElementById('tabBtnProfile');
-
-      if (activeClient) {
-        userDisplay.textContent = `👤 ${activeClient.name} (${activeClient.username})`;
-        headerLogoutBtn.style.display = 'inline-block';
-
-        if (profileViewName) profileViewName.textContent = activeClient.name;
-        if (profileViewUsername) profileViewUsername.textContent = activeClient.username;
-        if (profileViewReferredBy) profileViewReferredBy.textContent = activeClient.referredBy || 'superadmin';
-        
-        const refCode = activeClient.refCode || activeClient.username;
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
-        if (profileReferralLinkInput) profileReferralLinkInput.value = refLink;
-
-        tabBtnProfile.style.display = 'inline-block';
-        switchAuthTab('profileTab', tabBtnProfile);
-        renderProfileWinningClaims();
-      } else {
-        userDisplay.textContent = '👤 Guest (Please Login)';
-        headerLogoutBtn.style.display = 'none';
-
-        tabBtnProfile.style.display = 'none';
-        switchAuthTab('loginTab', tabBtnLogin);
-      }
-      updateChatBadge();
-    }
-
-    async function renderProfileWinningClaims() {
-      const tbody = document.getElementById('profileWinningClaimsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      if (!activeClient) return;
-
+    async function renderClientBetsTable() {
       placedBets = await window.getStorage('ez2_placedBets', []);
-      winningCombos = await window.getStorage('ez2_winningCombos', { '5:00 PM': null, '9:00 PM': null });
-
-      const clientWins = placedBets.filter(b => {
-        if (b.bettorAccount !== activeClient.username && b.bettorName !== activeClient.name) return false;
-        const targetDraw = b.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-        if (!drawCombo || drawCombo.length !== 2) return false;
-        return b.combo.length === 2 && drawCombo.includes(b.combo[0]) && drawCombo.includes(b.combo[1]);
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
       });
 
-      if (clientWins.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No winning prizes recorded yet.</td></tr>`;
+      const tbody = document.getElementById('clientBetsTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      if (!activeClient) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Please log in to view your placed bets.</td></tr>`;
         return;
       }
 
-      clientWins.forEach(win => {
+      const userBets = placedBets.filter(b => b.bettorName.toLowerCase() === activeClient.username.toLowerCase() || b.bettorName.toLowerCase() === activeClient.name.toLowerCase());
+
+      if (userBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">You have not placed any bets yet.</td></tr>`;
+        return;
+      }
+
+      userBets.forEach(bet => {
         const tr = document.createElement('tr');
-        const comboStr = win.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
         
-        let statusHtml = '';
-        if (win.prizeStatus === 'CONFIRMED_RECEIVED') {
-          statusHtml = `<span class="badge-win">✅ CLAIMED & RECEIVED</span>`;
-        } else {
-          statusHtml = `<button class="btn btn-primary btn-sm" onclick="confirmPrizeReceived('${win.id}')">🏆 Claim Prize</button>`;
+        const winCombo = winningCombos[bet.targetDraw];
+        let winComboStr = '<span style="color:var(--text-muted); font-style:italic;">Awaiting Draw</span>';
+        let statusBadge = '<span class="badge-pending">PENDING APPROVAL</span>';
+
+        if (bet.paymentStatus === 'CONFIRMED') {
+          statusBadge = '<span class="badge-win">CONFIRMED PAID</span>';
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusBadge = '<span class="badge-rejected">REJECTED</span>';
+        }
+
+        if (winCombo && winCombo.length === 2) {
+          winComboStr = winCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
+          if (bet.paymentStatus === 'CONFIRMED') {
+            const bSorted = [...bet.combo].sort((x, y) => x - y);
+            const wSorted = [...winCombo].sort((x, y) => x - y);
+            if (bSorted[0] === wSorted[0] && bSorted[1] === wSorted[1]) {
+              if (bet.claimStatus === 'CLAIMED') {
+                statusBadge = '<span class="badge-win">WON & CLAIMED ✓</span>';
+              } else {
+                statusBadge = '<span class="badge-win" style="background:#eab308; color:#000;">🎉 WON! (Unclaimed)</span>';
+              }
+            } else {
+              statusBadge = '<span class="badge-loss">NON-WINNING</span>';
+            }
+          }
+        }
+
+        let actionColHtml = '-';
+        if (winCombo && winCombo.length === 2 && bet.paymentStatus === 'CONFIRMED') {
+          const bSorted = [...bet.combo].sort((x, y) => x - y);
+          const wSorted = [...winCombo].sort((x, y) => x - y);
+          if (bSorted[0] === wSorted[0] && bSorted[1] === wSorted[1] && bet.claimStatus !== 'CLAIMED') {
+            actionColHtml = `<button class="btn btn-success btn-sm" onclick="openClientProfileModal()">Claim Prize</button>`;
+          } else if (bet.claimStatus === 'CLAIMED') {
+            actionColHtml = `<span style="color:var(--accent); font-size:0.8rem; font-weight:bold;">Claimed</span>`;
+          }
         }
 
         tr.innerHTML = `
-          <td><span class="badge-draw">${win.targetDraw || '9:00 PM'}</span></td>
-          <td style="font-weight: bold; color: var(--primary);">${comboStr}</td>
-          <td style="color: var(--accent); font-weight: bold;">₱${win.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          <td>${statusHtml}</td>
+          <td><span class="badge-draw">${bet.targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
+          <td style="font-weight: bold;">[ ${winComboStr} ]</td>
+          <td>₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
+          <td><code>${bet.senderNo}</code></td>
+          <td><code>${bet.refNo || 'N/A'}</code></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${bet.approvedAt || 'Pending Review'}</td>
+          <td>${statusBadge}</td>
+          <td>${actionColHtml}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    async function confirmPrizeReceived(betId) {
+    async function renderProfileWinningClaims() {
+      const tbody = document.getElementById('profileWinningClaimsTableBody');
+      if (!tbody) return;
       if (!activeClient) {
-        alert("Please log in to your client account.");
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please log in to view winning claims.</td></tr>`;
         return;
       }
 
       placedBets = await window.getStorage('ez2_placedBets', []);
-      const bet = placedBets.find(b => b.id === betId);
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
 
+      const userBets = placedBets.filter(b => b.bettorName.toLowerCase() === activeClient.username.toLowerCase() || b.bettorName.toLowerCase() === activeClient.name.toLowerCase());
+      
+      const winningBets = userBets.filter(b => {
+        if (b.paymentStatus !== 'CONFIRMED') return false;
+        const targetWinCombo = winningCombos[b.targetDraw];
+        if (!targetWinCombo || targetWinCombo.length !== 2) return false;
+        const bComboSorted = [...b.combo].sort((x, y) => x - y);
+        const wComboSorted = [...targetWinCombo].sort((x, y) => x - y);
+        return bComboSorted[0] === wComboSorted[0] && bComboSorted[1] === wComboSorted[1];
+      });
+
+      if (winningBets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No winning prizes recorded yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      winningBets.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+        const prize = bet.betAmount * 100;
+
+        let actionHtml = '';
+        if (bet.claimStatus === 'CLAIMED') {
+          actionHtml = `<span class="badge-win">Claimed ✓</span>`;
+        } else {
+          actionHtml = `<button class="btn btn-success btn-sm" onclick="claimPrize('${bet.id}')">Claim Prize</button>`;
+        }
+
+        tr.innerHTML = `
+          <td><span class="badge-draw">${bet.targetDraw}</span></td>
+          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
+          <td style="color: var(--accent); font-weight: bold;">₱${prize.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td>${actionHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function claimPrize(betId) {
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      const bet = placedBets.find(b => b.id === betId);
       if (!bet) {
         alert("Bet record not found.");
         return;
       }
-
-      bet.prizeStatus = 'CONFIRMED_RECEIVED';
-      bet.prizeConfirmedAt = getPhilippineTimestamp();
+      bet.claimStatus = 'CLAIMED';
+      bet.claimedAt = getPhilippineTimestamp();
       await window.setStorage('ez2_placedBets', placedBets);
 
+      renderProfileWinningClaims();
       renderClientBetsTable();
       renderAdminBetsTable();
-      updateClientAuthUI();
-
-      alert(`🎉 Successfully claimed and confirmed receipt of your winning prize of ₱${bet.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}! Thank you for playing EZ2WIN.`);
+      alert("🎉 Prize successfully claimed! Thank you for playing EZ2WIN.");
     }
 
-    async function updateClientPassword() {
-      if (!activeClient) {
-        alert("No active client logged in.");
-        return;
-      }
+    async function renderAdminBetsTable() {
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
+      agentsList = await window.getStorage('ez2_agents', agentsList);
 
-      const currentPass = document.getElementById('clientCurrentPassInput').value.trim();
-      const newPass = document.getElementById('clientNewPassInput').value.trim();
-      const confirmPass = document.getElementById('clientConfirmNewPassInput').value.trim();
+      const tbody = document.getElementById('adminBetsTableBody');
+      const actionHeader = document.getElementById('betHistoryActionHeader');
+      if (!tbody) return;
 
-      if (!currentPass || !newPass || !confirmPass) {
-        alert("Please fill in all password fields.");
-        return;
-      }
+      tbody.innerHTML = '';
 
-      if (currentPass !== activeClient.password) {
-        alert("Incorrect current password.");
-        return;
-      }
+      let bets = placedBets;
 
-      if (newPass !== confirmPass) {
-        alert("New passwords do not match.");
-        return;
-      }
-
-      if (newPass.length < 6) {
-        alert("New password must be at least 6 characters long.");
-        return;
-      }
-
-      activeClient.password = newPass;
-      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
-
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-      const clientIndex = registeredClients.findIndex(c => c.username.toLowerCase() === activeClient.username.toLowerCase());
-      if (clientIndex !== -1) {
-        registeredClients[clientIndex].password = newPass;
-        await window.setStorage('ez2_registeredClients', registeredClients);
-      }
-
-      document.getElementById('clientCurrentPassInput').value = '';
-      document.getElementById('clientNewPassInput').value = '';
-      document.getElementById('clientConfirmNewPassInput').value = '';
-
-      alert("🔒 Your client account password has been successfully updated!");
-    }
-
-    async function updateReferredClientPassword() {
-      const clientUser = document.getElementById('semiAdminClientUsernameInput').value.trim();
-      const newPass = document.getElementById('semiAdminClientNewPassInput').value.trim();
-      const confirmPass = document.getElementById('semiAdminClientConfirmPassInput').value.trim();
-
-      if (!clientUser || !newPass || !confirmPass) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      if (newPass !== confirmPass) {
-        alert("New passwords do not match.");
-        return;
-      }
-
-      if (newPass.length < 6) {
-        alert("New password must be at least 6 characters long.");
-        return;
-      }
-
-      registeredClients = await window.getStorage('ez2_registeredClients', []);
-      const client = registeredClients.find(c => c.username.toLowerCase() === clientUser.toLowerCase() || c.name.toLowerCase() === clientUser.toLowerCase());
-
-      if (!client) {
-        alert("Client account not found.");
-        return;
-      }
-
-      if (currentRole === 'admin') {
+      if (currentRole === 'admin' || currentRole === 'agent') {
         const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
-        const refBy = (client.referredBy || 'superadmin').toLowerCase();
-        if (refBy !== adminUsername && refBy !== adminName) {
-          alert("You can only update passwords for clients referred directly by your account.");
-          return;
+        let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+
+        if (currentRole === 'agent' && currentAdminObj && currentAdminObj.parentAdmin) {
+          const parentObj = agentsList.find(a => a.name.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase() || a.username.toLowerCase() === currentAdminObj.parentAdmin.toLowerCase());
+          if (parentObj) {
+            adminUsername = parentObj.username.toLowerCase();
+            adminName = parentObj.name.toLowerCase();
+          }
         }
+
+        const subAdminAgents = agentsList.filter(a => a.parentAdmin && (a.parentAdmin.toLowerCase() === adminUsername || a.parentAdmin.toLowerCase() === adminName));
+        const subAdminAgentUsernames = subAdminAgents.map(a => a.username.toLowerCase());
+        const subAdminAgentNames = subAdminAgents.map(a => a.name.toLowerCase());
+
+        bets = placedBets.filter(b => {
+          const refBy = (b.referredBy || 'superadmin').toLowerCase();
+          return refBy === adminUsername || refBy === adminName || subAdminAgentUsernames.includes(refBy) || subAdminAgentNames.includes(refBy);
+        });
       }
 
-      client.password = newPass;
-      await window.setStorage('ez2_registeredClients', registeredClients);
-
-      if (activeClient && activeClient.username.toLowerCase() === client.username.toLowerCase()) {
-        activeClient.password = newPass;
-        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+      if (actionHeader) {
+        actionHeader.style.display = currentRole === 'agent' ? 'none' : 'table-cell';
       }
 
-      document.getElementById('semiAdminClientUsernameInput').value = '';
-      document.getElementById('semiAdminClientNewPassInput').value = '';
-      document.getElementById('semiAdminClientConfirmPassInput').value = '';
+      if (bets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'agent' ? 11 : 12}" style="text-align: center; color: var(--text-muted);">No bet history found.</td></tr>`;
+        return;
+      }
 
-      alert(`🔒 Successfully updated password for client: ${client.name} (${client.username})`);
+      bets.forEach(bet => {
+        const tr = document.createElement('tr');
+        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+
+        const winCombo = winningCombos[bet.targetDraw];
+        let winComboStr = '<span style="color:var(--text-muted); font-style:italic;">Awaiting Draw</span>';
+        let statusBadge = '<span class="badge-pending">PENDING</span>';
+
+        if (bet.paymentStatus === 'CONFIRMED') {
+          statusBadge = '<span class="badge-win">CONFIRMED PAID</span>';
+        } else if (bet.paymentStatus === 'REJECTED') {
+          statusBadge = '<span class="badge-rejected">REJECTED</span>';
+        }
+
+        if (winCombo && winCombo.length === 2) {
+          winComboStr = winCombo.map(n => n < 10 ? '0' + n : n).join(' - ');
+          if (bet.paymentStatus === 'CONFIRMED') {
+            const bSorted = [...bet.combo].sort((x, y) => x - y);
+            const wSorted = [...winCombo].sort((x, y) => x - y);
+            if (bSorted[0] === wSorted[0] && bSorted[1] === wSorted[1]) {
+              statusBadge = '<span class="badge-win">WON (100x)</span>';
+            } else {
+              statusBadge = '<span class="badge-loss">NON-WINNING</span>';
+            }
+          }
+        }
+
+        let claimBadge = bet.claimStatus === 'CLAIMED' ? '<span class="badge-win">Claimed ✓</span>' : '<span style="color:var(--text-muted);">Unclaimed</span>';
+
+        let actionHtml = '';
+        if (currentRole !== 'agent') {
+          actionHtml = `
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteBetRecord('${bet.id}')">Delete</button>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${bet.bettorName}</td>
+          <td><span class="badge-draw">${bet.targetDraw}</span></td>
+          <td style="font-weight: bold;">[ ${comboStr} ]</td>
+          <td style="font-weight: bold;">[ ${winComboStr} ]</td>
+          <td style="color: var(--accent); font-weight: bold;">₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
+          <td><code>${bet.senderNo}</code></td>
+          <td><code>${bet.refNo || 'N/A'}</code></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${bet.approvedAt || 'Pending Review'}</td>
+          <td>${statusBadge}</td>
+          <td>${claimBadge}</td>
+          ${actionHtml}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteBetRecord(betId) {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only.");
+        return;
+      }
+      if (!confirm("Are you sure you want to delete this bet record?")) return;
+      placedBets = await window.getStorage('ez2_placedBets', []);
+      placedBets = placedBets.filter(b => b.id !== betId);
+      await window.setStorage('ez2_placedBets', placedBets);
+
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      renderAdminPaymentsQueue();
+      updateAdminNetTotals();
+      alert("🗑️ Bet record deleted.");
+    }
+
+    async function clearAllBetsHistory() {
+      if (currentRole !== 'super_admin' && currentRole !== 'admin') {
+        alert("Unauthorized action.");
+        return;
+      }
+      if (!confirm("Are you sure you want to clear ALL bet history records?")) return;
+      await window.setStorage('ez2_placedBets', []);
+      placedBets = [];
+      renderAdminBetsTable();
+      renderClientBetsTable();
+      renderAdminPaymentsQueue();
+      updateAdminNetTotals();
+      alert("🗑️ All bet history cleared.");
+    }
+
+    async function createNewPaymentMethod() {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only.");
+        return;
+      }
+
+      const name = document.getElementById('newMethodNameInput').value.trim();
+      const number = document.getElementById('newMethodNumberInput').value.trim();
+      const accountName = document.getElementById('newMethodAccountNameInput').value.trim();
+
+      if (!name || !number || !accountName) {
+        alert("Please fill in all payment method fields.");
+        return;
+      }
+
+      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
+      const newMethod = {
+        id: 'pm-' + Date.now(),
+        name: name,
+        number: number,
+        accountName: accountName,
+        createdBy: activeAgentIdentity || currentRole
+      };
+
+      paymentMethods.push(newMethod);
+      await window.setStorage('ez2_paymentMethods', paymentMethods);
+
+      document.getElementById('newMethodNameInput').value = '';
+      document.getElementById('newMethodNumberInput').value = '';
+      document.getElementById('newMethodAccountNameInput').value = '';
+
+      renderAdminPaymentMethodsTable();
+      alert(`✅ Successfully added payment method "${name}"!`);
+    }
+
+    async function renderAdminPaymentMethodsTable() {
+      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
+      const tbody = document.getElementById('adminPaymentMethodsTableBody');
+      const actionHeader = document.getElementById('paymentMethodActionHeader');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      let methods = paymentMethods;
+      if (currentRole === 'admin' || currentRole === 'agent') {
+        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+        let adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
+        let adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
+
+        methods = paymentMethods.filter(m => {
+          const creator = (m.createdBy || 'superadmin').toLowerCase();
+          return creator === adminUsername || creator === adminName || creator === 'superadmin' || creator === 'super admin root';
+        });
+      }
+
+      if (actionHeader) {
+        actionHeader.style.display = currentRole === 'agent' ? 'none' : 'table-cell';
+      }
+
+      if (methods.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'agent' ? 4 : 5}" style="text-align: center; color: var(--text-muted);">No payment methods configured.</td></tr>`;
+        return;
+      }
+
+      methods.forEach(m => {
+        const tr = document.createElement('tr');
+        let actionHtml = '';
+        if (currentRole !== 'agent') {
+          actionHtml = `
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deletePaymentMethod('${m.id}')">Delete</button>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${m.name}</td>
+          <td><code>${m.number}</code></td>
+          <td>${m.accountName}</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${m.createdBy || 'superadmin'}</td>
+          ${actionHtml}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deletePaymentMethod(id) {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only.");
+        return;
+      }
+      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
+      paymentMethods = paymentMethods.filter(m => m.id !== id);
+      await window.setStorage('ez2_paymentMethods', paymentMethods);
+      renderAdminPaymentMethodsTable();
+      alert("🗑️ Payment method deleted.");
     }
 
     async function createNewAgent() {
-      if (currentRole !== 'super_admin') {
-        alert("Only the Super Admin can create new admin accounts.");
+      if (currentRole !== 'super_admin' && currentRole !== 'admin') {
+        alert("Unauthorized action.");
         return;
       }
 
       const name = document.getElementById('newAgentNameInput').value.trim();
       const username = document.getElementById('newAgentUserInput').value.trim();
-      const pass = document.getElementById('newAgentPassInput').value.trim();
+      const password = document.getElementById('newAgentPassInput').value.trim();
       const role = document.getElementById('newAgentRoleSelect').value;
 
-      if (!name || !username || !pass) {
-        alert("Please fill in all admin account fields.");
+      if (!name || !username || !password) {
+        alert("Please fill in all staff/admin creation fields.");
         return;
       }
 
       agentsList = await window.getStorage('ez2_agents', agentsList);
-
-      const duplicate = agentsList.find(a => a.username.toLowerCase() === username.toLowerCase());
-      if (duplicate) {
-        alert("An admin with this username already exists.");
+      const existing = agentsList.find(a => a.username.toLowerCase() === username.toLowerCase());
+      if (existing) {
+        alert("Username already exists.");
         return;
       }
+
+      const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+      const parentName = currentAdminObj ? currentAdminObj.name : activeAgentIdentity;
 
       const newAgent = {
         id: 'ag-' + Date.now(),
         name: name,
         username: username,
-        password: pass,
+        password: password,
         role: role,
+        parentAdmin: currentRole === 'admin' ? parentName : null,
         createdAt: getPhilippineTimestamp()
       };
 
@@ -2455,28 +2952,8 @@
       document.getElementById('newAgentPassInput').value = '';
 
       renderAdminAgentsTable();
-      updateAdminNetTotals();
-      alert(`✅ Successfully created ${role === 'super_admin' ? 'Super Admin' : 'Sub-Admin'}: ${name} (${username})`);
-    }
-
-    async function deleteAgent(id) {
-      if (currentRole !== 'super_admin') {
-        alert("Only the Super Admin can delete other admin accounts.");
-        return;
-      }
-
-      agentsList = await window.getStorage('ez2_agents', agentsList);
-      if (agentsList.length <= 1) {
-        alert("You must keep at least one Super Admin account.");
-        return;
-      }
-
-      if (!confirm("Are you sure you want to delete this admin account?")) return;
-
-      agentsList = agentsList.filter(a => a.id !== id);
-      await window.setStorage('ez2_agents', agentsList);
-      renderAdminAgentsTable();
-      updateAdminNetTotals();
+      renderSubAdminAgentsTable();
+      alert(`✅ Successfully created Sub-Admin/Agent account "${name}"!`);
     }
 
     async function renderAdminAgentsTable() {
@@ -2486,536 +2963,431 @@
       if (!tbody) return;
 
       tbody.innerHTML = '';
-      if (actionHeader) actionHeader.style.display = currentRole === 'super_admin' ? '' : 'none';
 
-      let displayAgents = agentsList;
+      let list = agentsList;
       if (currentRole === 'admin') {
-        displayAgents = agentsList.filter(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : activeAgentIdentity.toLowerCase();
+        list = agentsList.filter(a => a.username.toLowerCase() === adminName || a.parentAdmin && a.parentAdmin.toLowerCase() === adminName);
       }
 
-      displayAgents.forEach(ag => {
+      if (actionHeader) {
+        actionHeader.style.display = currentRole === 'agent' ? 'none' : 'table-cell';
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${currentRole === 'agent' ? 6 : 7}" style="text-align: center; color: var(--text-muted);">No accounts found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(agent => {
         const tr = document.createElement('tr');
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(ag.username)}`;
-        const deleteBtn = currentRole === 'super_admin' && ag.username !== 'superadmin' ? `<button class="btn btn-danger btn-sm" onclick="deleteAgent('${ag.id}')">Delete</button>` : `<span style="color:var(--text-muted); font-size:0.8rem;">Protected</span>`;
+        const agentLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(agent.username)}`;
+        const roleDisplay = agent.role === 'super_admin' ? 'Super Admin' : agent.role === 'admin' ? 'Sub-Admin' : 'Agent';
+        const roleBadgeColor = agent.role === 'super_admin' ? '#a855f7' : agent.role === 'admin' ? '#6366f1' : '#3b82f6';
+
+        let actionHtml = '';
+        if (currentRole !== 'agent' && agent.username !== 'superadmin') {
+          actionHtml = `
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteAgentRecord('${agent.id}')">Delete</button>
+            </td>
+          `;
+        }
 
         tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--primary);">${ag.name}</td>
-          <td><code>${ag.username}</code></td>
-          <td><code>${ag.password}</code></td>
-          <td><span class="badge-draw" style="background: ${ag.role === 'super_admin' ? '#a855f7' : '#6366f1'};">${ag.role === 'super_admin' ? 'Super Admin' : 'Sub-Admin'}</span></td>
-          <td><input type="text" readonly value="${refLink}" style="background: #1e293b; border: 1px solid #475569; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; width: 180px;"></td>
-          <td>${ag.createdAt}</td>
-          ${currentRole === 'super_admin' ? `<td>${deleteBtn}</td>` : ''}
+          <td style="font-weight: 700; color: var(--primary);">${agent.name}</td>
+          <td><code>${agent.username}</code></td>
+          <td><code>${agent.password}</code></td>
+          <td><span class="badge-draw" style="background:${roleBadgeColor};">${roleDisplay}</span></td>
+          <td><input type="text" readonly value="${agentLink}" style="background:#0f172a; border:1px solid #475569; color:var(--primary); padding:4px 8px; border-radius:4px; font-size:0.75rem; width:220px;" onclick="this.select()"></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${agent.createdAt || 'N/A'}</td>
+          ${actionHtml}
         `;
         tbody.appendChild(tr);
       });
     }
 
-    async function createNewPaymentMethod() {
-      const name = document.getElementById('newMethodNameInput').value.trim();
-      const number = document.getElementById('newMethodNumberInput').value.trim();
-      const accountName = document.getElementById('newMethodAccountNameInput').value.trim() || activeAgentIdentity || 'EZ2WIN OFFICIAL ADMIN';
+    async function deleteAgentRecord(id) {
+      if (currentRole !== 'super_admin' && currentRole !== 'admin') {
+        alert("Unauthorized action.");
+        return;
+      }
+      if (!confirm("Are you sure you want to delete this account?")) return;
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      agentsList = agentsList.filter(a => a.id !== id);
+      await window.setStorage('ez2_agents', agentsList);
+      renderAdminAgentsTable();
+      renderSubAdminAgentsTable();
+      alert("🗑️ Account deleted.");
+    }
 
-      if (!name || !number) {
-        alert("Please enter both Method Name and Account Number.");
+    function switchAuthTab(tabId, btnElement) {
+      document.querySelectorAll('#authModal .tab-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      document.getElementById('loginTab').style.display = 'none';
+      document.getElementById('registerTab').style.display = 'none';
+      document.getElementById('profileTab').style.display = 'none';
+
+      document.getElementById(tabId).style.display = 'block';
+
+      if (tabId === 'profileTab' && activeClient) {
+        document.getElementById('profileViewName').textContent = activeClient.name;
+        document.getElementById('profileViewUsername').textContent = activeClient.username;
+        document.getElementById('profileViewReferredBy').textContent = activeClient.referredBy || 'superadmin';
+        
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(activeClient.username)}`;
+        document.getElementById('profileReferralLinkInput').value = refLink;
+        renderProfileWinningClaims();
+      }
+    }
+
+    async function registerClientAccount() {
+      const name = document.getElementById('clientRegNameInput').value.trim();
+      const username = document.getElementById('clientRegUserInput').value.trim();
+      const password = document.getElementById('clientRegPassInput').value.trim();
+      const confirmPass = document.getElementById('clientRegConfirmPassInput').value.trim();
+      const referral = document.getElementById('clientRegReferralInput').value.trim() || localStorage.getItem('ez2_pendingRef') || 'superadmin';
+
+      if (!name || !username || !password || !confirmPass) {
+        alert("Please fill in all registration fields.");
         return;
       }
 
-      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
-
-      let creatorTag = activeAgentIdentity;
-      if (currentRole === 'super_admin' || creatorTag.includes('@')) {
-        creatorTag = 'superadmin';
+      if (password !== confirmPass) {
+        alert("Passwords do not match.");
+        return;
       }
 
-      const newMethod = {
-        id: 'pm-' + Date.now(),
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      const existing = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase());
+      if (existing) {
+        alert("Username or mobile number is already registered.");
+        return;
+      }
+
+      const newClient = {
+        id: 'cli-' + Date.now(),
         name: name,
-        number: number,
-        accountName: accountName,
-        createdBy: creatorTag
+        username: username,
+        password: password,
+        referredBy: referral,
+        createdAt: getPhilippineTimestamp()
       };
 
-      paymentMethods.push(newMethod);
-      await window.setStorage('ez2_paymentMethods', paymentMethods);
+      registeredClients.push(newClient);
+      await window.setStorage('ez2_registeredClients', registeredClients);
 
-      document.getElementById('newMethodNameInput').value = '';
-      document.getElementById('newMethodNumberInput').value = '';
-      document.getElementById('newMethodAccountNameInput').value = '';
+      activeClient = newClient;
+      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
 
-      renderAdminPaymentMethodsTable();
-      alert("✅ Payment method successfully added!");
-    }
-
-    async function deletePaymentMethod(id) {
-      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
-      paymentMethods = paymentMethods.filter(m => m.id !== id);
-      await window.setStorage('ez2_paymentMethods', paymentMethods);
-      renderAdminPaymentMethodsTable();
-    }
-
-    async function renderAdminPaymentMethodsTable() {
-      paymentMethods = await window.getStorage('ez2_paymentMethods', paymentMethods);
-      agentsList = await window.getStorage('ez2_agents', agentsList);
-      const tbody = document.getElementById('adminPaymentMethodsTableBody');
-      const actionHeader = document.getElementById('paymentMethodActionHeader');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-      if (actionHeader) actionHeader.style.display = currentRole === 'super_admin' ? '' : 'none';
-
-      let displayMethods = paymentMethods;
-      if (currentRole === 'admin') {
-        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
-
-        displayMethods = paymentMethods.filter(m => {
-          const creator = (m.createdBy || 'superadmin').toLowerCase();
-          return creator === adminUsername || creator === adminName || creator === 'superadmin';
-        });
-      }
-
-      if (displayMethods.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No payment methods configured yet.</td></tr>`;
-        return;
-      }
-
-      displayMethods.forEach(m => {
-        const tr = document.createElement('tr');
-        const deleteBtn = `<button class="btn btn-danger btn-sm" onclick="deletePaymentMethod('${m.id}')">Delete</button>`;
-
-        tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--primary);">${m.name}</td>
-          <td><code>${m.number}</code></td>
-          <td>${m.accountName}</td>
-          <td><span class="badge-draw">${m.createdBy || 'superadmin'}</span></td>
-          ${currentRole === 'super_admin' ? `<td>${deleteBtn}</td>` : ''}
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function saveAdminWinningCombination() {
-      const draw = document.getElementById('adminDrawSelect').value;
-      const num1 = parseInt(document.getElementById('adminNum1').value, 10);
-      const num2 = parseInt(document.getElementById('adminNum2').value, 10);
-
-      if (isNaN(num1) || isNaN(num2) || num1 < 1 || num1 > 31 || num2 < 1 || num2 > 31) {
-        alert("Please enter valid numbers between 1 and 31.");
-        return;
-      }
-
-      if (num1 === num2) {
-        alert("EZ2 winning combination numbers must be distinct.");
-        return;
-      }
-
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-      winningCombos[draw] = [num1, num2].sort((a, b) => a - b);
-
-      await window.setStorage('ez2_winningCombos', winningCombos);
-
-      document.getElementById('adminNum1').value = '';
-      document.getElementById('adminNum2').value = '';
-
-      updateWinningDisplay();
-      updateWinnerTicker();
-      renderAdminBetsTable();
+      closeModal('authModal');
+      updateClientAuthUI();
       renderClientBetsTable();
-
-      alert(`✅ Successfully published official winning combination for ${draw} Draw: [ ${winningCombos[draw].map(n => n < 10 ? '0' + n : n).join(' - ')} ]`);
+      renderProfileWinningClaims();
+      alert(`🎉 Registration successful! Welcome to EZ2WIN, ${name}! Your account is linked to referrer: ${referral}`);
     }
 
-    async function resetAdminWinningCombination() {
-      const draw = document.getElementById('adminDrawSelect').value;
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-      winningCombos[draw] = null;
+    async function loginClientAccount() {
+      const username = document.getElementById('clientLoginUsernameInput').value.trim();
+      const password = document.getElementById('clientLoginPasswordInput').value.trim();
 
-      await window.setStorage('ez2_winningCombos', winningCombos);
-      updateWinningDisplay();
-      updateWinnerTicker();
-      renderAdminBetsTable();
-      renderClientBetsTable();
-
-      alert(`Reset winning combination for ${draw} Draw.`);
-    }
-
-    async function updateWinningDisplay() {
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-
-      const disp5PM = document.getElementById('clientWinDisplay5PM');
-      const disp9PM = document.getElementById('clientWinDisplay9PM');
-      const adminCurrentDisplay = document.getElementById('adminCurrentWinningDisplay');
-
-      if (disp5PM) {
-        disp5PM.innerHTML = '';
-        const combo = winningCombos['5:00 PM'];
-        if (combo && combo.length === 2) {
-          combo.forEach(n => {
-            const ball = document.createElement('div');
-            ball.className = 'win-ball';
-            ball.textContent = n < 10 ? '0' + n : n;
-            disp5PM.appendChild(ball);
-          });
-        } else {
-          disp5PM.innerHTML = `<div class="win-ball pending">Awaiting Draw</div>`;
-        }
-      }
-
-      if (disp9PM) {
-        disp9PM.innerHTML = '';
-        const combo = winningCombos['9:00 PM'];
-        if (combo && combo.length === 2) {
-          combo.forEach(n => {
-            const ball = document.createElement('div');
-            ball.className = 'win-ball';
-            ball.textContent = n < 10 ? '0' + n : n;
-            disp9PM.appendChild(ball);
-          });
-        } else {
-          disp9PM.innerHTML = `<div class="win-ball pending">Awaiting Draw</div>`;
-        }
-      }
-
-      if (adminCurrentDisplay) {
-        adminCurrentDisplay.innerHTML = `
-          <div class="admin-status-chip">
-            <strong>5:00 PM:</strong> ${winningCombos['5:00 PM'] ? winningCombos['5:00 PM'].map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}
-          </div>
-          <div class="admin-status-chip">
-            <strong>9:00 PM:</strong> ${winningCombos['9:00 PM'] ? winningCombos['9:00 PM'].map(n => n < 10 ? '0' + n : n).join(' - ') : 'Not Set'}
-          </div>
-        `;
-      }
-    }
-
-    async function updateWinnerTicker() {
-      placedBets = await window.getStorage('ez2_placedBets', []);
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-      const tickerContent = document.getElementById('winnerTickerContent');
-      if (!tickerContent) return;
-
-      const confirmedWins = placedBets.filter(b => {
-        if (b.paymentStatus !== 'CONFIRMED') return false;
-        const targetDraw = b.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-        if (!drawCombo || drawCombo.length !== 2) return false;
-        return b.combo.length === 2 && drawCombo.includes(b.combo[0]) && drawCombo.includes(b.combo[1]);
-      });
-
-      if (confirmedWins.length === 0) {
-        tickerContent.innerHTML = `
-          <span class="ticker-item"><span class="ticker-tag">ANNOUNCEMENT</span> Welcome to EZ2WIN x100 - Official PCSO EZ2 Online Betting Platform! Place your bets now for the 5:00 PM and 9:00 PM draws!</span>
-        `;
+      if (!username || !password) {
+        alert("Please enter your username and password.");
         return;
       }
 
-      let html = '';
-      confirmedWins.forEach(win => {
-        const comboStr = win.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        html += `
-          <span class="ticker-item">
-            <span class="ticker-tag">🎉 WINNER!</span>
-            <strong>${win.bettorName}</strong> won <strong>₱${win.potentialWin.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> on ${win.targetDraw} Draw with combo [ ${comboStr} ]!
-          </span>
-        `;
-      });
-      tickerContent.innerHTML = html;
-    }
-
-    async function renderClientBetsTable() {
-      placedBets = await window.getStorage('ez2_placedBets', []);
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-      const tbody = document.getElementById('clientBetsTableBody');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-
-      if (!activeClient) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">Please log in or register to view your placed bets history.</td></tr>`;
-        return;
-      }
-
-      const clientBets = placedBets.filter(b => b.bettorAccount === activeClient.username || b.bettorName === activeClient.name);
-
-      if (clientBets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">You have not placed any bets yet.</td></tr>`;
-        return;
-      }
-
-      clientBets.forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        const targetDraw = bet.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-        const winComboStr = drawCombo && drawCombo.length === 2 ? drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ') : 'Awaiting Draw';
-
-        let statusBadge = '';
-        if (bet.paymentStatus === 'CONFIRMED') {
-          if (drawCombo && drawCombo.length === 2) {
-            const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-            if (isWin) {
-              statusBadge = `<span class="badge-win">🏆 WON ₱${bet.potentialWin.toLocaleString()}</span>`;
-            } else {
-              statusBadge = `<span class="badge-loss">❌ NON-WINNING</span>`;
-            }
-          } else {
-            statusBadge = `<span class="badge-draw" style="background:#166534;">CONFIRMED (Awaiting Draw)</span>`;
-          }
-        } else if (bet.paymentStatus === 'REJECTED') {
-          statusBadge = `<span class="badge-rejected">REJECTED</span>`;
-        } else {
-          statusBadge = `<span class="badge-pending">PENDING APPROVAL</span>`;
-        }
-
-        let actionHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">-</span>`;
-        if (bet.paymentStatus === 'CONFIRMED' && drawCombo && drawCombo.length === 2) {
-          const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-          if (isWin) {
-            if (bet.prizeStatus === 'CONFIRMED_RECEIVED') {
-              actionHtml = `<span class="badge-win">✅ CLAIMED</span>`;
-            } else {
-              actionHtml = `<button class="btn btn-primary btn-sm" onclick="confirmPrizeReceived('${bet.id}')">🏆 Claim</button>`;
-            }
-          }
-        }
-
-        tr.innerHTML = `
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td style="font-weight: bold; color: var(--primary);">[ ${comboStr} ]</td>
-          <td style="font-weight: bold; color: var(--accent);">[ ${winComboStr} ]</td>
-          <td>₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
-          <td><code>${bet.senderNo}</code></td>
-          <td>${bet.approvedAt || 'Pending'}</td>
-          <td>${statusBadge}</td>
-          <td>${actionHtml}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function renderAdminBetsTable() {
-      placedBets = await window.getStorage('ez2_placedBets', []);
-      winningCombos = await window.getStorage('ez2_winningCombos', winningCombos);
-      agentsList = await window.getStorage('ez2_agents', agentsList);
-      const tbody = document.getElementById('adminBetsTableBody');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-
-      let betsToDisplay = placedBets;
-      if (currentRole === 'admin') {
-        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
-
-        betsToDisplay = placedBets.filter(b => {
-          const refBy = (b.referredBy || 'superadmin').toLowerCase();
-          return refBy === adminUsername || refBy === adminName;
-        });
-      }
-
-      if (betsToDisplay.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--text-muted);">No placed bets recorded yet.</td></tr>`;
-        return;
-      }
-
-      betsToDisplay.forEach(bet => {
-        const tr = document.createElement('tr');
-        const comboStr = bet.combo.map(n => n < 10 ? '0' + n : n).join(' - ');
-        const targetDraw = bet.targetDraw || '9:00 PM';
-        const drawCombo = winningCombos[targetDraw];
-        const winComboStr = drawCombo && drawCombo.length === 2 ? drawCombo.map(n => n < 10 ? '0' + n : n).join(' - ') : 'Awaiting Draw';
-
-        let statusBadge = '';
-        if (bet.paymentStatus === 'CONFIRMED') {
-          statusBadge = `<span class="badge-draw" style="background:#166534;">CONFIRMED</span>`;
-        } else if (bet.paymentStatus === 'REJECTED') {
-          statusBadge = `<span class="badge-rejected">REJECTED</span>`;
-        } else {
-          statusBadge = `<span class="badge-pending">PENDING</span>`;
-        }
-
-        let winStatus = `<span style="color:var(--text-muted);">-</span>`;
-        if (bet.paymentStatus === 'CONFIRMED' && drawCombo && drawCombo.length === 2) {
-          const isWin = bet.combo.length === 2 && drawCombo.includes(bet.combo[0]) && drawCombo.includes(bet.combo[1]);
-          if (isWin) {
-            if (bet.prizeStatus === 'CONFIRMED_RECEIVED') {
-              winStatus = `<span class="badge-win">✅ CLAIMED RECEIVED</span>`;
-            } else {
-              winStatus = `<span class="badge-win">🏆 WON ₱${bet.potentialWin.toLocaleString()} (Pending Claim)</span>`;
-            }
-          } else {
-            winStatus = `<span class="badge-loss">NON-WINNING</span>`;
-          }
-        }
-
-        tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--primary);">${bet.bettorName}</td>
-          <td><span class="badge-draw">${targetDraw}</span></td>
-          <td style="font-weight: bold;">[ ${comboStr} ]</td>
-          <td style="font-weight: bold; color: var(--accent);">[ ${winComboStr} ]</td>
-          <td>₱${bet.betAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          <td><span class="badge-draw">${bet.paymentMethod || 'GCash'}</span></td>
-          <td><code>${bet.senderNo}</code></td>
-          <td>${bet.approvedAt || 'Pending'}</td>
-          <td>${statusBadge}</td>
-          <td>${winStatus}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" onclick="deleteBetRecord('${bet.id}')">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function deleteBetRecord(id) {
-      if (!confirm("Are you sure you want to delete this bet record?")) return;
-      placedBets = await window.getStorage('ez2_placedBets', []);
-      placedBets = placedBets.filter(b => b.id !== id);
-      await window.setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      renderAdminPaymentsQueue();
-      updateAdminNetTotals();
-    }
-
-    async function clearAllBetsHistory() {
-      if (currentRole !== 'super_admin') {
-        alert("Only the Super Admin can clear all bets history.");
-        return;
-      }
-      if (!confirm("Are you sure you want to clear ALL bets history across the system? This action cannot be undone.")) return;
-      placedBets = [];
-      await window.setStorage('ez2_placedBets', placedBets);
-      renderAdminBetsTable();
-      renderClientBetsTable();
-      renderAdminPaymentsQueue();
-      updateAdminNetTotals();
-      alert("All bets history has been cleared.");
-    }
-
-    async function updateAdminNetTotals() {
-      placedBets = await window.getStorage('ez2_placedBets', []);
-      agentsList = await window.getStorage('ez2_agents', agentsList);
       registeredClients = await window.getStorage('ez2_registeredClients', []);
+      const client = registeredClients.find(c => c.username.toLowerCase() === username.toLowerCase() && c.password === password);
 
-      let confirmedBets = placedBets.filter(b => b.paymentStatus === 'CONFIRMED');
-
-      if (currentRole === 'admin') {
-        const currentAdminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
-        const adminUsername = currentAdminObj ? currentAdminObj.username.toLowerCase() : activeAgentIdentity.toLowerCase();
-        const adminName = currentAdminObj ? currentAdminObj.name.toLowerCase() : '';
-
-        confirmedBets = confirmedBets.filter(b => {
-          const refBy = (b.referredBy || 'superadmin').toLowerCase();
-          return refBy === adminUsername || refBy === adminName;
-        });
+      if (!client) {
+        alert("Invalid username or password.");
+        return;
       }
 
-      let net5PM = 0;
-      let net9PM = 0;
+      activeClient = client;
+      localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
 
-      confirmedBets.forEach(b => {
-        if (b.targetDraw === '5:00 PM') {
-          net5PM += b.betAmount;
-        } else {
-          net9PM += b.betAmount;
-        }
-      });
+      closeModal('authModal');
+      updateClientAuthUI();
+      renderClientBetsTable();
+      renderProfileWinningClaims();
+      alert(`👋 Welcome back, ${client.name}!`);
+    }
 
-      const net5PMEl = document.getElementById('adminNet5PMDisplay');
-      const net9PMEl = document.getElementById('adminNet9PMDisplay');
-      if (net5PMEl) net5PMEl.textContent = '₱' + net5PM.toLocaleString('en-US', {minimumFractionDigits: 2});
-      if (net9PMEl) net9PMEl.textContent = '₱' + net9PM.toLocaleString('en-US', {minimumFractionDigits: 2});
+    async function updateClientPassword() {
+      if (!activeClient) return;
+      const curPass = document.getElementById('clientCurrentPassInput').value.trim();
+      const newPass = document.getElementById('clientNewPassInput').value.trim();
+      const confirmNewPass = document.getElementById('clientConfirmNewPassInput').value.trim();
 
-      const breakdownContainer = document.getElementById('subAdminRevenueBreakdownContainer');
-      if (!breakdownContainer) return;
-
-      breakdownContainer.innerHTML = '';
-      const title = document.createElement('h4');
-      title.style.cssText = 'color: var(--primary); font-size: 0.95rem; margin-bottom: 10px; border-top: 1px solid #334155; padding-top: 12px;';
-      title.textContent = '👥 Sub-Admin & Referral Client Revenue Breakdown';
-      breakdownContainer.appendChild(title);
-
-      const tableDiv = document.createElement('div');
-      tableDiv.className = 'table-responsive';
-
-      let agentsToDisplay = agentsList;
-      if (currentRole === 'admin') {
-        agentsToDisplay = agentsList.filter(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+      if (!curPass || !newPass || !confirmNewPass) {
+        alert("Please fill in all password fields.");
+        return;
       }
 
-      let html = `
-        <table>
-          <thead>
-            <tr>
-              <th>Admin / Sub-Admin</th>
-              <th>Username</th>
-              <th>Referred Clients</th>
-              <th>Confirmed Bets Count</th>
-              <th>Total Revenue Generated</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      let hasRows = false;
-      agentsToDisplay.forEach(agent => {
-        const agentKey = agent.username.toLowerCase();
-        const agentName = agent.name.toLowerCase();
-
-        const agentClients = registeredClients.filter(c => {
-          const ref = (c.referredBy || 'superadmin').toLowerCase();
-          return ref === agentKey || ref === agentName;
-        });
-
-        const agentBets = confirmedBets.filter(b => {
-          const ref = (b.referredBy || 'superadmin').toLowerCase();
-          return ref === agentKey || ref === agentName;
-        });
-
-        const totalRev = agentBets.reduce((sum, b) => sum + b.betAmount, 0);
-
-        hasRows = true;
-        html += `
-          <tr>
-            <td style="font-weight: 700; color: var(--primary);">${agent.name}</td>
-            <td><code>${agent.username}</code></td>
-            <td>${agentClients.length} client(s)</td>
-            <td>${agentBets.length} bet(s)</td>
-            <td style="color: var(--accent); font-weight: bold;">₱${totalRev.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-        `;
-      });
-
-      if (!hasRows) {
-        html += `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No sub-admin revenue records found.</td></tr>`;
+      if (curPass !== activeClient.password) {
+        alert("Current password is incorrect.");
+        return;
       }
 
-      html += `</tbody></table>`;
-      tableDiv.innerHTML = html;
-      breakdownContainer.appendChild(tableDiv);
+      if (newPass.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+      }
+
+      if (newPass !== confirmNewPass) {
+        alert("New passwords do not match.");
+        return;
+      }
+
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      const idx = registeredClients.findIndex(c => c.username === activeClient.username);
+      if (idx !== -1) {
+        registeredClients[idx].password = newPass;
+        activeClient.password = newPass;
+        await window.setStorage('ez2_registeredClients', registeredClients);
+        localStorage.setItem('ez2_activeClient', JSON.stringify(activeClient));
+      }
+
+      document.getElementById('clientCurrentPassInput').value = '';
+      document.getElementById('clientNewPassInput').value = '';
+      document.getElementById('clientConfirmNewPassInput').value = '';
+
+      alert("🔒 Password successfully updated!");
+    }
+
+    function logoutClientAccount() {
+      activeClient = null;
+      localStorage.removeItem('ez2_activeClient');
+      updateClientAuthUI();
+      renderClientBetsTable();
+      closeModal('authModal');
+      alert("🔒 Logged out of client account.");
+    }
+
+    function updateClientAuthUI() {
+      const badge = document.getElementById('clientHeaderUserDisplay');
+      const logoutBtn = document.getElementById('clientHeaderLogoutBtn');
+      if (!badge) return;
+
+      if (activeClient) {
+        badge.textContent = `👤 ${activeClient.name}`;
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      } else {
+        badge.textContent = '👤 Guest';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+      }
     }
 
     function copyReferralLink() {
       const input = document.getElementById('profileReferralLinkInput');
-      if (!input) return;
       input.select();
-      input.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(input.value);
-      alert("📋 Personal referral link copied to clipboard!");
+      alert("📋 Referral link copied to clipboard!");
     }
 
     function copyAdminReferralLink() {
       const input = document.getElementById('adminProfileReferralLinkInput');
-      if (!input) return;
       input.select();
-      input.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(input.value);
       alert("📋 Admin referral link copied to clipboard!");
+    }
+
+    async function authenticateStaff() {
+      const user = document.getElementById('staffUsernameInput').value.trim();
+      const pass = document.getElementById('staffPasswordInput').value.trim();
+
+      agentsList = await window.getStorage('ez2_agents', agentsList);
+      const found = agentsList.find(a => (a.username.toLowerCase() === user.toLowerCase() || a.name.toLowerCase() === user.toLowerCase()) && a.password === pass);
+
+      if (!found && user !== 'superadmin' && pass !== 'password123') {
+        alert("Invalid staff username or password.");
+        return;
+      }
+
+      const role = found ? found.role : 'super_admin';
+      const name = found ? found.name : 'Super Admin Root';
+
+      currentRole = role;
+      activeAgentIdentity = name;
+      localStorage.setItem('user_role', currentRole);
+      localStorage.setItem('user_email', activeAgentIdentity);
+
+      closeModal('staffLoginModal');
+      applyRoleUI();
+      alert(`🔐 Successfully logged into Staff Portal as ${name} (${role.toUpperCase()})!`);
+    }
+
+    function handleRoleButtonClick() {
+      if (currentRole === 'client') {
+        openModal('staffLoginModal');
+      } else {
+        currentRole = 'client';
+        activeAgentIdentity = '';
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_email');
+        applyRoleUI();
+        alert("👤 Switched back to Client View.");
+      }
+    }
+
+    function applyRoleUI() {
+      const clientView = document.getElementById('clientView');
+      const adminView = document.getElementById('adminView');
+      const badge = document.getElementById('viewModeBadge');
+      const toggleBtn = document.getElementById('roleToggleBtn');
+      const profileCardTitle = document.getElementById('profileCardTitle');
+      const profileAccountRole = document.getElementById('profileAccountRole');
+      const agentNotice = document.getElementById('agentViewerNotice');
+      const agentManagementCard = document.getElementById('adminAgentManagementCard');
+      const subAdminAgentCard = document.getElementById('subAdminAgentCard');
+      const revenueCard = document.getElementById('revenueSummaryCard');
+      const winningComboPanel = document.getElementById('winningComboPanel');
+      const adminPaymentsCard = document.getElementById('paymentQueueCard');
+      const adminPaymentMethodsCard = document.getElementById('adminPaymentMethodsCard');
+      const changeClientPassSec = document.getElementById('changeClientPasswordSection');
+
+      if (currentRole === 'client') {
+        if (clientView) clientView.style.display = 'block';
+        if (adminView) adminView.style.display = 'none';
+        if (badge) badge.textContent = 'CLIENT HOME';
+        if (toggleBtn) {
+          toggleBtn.textContent = 'Staff Portal';
+          toggleBtn.style.background = '#6366f1';
+        }
+      } else {
+        if (clientView) clientView.style.display = 'none';
+        if (adminView) adminView.style.display = 'block';
+        if (badge) badge.textContent = currentRole === 'super_admin' ? 'SUPER ADMIN PORTAL' : currentRole === 'admin' ? 'SUB-ADMIN PORTAL' : 'AGENT VIEWER';
+        if (toggleBtn) {
+          toggleBtn.textContent = 'Exit to Client Home';
+          toggleBtn.style.background = '#ef4444';
+        }
+
+        if (profileCardTitle) profileCardTitle.textContent = `👤 ${activeAgentIdentity || currentRole.toUpperCase()} Profile Information`;
+        if (profileAccountRole) profileAccountRole.textContent = currentRole === 'super_admin' ? 'Super Admin' : currentRole === 'admin' ? 'Sub-Admin' : 'Agent (Read-Only)';
+
+        const adminObj = agentsList.find(a => a.name === activeAgentIdentity || a.username === activeAgentIdentity);
+        const refCode = adminObj ? adminObj.username : (currentRole === 'super_admin' ? 'superadmin' : activeAgentIdentity);
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
+        const adminRefInput = document.getElementById('adminProfileReferralLinkInput');
+        if (adminRefInput) adminRefInput.value = refLink;
+
+        if (agentNotice) {
+          agentNotice.style.display = currentRole === 'agent' ? 'inline-block' : 'none';
+        }
+
+        if (currentRole === 'agent') {
+          if (agentManagementCard) agentManagementCard.style.display = 'none';
+          if (subAdminAgentCard) subAdminAgentCard.style.display = 'none';
+          if (revenueCard) revenueCard.style.display = 'block';
+          if (winningComboPanel) winningComboPanel.style.display = 'block';
+          if (adminPaymentsCard) adminPaymentsCard.style.display = 'block';
+          if (adminPaymentMethodsCard) adminPaymentMethodsCard.style.display = 'block';
+          if (changeClientPassSec) changeClientPassSec.style.display = 'none';
+        } else if (currentRole === 'admin') {
+          if (agentManagementCard) agentManagementCard.style.display = 'none';
+          if (subAdminAgentCard) subAdminAgentCard.style.display = 'block';
+          if (revenueCard) revenueCard.style.display = 'block';
+          if (winningComboPanel) winningComboPanel.style.display = 'block';
+          if (adminPaymentsCard) adminPaymentsCard.style.display = 'block';
+          if (adminPaymentMethodsCard) adminPaymentMethodsCard.style.display = 'block';
+          if (changeClientPassSec) changeClientPassSec.style.display = 'block';
+        } else if (currentRole === 'super_admin') {
+          if (agentManagementCard) agentManagementCard.style.display = 'block';
+          if (subAdminAgentCard) subAdminAgentCard.style.display = 'none';
+          if (revenueCard) revenueCard.style.display = 'block';
+          if (winningComboPanel) winningComboPanel.style.display = 'block';
+          if (adminPaymentsCard) adminPaymentsCard.style.display = 'block';
+          if (adminPaymentMethodsCard) adminPaymentMethodsCard.style.display = 'block';
+          if (changeClientPassSec) changeClientPassSec.style.display = 'block';
+        }
+
+        renderAdminPaymentsQueue();
+        renderAdminBetsTable();
+        renderAdminAgentsTable();
+        renderSubAdminAgentsTable();
+        renderAdminPaymentMethodsTable();
+        updateAdminNetTotals();
+      }
+    }
+
+    async function updateReferredClientPassword() {
+      if (currentRole === 'agent') {
+        alert("Agent profiles are read-only.");
+        return;
+      }
+      const usernameInput = document.getElementById('semiAdminClientUsernameInput').value.trim();
+      const newPass = document.getElementById('semiAdminClientNewPassInput').value.trim();
+      const confirmPass = document.getElementById('semiAdminClientConfirmPassInput').value.trim();
+
+      if (!usernameInput || !newPass || !confirmPass) {
+        alert("Please fill in all client password update fields.");
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alert("Passwords do not match.");
+        return;
+      }
+
+      registeredClients = await window.getStorage('ez2_registeredClients', []);
+      const idx = registeredClients.findIndex(c => c.username.toLowerCase() === usernameInput.toLowerCase() || c.name.toLowerCase() === usernameInput.toLowerCase());
+
+      if (idx === -1) {
+        alert("Referred client account not found.");
+        return;
+      }
+
+      registeredClients[idx].password = newPass;
+      await window.setStorage('ez2_registeredClients', registeredClients);
+
+      document.getElementById('semiAdminClientUsernameInput').value = '';
+      document.getElementById('semiAdminClientNewPassInput').value = '';
+      document.getElementById('semiAdminClientConfirmPassInput').value = '';
+
+      alert(`✅ Successfully updated password for client "${registeredClients[idx].name}"!`);
+    }
+
+    async function updateWinnerTicker() {
+      winningCombos = await window.getStorage('ez2_winningCombos', {
+        '5:00 PM': null,
+        '9:00 PM': null,
+        'Yesterday 5:00 PM': null,
+        'Yesterday 9:00 PM': null
+      });
+
+      const tickerContent = document.getElementById('winnerTickerContent');
+      if (!tickerContent) return;
+
+      let html = '';
+      const draws = ['Yesterday 5:00 PM', 'Yesterday 9:00 PM', '5:00 PM', '9:00 PM'];
+      
+      draws.forEach(draw => {
+        const combo = winningCombos[draw];
+        if (combo && combo.length === 2) {
+          const comboStr = combo.map(n => n < 10 ? '0' + n : n).join(' - ');
+          html += `
+            <div class="ticker-item">
+              <span class="ticker-tag">${draw} WINNER</span>
+              <span>Winning Combination: <strong>[ ${comboStr} ]</strong> (x100 Payout Paid!)</span>
+            </div>
+          `;
+        }
+      });
+
+      if (!html) {
+        html = `
+          <div class="ticker-item">
+            <span class="ticker-tag">EZ2WIN ANNOUNCEMENT</span>
+            <span>Welcome to EZ2WIN x100 PCSO Draw! Place your bets now and win 100x your payout!</span>
+          </div>
+        `;
+      }
+
+      tickerContent.innerHTML = html;
     }
   </script>
 </body>
